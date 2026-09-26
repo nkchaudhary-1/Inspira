@@ -111,7 +111,7 @@
   --page-title: clamp(20px, 1.46vw, 28px); /* 28 */
   --month-num: clamp(18px, 1.46vw, 28px); /* 28 */
   --board-num: clamp(18px, 1.25vw, 24px); /* 24 */
-  --quote-display: clamp(28px, 2.7vw, 52px); /* 52 */
+  --quote-display: clamp(30px, 3.8vw, 72px);
   --dot: clamp(8px, min(0.83vw, 1.6vh), 16px); /* 16 */
   --content-max: 1180px;
 }

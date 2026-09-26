@@ -3231,7 +3231,7 @@ body:has(.dock-wrap.is-open) .hint,
     --face-date: 15px;
     --face-line: 19px;
     --face-temp: 36px;
-    --quote-display: 26px;
+    --quote-display: 30px;
     --dot: 1.7vw;
   }
 
