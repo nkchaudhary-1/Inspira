@@ -226,6 +226,14 @@
   --glow-2: var(--state-l-info);
   --glow-3: var(--pink-l-500);
   --light-a: 0.3;
+  /* Navigation (Figma 56:7576) */
+  --nav-bg: color-mix(in srgb, var(--paper-0) 78%, transparent);
+  --nav-border: var(--paper-200);
+  --nav-shadow: 0 1px 2px rgb(17 19 24 / 5%), 0 12px 32px -12px rgb(17 19 24 / 18%);
+  --nav-item: color-mix(in srgb, var(--paper-900) 4%, transparent);
+  --nav-item-hover: color-mix(in srgb, var(--paper-900) 9%, transparent);
+  --nav-active: var(--paper-900);
+  --nav-active-ink: var(--paper-0);
 }
 
 /* ---- Layer 2 · semantic (dark) ---- */
@@ -280,6 +288,13 @@
   --glow-2: var(--state-info);
   --glow-3: var(--pink-500);
   --light-a: 0.34;
+  --nav-bg: color-mix(in srgb, var(--ink-650) 72%, transparent);
+  --nav-border: color-mix(in srgb, var(--white-100) 8%, transparent);
+  --nav-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 16px 40px -12px rgb(0 0 0 / 55%);
+  --nav-item: rgb(0 0 0 / 16%);
+  --nav-item-hover: color-mix(in srgb, var(--white-100) 10%, transparent);
+  --nav-active: color-mix(in srgb, var(--white-100) 62%, transparent);
+  --nav-active-ink: var(--ink-950);
 }
 
 /* ---- Atmosphere: palette ground + a faint daypart glow ---- */
