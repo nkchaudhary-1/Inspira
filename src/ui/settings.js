@@ -165,10 +165,6 @@ function appearance(p) {
       toggle(p.showSeconds, (v) => store.setPrefs({ showSeconds: v }), 'Show seconds'),
     ),
     row(
-      'Today panel beside the clock',
-      toggle(p.showRail, (v) => store.setPrefs({ showRail: v }), 'Today panel'),
-    ),
-    row(
       'Quote beneath the clock',
       toggle(p.showQuoteOnClock, (v) => store.setPrefs({ showQuoteOnClock: v }), 'Quote beneath the clock'),
     ),

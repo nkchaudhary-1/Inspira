@@ -8,7 +8,6 @@ import { loadMonth } from './services/calendar.js';
 import { startSync } from './services/sync.js';
 import { h, icon } from './ui/dom.js';
 import { clock, fullDateLine, greetingLine, quote, weather } from './ui/hero.js';
-import { rail } from './ui/rail.js';
 import { workspace } from './ui/workspace.js';
 import { focusView, focusTick, focusRemaining } from './ui/focus.js';
 import { registerStage, currentMode } from './ui/modes.js';
@@ -44,7 +43,7 @@ function renderMode(mode) {
     default:
       return h(
         'div',
-        { class: ['layout layout--clock', p.showRail && 'has-rail'] },
+        { class: 'layout layout--clock' },
         // Figma "Inspira 2.0 / Clock": date + line top-left, display clock, weather bottom-left.
         h(
           'div',
@@ -53,7 +52,6 @@ function renderMode(mode) {
           clock('display'),
           weather('display'),
         ),
-        p.showRail && rail(),
       );
   }
 }
@@ -114,7 +112,7 @@ let paint;
 let signature = '';
 const signatureOf = (mode) => {
   const p = store.prefs();
-  return `${mode}|${p.showRail}|${p.showQuoteOnClock}`;
+  return `${mode}|${p.showQuoteOnClock}`;
 };
 
 function rerender() {

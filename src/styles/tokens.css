@@ -1,7 +1,7 @@
 /* ==========================================================================
    Inspira design tokens
    Layer 1: primitives (raw values)  →  Layer 2: semantic (what it's for)
-   →  Layer 3: component tokens (clock, quote, rail…).
+   →  Layer 3: component tokens (clock face, quote, dock…).
    To re-skin toward the original Inspira identity, change Layer 1 + the
    type families; components only reference semantic/component tokens.
    ========================================================================== */
@@ -103,8 +103,6 @@
   --clock-tracking: -0.045em;
   --quote-hero-size: clamp(1rem, 1.5vw, 1.25rem);
   --quote-feature-size: clamp(1.75rem, 3.6vw, 3rem);
-  --rail-width: 272px;
-
   /* Clock face — values from the 1920 × 1024 Figma frame, scaled with the viewport. */
   --face-pad: clamp(32px, 6.25vw, 120px); /* 120 */
   --face-clock: clamp(88px, 9.5vw, 182px); /* 182 */

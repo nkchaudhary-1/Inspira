@@ -41,8 +41,6 @@ function inPlan(fn) {
 }
 
 function focusComposer() {
-  const mode = currentMode();
-  if (mode === 'clock' && store.prefs().showRail) return document.getElementById('rail-composer')?.focus();
   inPlan(() => {
     if (store.ui.view !== 'day') store.setUI({ view: 'day' });
     requestAnimationFrame(() => document.getElementById('plan-composer')?.focus());

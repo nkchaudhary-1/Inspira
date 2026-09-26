@@ -16,7 +16,6 @@ export const DEFAULT_PREFS = {
   clock24: false,
   showSeconds: false,
   quoteCategory: 'motivation',
-  showRail: true,
   showQuoteOnClock: true,
   units: 'c',
   name: '',

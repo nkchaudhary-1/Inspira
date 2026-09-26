@@ -22,7 +22,7 @@ Components only reference semantic and component tokens, so none of them need ed
 
 | Mode | Job | What's on screen |
 | --- | --- | --- |
-| **Clock** (default) | Glance | Date, clock, one quote line, weather. A quiet *Today* rail on the right (toggleable). |
+| **Clock** (default) | Glance | Date, one quote line, clock, weather — nothing else. Tasks live in Plan. |
 | **Motivation** | Pause | Greeting and a large serif quote, plus category and "another one". Time and weather shrink to a meta line. |
 | **Focus** | Do one thing | Intention, duration and a timer. Everything else disappears. The session is shared across tabs, and a notification fires when it ends. |
 | **Plan** | Organize the day | Date navigation, then *Schedule · Tasks · Notes* as three columns. Projects are one click away. |
@@ -63,7 +63,7 @@ Navigation lives in a hidden dock. A faint ••• handle at the bottom (or th
 
 ## Edge cases handled
 
-- Midnight rollover: the clock, the "today" rail and the selected day follow if you were on today.
+- Midnight rollover: the clock and the selected day follow if you were on today.
 - Editing in two tabs: storage changes merge instead of overwriting, and nothing re-renders while you’re typing.
 - Calendar offline or token expired: cached events stay visible with a quiet retry.
 - Deleting a project keeps its tasks and notes.
