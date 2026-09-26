@@ -2,10 +2,10 @@
 
 **Your day, every time you open a new tab.**
 
-Inspira replaces Chrome's New Tab page with a calm clock, daily inspiration and weather, with a quiet personal workspace for your day: tasks, notes, projects and Google Calendar.
+Inspira replaces Chrome's New Tab page with a calm clock, daily inspiration and weather, plus a quiet personal workspace: a pomodoro timer, a week task board, and a calendar with notes, projects and Google Calendar.
 
-- **Four modes, one key each.** `1` Clock · `2` Motivation · `3` Focus · `4` Plan
-- **The date is the backbone.** Every task, note and event belongs to a day. Use `←` / `→` to move between days, `T` for today and `C` for the month calendar.
+- **Five modes, one key each.** `1` Clock · `2` Quote · `3` Focus (pomodoro) · `4` Tasks (week board) · `5` Calendar (day / week / month / year)
+- **The date is the backbone.** Every task, note and event belongs to a day. Drag tasks between days, step through weeks or months with `←` / `→`, and jump back with `T`.
 - **Three things stay separate.** *Schedule* is what's booked (Google Calendar, read-only). *Tasks* are what you need to do. *Notes* are what you want to remember.
 - **Works without an account.** Signing in with Google syncs everything through a private file in your Drive.
 
@@ -45,7 +45,7 @@ manifest.json          MV3, newtab override, service worker
 newtab.html            shell; src/paint.js sets theme before first paint
 background.js          reminders + focus-end notifications via chrome.alarms
 src/
-  app.js               bootstrap, stage per mode, 1s ticker (clock, focus, midnight rollover)
+  app.js               bootstrap, stage per mode, 1s ticker (clock, pomodoro, midnight rollover)
   core/
     store.js           single store: data (synced) · device (local) · ui (ephemeral)
     dates.js           day keys ('YYYY-MM-DD'), formatting, month grid
@@ -58,6 +58,10 @@ src/
     calendar.js        Calendar API, month-at-a-time cache
     weather.js         Open-Meteo (no key), city search / geolocation
   ui/                  small components built with h() + reactive()
+    tasksPage.js       Tasks mode: week board, inline add, drag between days, projects
+    calendarPage.js    Calendar mode: day workspace / week / month grid / year
+    focus.js           Focus mode: pomodoro cycle + dot-matrix display
+    dock.js            hidden macOS-style dock
   data/quotes.js       100 original lines across 5 categories
   styles/              tokens.css → base.css → app.css
 ```
@@ -74,15 +78,16 @@ src/
 
 | Key | Action |
 | --- | --- |
-| `1`–`4` | Clock · Motivation · Focus · Plan |
-| `←` `→` | Previous / next day |
+| `1`–`5` | Clock · Quote · Focus · Tasks · Calendar |
+| `←` `→` | Previous / next week (Tasks) or day / week / month / year (Calendar) |
 | `T` | Today |
 | `C` | Calendar |
 | `P` | Projects |
-| `N` | New task |
-| `M` | New note |
+| `N` | New task for today |
+| `M` | New note for the selected day |
 | `Q` | Another quote |
-| `Space` | Start / pause focus |
+| `Space` | Start / pause the timer |
+| `R` `S` | Reset / skip the timer |
 | `D` | Cycle theme |
 | `,` | Settings |
 | `?` | Shortcuts |

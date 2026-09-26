@@ -9,16 +9,19 @@ import { openPopover, closeOverlay, toast } from './overlay.js';
 
 const PRIORITY = ['None', 'Low', 'Medium', 'High'];
 
-export function taskList(tasks, { showDate = false, showProject = true, compact = false, limit } = {}) {
+/** Drag payload type for moving tasks between days. */
+export const TASK_MIME = 'application/x-inspira-task';
+
+export function taskList(tasks, { showDate = false, showProject = true, compact = false, draggable = false, limit } = {}) {
   const list = limit ? tasks.slice(0, limit) : tasks;
   return h(
     'ul',
     { class: ['task-list', compact && 'task-list--compact'], role: 'list' },
-    list.map((t) => taskRow(t, { showDate, showProject, compact })),
+    list.map((t) => taskRow(t, { showDate, showProject, compact, draggable })),
   );
 }
 
-function taskRow(task, { showDate, showProject, compact }) {
+function taskRow(task, { showDate, showProject, compact, draggable }) {
   const prefs = store.prefs();
   const project = showProject ? store.getProject(task.projectId) : null;
   const meta = [
@@ -39,6 +42,15 @@ function taskRow(task, { showDate, showProject, compact }) {
     {
       class: ['task', Date.now() - task.createdAt < 600 && 'is-new', task.done && 'is-done', task.priority && `task--p${task.priority}`],
       dataset: { id: task.id },
+      draggable: draggable ? 'true' : null,
+      onDragstart: draggable
+        ? (e) => {
+            e.dataTransfer.setData(TASK_MIME, task.id);
+            e.dataTransfer.effectAllowed = 'move';
+            e.currentTarget.classList.add('is-dragging');
+          }
+        : null,
+      onDragend: draggable ? (e) => e.currentTarget.classList.remove('is-dragging') : null,
     },
     h(
       'button',
@@ -55,6 +67,28 @@ function taskRow(task, { showDate, showProject, compact }) {
     h('div', { class: 'task__body' }, title, meta.length ? h('div', { class: 'task__meta' }, meta) : null),
     iconButton('more', 'Task details', (e) => openTaskMenu(e.currentTarget, task.id), { class: 'task__more', size: 16 }),
   );
+}
+
+/** Let `el` accept dropped tasks and move them to day `key`. */
+export function taskDropTarget(el, key) {
+  el.addEventListener('dragover', (e) => {
+    if (!e.dataTransfer.types.includes(TASK_MIME)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    el.classList.add('is-drop');
+  });
+  el.addEventListener('dragleave', (e) => {
+    if (!el.contains(e.relatedTarget)) el.classList.remove('is-drop');
+  });
+  el.addEventListener('drop', (e) => {
+    el.classList.remove('is-drop');
+    const id = e.dataTransfer.getData(TASK_MIME);
+    if (!id) return;
+    e.preventDefault();
+    const task = store.getData().tasks[id];
+    if (task && task.date !== key) store.updateTask(id, { date: key });
+  });
+  return el;
 }
 
 function editTitle(titleEl, task) {

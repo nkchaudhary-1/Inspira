@@ -47,3 +47,15 @@ test('misc helpers', () => {
   assert.equal(formatDuration(25 * 60000), '25:00');
   assert.equal(formatDuration(61000), '01:01');
 });
+
+import { weekKeys, formatWeekRange, formatMonthYear, addYears } from '../src/core/dates.js';
+
+test('week helpers', () => {
+  assert.deepEqual(weekKeys('2026-09-26', 1), ['2026-09-21', '2026-09-22', '2026-09-23', '2026-09-24', '2026-09-25', '2026-09-26', '2026-09-27']);
+  assert.equal(weekKeys('2026-09-26', 0)[0], '2026-09-20');
+  assert.equal(formatWeekRange('2026-09-26'), '21 – 27 September 2026');
+  assert.equal(formatWeekRange('2026-10-01'), '28 September – 04 October 2026');
+  assert.equal(formatWeekRange('2026-01-01'), '29 Dec 2025 – 04 Jan 2026');
+  assert.equal(formatMonthYear('2026-09-26'), 'September 2026');
+  assert.equal(addYears('2028-02-29', 1), '2029-02-28');
+});

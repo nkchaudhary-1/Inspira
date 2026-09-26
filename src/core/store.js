@@ -20,17 +20,22 @@ export const DEFAULT_PREFS = {
   units: 'c',
   name: '',
   focusMinutes: 25,
+  shortBreakMinutes: 5,
+  longBreakMinutes: 15,
   weekStart: 1,
   updatedAt: 0,
 };
 
 export const DEFAULT_DEVICE = {
-  mode: 'clock', // clock | motivation | focus | plan
+  mode: 'clock', // clock | motivation | focus | tasks | calendar
+  calView: 'month', // day | week | month | year
+  tasksView: 'week', // week | projects
   location: null, // { lat, lon, name }
   weather: null, // cached forecast
   account: null, // { email, name, givenName, picture }
   calendarConnected: false,
-  focus: { state: 'idle', intention: '', taskId: null, minutes: 25, endsAt: null, remainingMs: null },
+  // Pomodoro: phase focus → short break (long break every 4th), started manually.
+  focus: { phase: 'focus', state: 'idle', intention: '', endsAt: null, remainingMs: null, cycle: 0, cycleDate: null },
   quoteShift: { date: null, n: 0 },
   sync: { fileId: null, lastSyncedAt: 0 },
   hintsSeen: false,
@@ -42,7 +47,6 @@ let data = { tasks: {}, notes: {}, projects: {}, prefs: { ...DEFAULT_PREFS } };
 let device = structuredClone(DEFAULT_DEVICE);
 export const ui = {
   date: todayKey(),
-  view: 'day', // day | projects
   projectId: null,
   openNoteId: null,
   events: {}, // dayKey -> [event]
@@ -99,6 +103,10 @@ export async function init() {
   if (storedDevice) {
     device = { ...structuredClone(DEFAULT_DEVICE), ...storedDevice };
     device.focus = { ...DEFAULT_DEVICE.focus, ...storedDevice.focus };
+    // 2.0 → 2.1: Plan mode became Calendar → Day; old focus sessions had no phase.
+    if (device.mode === 'plan') Object.assign(device, { mode: 'calendar', calView: 'day' });
+    if (!['focus', 'short', 'long'].includes(device.focus.phase)) device.focus.phase = 'focus';
+    if (device.focus.state === 'done') device.focus.state = 'idle';
   }
   storage.onExternalChange((key, value) => {
     if (!value || ownRevs.has(value._rev)) return;

@@ -20,14 +20,17 @@ Components only reference semantic and component tokens, so none of them need ed
 
 ## Modes
 
+Figma: *Inspira 2.0 — Home — Clock / Daily Quote / Pomodoro / Tasks / Calendar*.
+
 | Mode | Job | What's on screen |
 | --- | --- | --- |
-| **Clock** (default) | Glance | Date, one quote line, clock, weather — nothing else. Tasks live in Plan. |
-| **Motivation** | Pause | Greeting and a large serif quote, plus category and "another one". Time and weather shrink to a meta line. |
-| **Focus** | Do one thing | Intention, duration and a timer. Everything else disappears. The session is shared across tabs, and a notification fires when it ends. |
-| **Plan** | Organize the day | Date navigation, then *Schedule · Tasks · Notes* as three columns. Projects are one click away. |
+| **Clock** (default) | Glance | Date, one quote line, a large Boldonse clock, weather — nothing else. |
+| **Quote** | Pause | Greeting, the day's line set large in Boldonse, date + time + weather. Category, "another one" and copy appear on hover. |
+| **Focus** | Do one thing | Pomodoro on a dot-matrix display: Focus / Short break / Long break (every 4th). Reset · Start · Skip, session pips, optional intention. Shared across tabs; a notification fires at the end. |
+| **Tasks** | Plan the week | Seven day columns. "+ Add task" inline (stays open for rapid entry), drag a task onto another day, carry-over from earlier days. Projects is a tab. |
+| **Calendar** | See time | Day (Schedule · Tasks · Notes — the old Plan mode), Week, Month (the Figma grid) and Year. Click any day to open it. |
 
-Navigation lives in a hidden dock. A faint ••• handle at the bottom (or the very bottom edge of the screen, like macOS auto-hide) reveals a glass dock with the four modes plus shortcuts, theme and settings; icons magnify toward the pointer. Number keys are the fast path.
+Navigation lives in a hidden dock. A faint ••• handle at the bottom (or the very bottom edge of the screen, like macOS auto-hide) reveals a glass dock with the five modes plus shortcuts, theme and settings; icons magnify toward the pointer. Number keys are the fast path.
 
 ## Key decisions and tradeoffs
 

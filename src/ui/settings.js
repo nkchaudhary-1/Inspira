@@ -239,26 +239,18 @@ function weatherSection(d, p) {
 }
 
 function focusSection(p) {
+  const minutes = (key, options, label) =>
+    segmented(
+      options.map((v) => [v, String(v)]),
+      p[key],
+      (v) => store.setPrefs({ [key]: v }),
+      label,
+    );
   return section(
-    'Focus',
-    row(
-      'Default session',
-      segmented(
-        [
-          [15, '15'],
-          [25, '25'],
-          [45, '45'],
-          [60, '60'],
-        ],
-        p.focusMinutes,
-        (v) => {
-          store.setPrefs({ focusMinutes: v });
-          store.setDevice({ focus: { ...store.getDevice().focus, minutes: v } });
-        },
-        'Default focus minutes',
-      ),
-      'Minutes',
-    ),
+    'Focus timer',
+    row('Focus', minutes('focusMinutes', [15, 25, 45, 60], 'Focus minutes'), 'Minutes'),
+    row('Short break', minutes('shortBreakMinutes', [3, 5, 10], 'Short break minutes'), 'Minutes'),
+    row('Long break', minutes('longBreakMinutes', [10, 15, 20, 30], 'Long break minutes'), 'After every 4th focus session'),
   );
 }
 

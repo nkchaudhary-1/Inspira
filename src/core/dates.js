@@ -142,3 +142,47 @@ export function formatDuration(ms) {
   const s = total % 60;
   return h ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
 }
+
+/** Monday (or Sunday) that starts the week containing `key`. */
+export function weekStartKey(key, weekStart = 1) {
+  const d = fromKey(key);
+  const offset = (d.getDay() - weekStart + 7) % 7;
+  d.setDate(d.getDate() - offset);
+  return toKey(d);
+}
+
+/** The seven day keys of the week containing `key`. */
+export function weekKeys(key, weekStart = 1) {
+  const start = weekStartKey(key, weekStart);
+  return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+}
+
+/** "21 – 27 September 2026", "28 September – 04 October 2026", "29 Dec 2025 – 04 Jan 2026" */
+export function formatWeekRange(key, weekStart = 1) {
+  const days = weekKeys(key, weekStart);
+  const a = fromKey(days[0]);
+  const b = fromKey(days[6]);
+  if (a.getFullYear() !== b.getFullYear()) {
+    return `${pad(a.getDate())} ${MONTHS[a.getMonth()].slice(0, 3)} ${a.getFullYear()} – ${pad(b.getDate())} ${MONTHS[b.getMonth()].slice(0, 3)} ${b.getFullYear()}`;
+  }
+  if (a.getMonth() !== b.getMonth()) {
+    return `${pad(a.getDate())} ${MONTHS[a.getMonth()]} – ${pad(b.getDate())} ${MONTHS[b.getMonth()]} ${b.getFullYear()}`;
+  }
+  return `${pad(a.getDate())} – ${pad(b.getDate())} ${MONTHS[b.getMonth()]} ${b.getFullYear()}`;
+}
+
+/** "September 2026" */
+export function formatMonthYear(key) {
+  const d = fromKey(key);
+  return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+/** "26 September 2026" */
+export function formatDayMonthYear(key) {
+  const d = fromKey(key);
+  return `${pad(d.getDate())} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+export function addYears(key, n) {
+  return addMonths(key, n * 12);
+}

@@ -25,6 +25,11 @@ export const dateLine = (className = 'hero-date') => h('div', { class: className
 /** "Saturday, 02 September 2026" — the Clock face's date. */
 export const fullDateLine = (className = 'clockface__date') => h('div', { class: className, dataset: { bind: 'date-full' } }, formatFull(todayKey()));
 
+/** Figma footer on Quote and Focus: date, then "10:45 PM  24° Delhi". */
+export function metaFooter() {
+  return h('footer', { class: 'meta-foot' }, fullDateLine('meta-foot__date'), h('div', { class: 'meta-foot__line' }, clock('meta'), weather('meta')));
+}
+
 export function greetingLine() {
   const name = store.prefs().name;
   return h('div', { class: 'eyebrow', dataset: { bind: 'greeting' } }, `${greeting(new Date().getHours())}${name ? `, ${name}` : ''}`);
@@ -48,6 +53,7 @@ export function weather(variant = 'full') {
       h('span', { class: 'weather__place' }, location.name),
     );
     if (variant === 'inline') return [btn, h('span', { class: 'weather__label' }, label)];
+    if (variant === 'meta') return btn;
     if (variant === 'display') {
       return [btn, h('div', { class: 'weather__detail' }, `${label} H ${convert(w.high)}° / L ${convert(w.low)}°`)];
     }
@@ -150,8 +156,24 @@ export function quote(variant = 'hero') {
     const q = currentQuote();
     const fresh = q.text !== lastText;
     lastText = q.text;
-    // The Clock face shows the line plainly; other variants keep quotation marks.
-    const text = h('blockquote', { class: ['quote__text', fresh && 'is-entering'] }, variant === 'line' ? q.text : `“${q.text}”`);
+    // Clock and Quote faces show the line plainly (Figma); others keep quotation marks.
+    const plain = variant === 'line' || variant === 'display';
+    const body = variant === 'display' ? q.text.replace(/\.$/, '') : q.text;
+    const text = h('blockquote', { class: ['quote__text', fresh && 'is-entering'] }, plain ? body : `“${body}”`);
+    if (variant === 'display') {
+      return [
+        text,
+        h(
+          'div',
+          { class: 'quote__tools' },
+          h('button', { type: 'button', class: 'text-btn', onClick: (e) => openCategories(e.currentTarget) }, categoryLabel()),
+          h('span', { class: 'sep' }, '·'),
+          h('button', { type: 'button', class: 'text-btn', onClick: nextQuote, title: 'Another one (Q)' }, 'Another one'),
+          h('span', { class: 'sep' }, '·'),
+          h('button', { type: 'button', class: 'text-btn', onClick: () => copyQuote(q.text) }, 'Copy'),
+        ),
+      ];
+    }
     if (variant !== 'feature') return text;
     return [
       text,
@@ -165,6 +187,13 @@ export function quote(variant = 'hero') {
       ),
     ];
   });
+}
+
+function copyQuote(text) {
+  navigator.clipboard?.writeText(text).then(
+    () => toast('Copied'),
+    () => toast('Couldn’t copy — select the text instead'),
+  );
 }
 
 const categoryLabel = () => CATEGORIES.find((c) => c.id === store.prefs().quoteCategory)?.label || 'Motivation';

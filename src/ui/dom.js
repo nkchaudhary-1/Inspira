@@ -125,6 +125,11 @@ export function iconButton(name, label, onClick, extra = {}) {
   );
 }
 
+/** Segmented-control tab (Calendar views, Tasks views). */
+export function tab(label, active, onClick) {
+  return h('button', { type: 'button', role: 'tab', 'aria-selected': String(active), class: ['tabs__tab', active && 'is-active'], onClick }, label);
+}
+
 export function autosize(textarea) {
   const fit = () => {
     textarea.style.height = 'auto';

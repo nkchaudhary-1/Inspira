@@ -38,11 +38,16 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     const { [DEVICE_KEY]: device } = await chrome.storage.local.get(DEVICE_KEY);
     const focus = device?.focus;
     if (!focus || focus.state !== 'running') return;
+    const isFocus = !focus.phase || focus.phase === 'focus';
     chrome.notifications.create('focus-end', {
       type: 'basic',
       iconUrl: 'icons/icon-128.png',
-      title: 'Focus session complete',
-      message: focus.intention ? `“${focus.intention}” — take a breath.` : 'Nicely done. Take a breath.',
+      title: isFocus ? 'Focus session complete' : 'Break’s over',
+      message: isFocus
+        ? focus.intention
+          ? `“${focus.intention}” — time for a break.`
+          : 'Nicely done. Time for a break.'
+        : 'Ready for the next focus session?',
       priority: 1,
     });
     return;

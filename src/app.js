@@ -7,9 +7,10 @@ import { refreshWeather } from './services/weather.js';
 import { loadMonth } from './services/calendar.js';
 import { startSync } from './services/sync.js';
 import { h, icon } from './ui/dom.js';
-import { clock, fullDateLine, greetingLine, quote, weather } from './ui/hero.js';
-import { workspace } from './ui/workspace.js';
-import { focusView, focusTick, focusRemaining } from './ui/focus.js';
+import { clock, fullDateLine, greetingLine, quote, weather, metaFooter } from './ui/hero.js';
+import { focusView, focusTick, focusRemaining, paintFocus, PHASES } from './ui/focus.js';
+import { tasksPage } from './ui/tasksPage.js';
+import { calendarPage } from './ui/calendarPage.js';
 import { registerStage, currentMode } from './ui/modes.js';
 import { dock } from './ui/dock.js';
 import { initShortcuts } from './ui/shortcuts.js';
@@ -19,26 +20,14 @@ function renderMode(mode) {
   const p = store.prefs();
   switch (mode) {
     case 'motivation':
-      return h(
-        'div',
-        { class: 'layout layout--motivation' },
-        h('header', { class: 'meta-line' }, clock('inline'), h('span', { class: 'sep' }, '·'), weather('inline')),
-        h('div', { class: 'motivation' }, greetingLine(), quote('feature')),
-      );
+      // Figma "Home — Daily Quote": greeting, the day's line, date + time + weather.
+      return h('div', { class: 'layout layout--quote' }, greetingLine(), quote('display'), metaFooter());
     case 'focus':
       return h('div', { class: 'layout layout--focus' }, focusView());
-    case 'plan':
-      return h(
-        'div',
-        { class: 'layout layout--plan' },
-        h(
-          'header',
-          { class: 'planbar' },
-          greetingLine(),
-          h('span', { class: 'planbar__right' }, clock('inline'), h('span', { class: 'sep' }, '·'), weather('inline')),
-        ),
-        workspace(),
-      );
+    case 'tasks':
+      return h('div', { class: 'layout layout--page' }, tasksPage());
+    case 'calendar':
+      return h('div', { class: 'layout layout--page' }, calendarPage());
     case 'clock':
     default:
       return h(
@@ -78,11 +67,8 @@ function tick() {
   focusTick(now.getTime());
   const f = store.getDevice().focus;
   const remaining = focusRemaining(now.getTime());
-  setAll('focus-remaining', formatDuration(remaining));
-  for (const el of document.querySelectorAll('[data-bind="focus-progress"]')) {
-    el.style.transform = `scaleX(${Math.min(1, Math.max(0, 1 - remaining / (f.minutes * 60000)))})`;
-  }
-  const title = f.state === 'running' ? `${formatDuration(remaining)} · Focus` : 'New Tab';
+  paintFocus(now.getTime());
+  const title = f.state === 'running' ? `${formatDuration(remaining)} · ${PHASES[f.phase]?.label || 'Focus'}` : 'New Tab';
   if (document.title !== title) document.title = title;
 
   applyDaypart(now);
@@ -165,7 +151,7 @@ async function boot() {
 
 function firstRunHint() {
   if (store.getDevice().hintsSeen) return;
-  const hint = h('div', { class: 'hint' }, 'Tip: hover the dots below for the menu · ', h('kbd', null, '1'), '–', h('kbd', null, '4'), ' to switch views');
+  const hint = h('div', { class: 'hint' }, 'Tip: hover the dots below for the menu · ', h('kbd', null, '1'), '–', h('kbd', null, '5'), ' to switch views');
   document.body.append(hint);
   const dismiss = () => {
     hint.classList.add('is-leaving');

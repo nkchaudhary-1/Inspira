@@ -1,28 +1,28 @@
 // Keyboard shortcuts. Single keys, ignored while typing (except Escape).
 
 import * as store from '../core/store.js';
-import { todayKey } from '../core/dates.js';
 import { h } from './dom.js';
 import { closeOverlay, overlayOpen, openSheet } from './overlay.js';
 import { setMode, currentMode, MODES } from './modes.js';
-import { shiftDay, goToDate, openProjects } from './workspace.js';
-import { openCalendar } from './calendar.js';
+import { shiftCalendar, calendarToday, setCalView } from './calendarPage.js';
+import { shiftWeek, tasksToday, setTasksView, focusAddTask } from './tasksPage.js';
 import { nextQuote } from './hero.js';
 import { createNote, closeNote } from './notes.js';
-import { togglePause } from './focus.js';
+import { togglePause, resetFocus, skipFocus } from './focus.js';
 import { openSettings } from './settings.js';
 import { cycleTheme } from './theme.js';
 
 export const SHORTCUTS = [
-  ['1 – 4', 'Clock · Motivation · Focus · Plan'],
-  ['← / →', 'Previous / next day'],
+  ['1 – 5', 'Clock · Quote · Focus · Tasks · Calendar'],
+  ['← / →', 'Previous / next week (Tasks) or period (Calendar)'],
   ['T', 'Jump to today'],
-  ['C', 'Open calendar'],
+  ['C', 'Calendar'],
   ['P', 'Projects'],
-  ['N', 'New task'],
-  ['M', 'New note'],
+  ['N', 'New task for today'],
+  ['M', 'New note for the selected day'],
   ['Q', 'Another quote'],
-  ['Space', 'Start / pause focus (in Focus)'],
+  ['Space', 'Start / pause the timer (Focus)'],
+  ['R / S', 'Reset / skip the timer (Focus)'],
   ['D', 'Cycle light / dark / auto'],
   [',', 'Settings'],
   ['?', 'This list'],
@@ -31,21 +31,17 @@ export const SHORTCUTS = [
 
 const typing = (el) => el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
 
-function inPlan(fn) {
-  if (currentMode() === 'plan') return fn();
-  setMode('plan');
-  // The mode switch may run inside a view transition; wait for the workspace.
+/** Switch to `mode` (if needed), then run `fn` once its page is on screen. */
+function inMode(mode, selector, fn) {
+  if (currentMode() === mode) return fn();
+  setMode(mode);
+  // The mode switch may run inside a view transition; wait for the page.
   let frames = 0;
-  const wait = () => (document.querySelector('.workspace') || ++frames > 30 ? fn() : requestAnimationFrame(wait));
+  const wait = () => (document.querySelector(selector) || ++frames > 30 ? fn() : requestAnimationFrame(wait));
   requestAnimationFrame(wait);
 }
 
-function focusComposer() {
-  inPlan(() => {
-    if (store.ui.view !== 'day') store.setUI({ view: 'day' });
-    requestAnimationFrame(() => document.getElementById('plan-composer')?.focus());
-  });
-}
+const afterRender = (fn) => requestAnimationFrame(() => requestAnimationFrame(fn));
 
 export function openShortcuts() {
   openSheet(
@@ -81,50 +77,59 @@ export function initShortcuts() {
     const mode = MODES.find((m) => m.key === e.key);
     if (mode) return setMode(mode.id);
 
+    const current = currentMode();
     // Space is reserved for buttons that have focus.
     const onButton = document.activeElement?.tagName === 'BUTTON';
 
-    switch (e.key) {
-      case 'ArrowLeft':
-      case 'ArrowRight':
-        e.preventDefault();
-        inPlan(() => shiftDay(e.key === 'ArrowLeft' ? -1 : 1));
+    switch (e.key.toLowerCase()) {
+      case 'arrowleft':
+      case 'arrowright': {
+        const dir = e.key === 'ArrowLeft' ? -1 : 1;
+        if (current === 'tasks' && store.getDevice().tasksView === 'week') {
+          e.preventDefault();
+          shiftWeek(dir);
+        } else if (current === 'calendar') {
+          e.preventDefault();
+          shiftCalendar(dir);
+        }
         break;
+      }
       case 't':
-      case 'T':
-        inPlan(() => goToDate(todayKey()));
+        if (current === 'tasks') tasksToday();
+        else inMode('calendar', '.page--calendar', calendarToday);
         break;
       case 'c':
-      case 'C':
-        inPlan(() => {
-          const anchor = document.getElementById('daynav-title');
-          if (anchor) openCalendar(anchor, goToDate);
-        });
+        setMode('calendar');
         break;
       case 'p':
-      case 'P':
-        inPlan(() => openProjects());
+        inMode('tasks', '.page--tasks', () => setTasksView('projects'));
         break;
       case 'n':
-      case 'N':
         e.preventDefault();
-        focusComposer();
+        inMode('tasks', '.page--tasks', () => {
+          if (store.getDevice().tasksView !== 'week') setTasksView('week');
+          tasksToday();
+          afterRender(() => focusAddTask());
+        });
         break;
       case 'm':
-      case 'M':
         e.preventDefault();
-        inPlan(() => {
-          if (store.ui.view !== 'day') store.setUI({ view: 'day' });
-          createNote({ date: store.ui.date });
+        inMode('calendar', '.page--calendar', () => {
+          setCalView('day');
+          afterRender(() => createNote({ date: store.ui.date }));
         });
         break;
       case 'q':
-      case 'Q':
         nextQuote();
         break;
       case 'd':
-      case 'D':
         cycleTheme();
+        break;
+      case 'r':
+        if (current === 'focus') resetFocus();
+        break;
+      case 's':
+        if (current === 'focus') skipFocus();
         break;
       case ',':
         openSettings();
@@ -133,7 +138,7 @@ export function initShortcuts() {
         openShortcuts();
         break;
       case ' ':
-        if (currentMode() === 'focus' && !onButton) {
+        if (current === 'focus' && !onButton) {
           e.preventDefault();
           togglePause();
         }

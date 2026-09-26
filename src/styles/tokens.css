@@ -111,6 +111,13 @@
   --face-line: clamp(20px, 1.67vw, 32px); /* 32 */
   --face-temp: clamp(40px, 3.33vw, 64px); /* 64 */
   --face-muted: color-mix(in srgb, var(--text) 60%, transparent); /* rgba(255,255,255,.6) */
+
+  /* Home screens (Figma 1920 frames), scaled with the viewport */
+  --page-title: clamp(20px, 1.46vw, 28px); /* 28 */
+  --month-num: clamp(18px, 1.46vw, 28px); /* 28 */
+  --board-num: clamp(18px, 1.25vw, 24px); /* 24 */
+  --quote-display: clamp(28px, 2.7vw, 52px); /* 52 */
+  --dot: clamp(8px, min(0.83vw, 1.6vh), 16px); /* 16 */
   --content-max: 1180px;
 }
 
@@ -133,6 +140,23 @@
   --focus-ring: color-mix(in srgb, var(--amber-500) 55%, transparent);
   --shadow-pop: 0 1px 1px rgb(40 30 20 / 4%), 0 12px 32px -8px rgb(40 30 20 / 18%);
   --scrim: rgb(30 25 20 / 18%);
+  /* Figma "Home" screens — light counterparts */
+  --cell-active: #e8e5df;
+  --text-soft: #4a4640;
+  --label: #8b857b;
+  --check-bg: #ffffff;
+  --check-border: #c9c2b6;
+  --matrix-bezel: #fbfaf7;
+  --matrix-card: #ebe8e2;
+  --matrix-edge: rgb(0 0 0 / 5%);
+  --dot-off: rgb(0 0 0 / 7%);
+  --dot-on: #211f1c;
+  --dot-glow: none;
+  --pill-bg: rgb(0 0 0 / 4%);
+  --pill-border: rgb(0 0 0 / 7%);
+  --tabs-bg: rgb(0 0 0 / 5%);
+  --tab-active: #ffffff;
+  --outline: rgb(0 0 0 / 20%);
   --grain-opacity: 0.05;
 }
 
@@ -155,6 +179,23 @@
   --focus-ring: color-mix(in srgb, var(--amber-400) 55%, transparent);
   --shadow-pop: 0 1px 1px rgb(0 0 0 / 30%), 0 16px 40px -8px rgb(0 0 0 / 55%);
   --scrim: rgb(0 0 0 / 40%);
+  /* Figma "Home" screens */
+  --cell-active: #2e2e38;
+  --text-soft: #d9d9e0;
+  --label: #8c8f9e;
+  --check-bg: #292933;
+  --check-border: #4d4d5c;
+  --matrix-bezel: #000000;
+  --matrix-card: #161719;
+  --matrix-edge: rgb(255 255 255 / 4%);
+  --dot-off: rgb(255 255 255 / 6%);
+  --dot-on: #ffffff;
+  --dot-glow: 0 0 6px rgb(255 255 255 / 55%);
+  --pill-bg: rgb(255 255 255 / 5%);
+  --pill-border: rgb(255 255 255 / 7%);
+  --tabs-bg: rgb(255 255 255 / 8%);
+  --tab-active: rgb(255 255 255 / 15%);
+  --outline: rgb(255 255 255 / 25%);
   --grain-opacity: 0.07;
 }
 

@@ -1,13 +1,14 @@
-// Experience modes. Switched from the hidden dock (see dock.js) or keys 1–4.
+// Experience modes. Switched from the hidden dock (see dock.js) or keys 1–5.
 
 import * as store from '../core/store.js';
 import { transition } from './dom.js';
 
 export const MODES = [
   { id: 'clock', label: 'Clock', key: '1', icon: 'clock' },
-  { id: 'motivation', label: 'Motivation', key: '2', icon: 'sparkle' },
+  { id: 'motivation', label: 'Quote', key: '2', icon: 'sparkle' },
   { id: 'focus', label: 'Focus', key: '3', icon: 'target' },
-  { id: 'plan', label: 'Plan', key: '4', icon: 'checklist' },
+  { id: 'tasks', label: 'Tasks', key: '4', icon: 'checklist' },
+  { id: 'calendar', label: 'Calendar', key: '5', icon: 'calendar' },
 ];
 
 let renderStage = () => {};
