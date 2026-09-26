@@ -184,7 +184,10 @@
   --line-strong: var(--paper-400);
   --surface: color-mix(in srgb, var(--paper-0) 80%, transparent);
   --surface-solid: var(--paper-0); /* Card / Elevated (with shadow) */
-  --surface-hover: var(--paper-100);
+  /* Hover follows the theme: a neutral wash tinted with the live accent
+     (mint, or the Sky phase colour). */
+  --surface-hover: color-mix(in srgb, var(--accent) 10%, var(--paper-100));
+  --hover-line: color-mix(in srgb, var(--accent) 55%, var(--paper-400));
   --card: var(--paper-0); /* Card / Default */
   --card-border: var(--paper-200); /* Card / Border */
   --accent: var(--mint-l-500);
@@ -236,7 +239,7 @@
   --glass-hi: rgb(255 255 255 / 90%);
   --glass-sheen: rgb(255 255 255 / 60%);
   --glass-well: rgb(17 19 24 / 4%);
-  --glass-well-hover: rgb(17 19 24 / 7%);
+  --glass-well-hover: color-mix(in srgb, var(--accent) 14%, rgb(17 19 24 / 5%));
   --glass-inset: rgb(17 19 24 / 8%);
   --glass-raised: #ffffff;
   /* Navigation (Figma 56:7576) */
@@ -244,7 +247,7 @@
   --nav-border: var(--paper-200);
   --nav-shadow: 0 1px 2px rgb(17 19 24 / 5%), 0 12px 32px -12px rgb(17 19 24 / 18%);
   --nav-item: color-mix(in srgb, var(--paper-900) 4%, transparent);
-  --nav-item-hover: color-mix(in srgb, var(--paper-900) 9%, transparent);
+  --nav-item-hover: color-mix(in srgb, var(--accent) 18%, rgb(17 19 24 / 6%));
   --nav-active: var(--paper-900);
   --nav-active-ink: var(--paper-0);
 }
@@ -262,7 +265,8 @@
   --line-strong: var(--ink-500);
   --surface: color-mix(in srgb, var(--ink-800) 82%, transparent);
   --surface-solid: var(--ink-780); /* Card / Elevated — popovers, sheets */
-  --surface-hover: var(--ink-750); /* Card / Hover */
+  --surface-hover: color-mix(in srgb, var(--accent) 12%, var(--ink-750)); /* Card / Hover, tinted */
+  --hover-line: color-mix(in srgb, var(--accent) 60%, var(--ink-500));
   --card: var(--ink-800); /* Card / Default */
   --card-border: var(--ink-700); /* Card / Border */
   --accent: var(--mint-500);
@@ -308,14 +312,14 @@
   --glass-hi: rgb(255 255 255 / 7%);
   --glass-sheen: rgb(255 255 255 / 6%);
   --glass-well: rgb(0 0 0 / 22%);
-  --glass-well-hover: rgb(255 255 255 / 6%);
+  --glass-well-hover: color-mix(in srgb, var(--accent) 18%, rgb(255 255 255 / 5%));
   --glass-inset: rgb(0 0 0 / 45%);
   --glass-raised: rgb(255 255 255 / 9%);
   --nav-bg: color-mix(in srgb, var(--ink-650) 72%, transparent);
   --nav-border: color-mix(in srgb, var(--white-100) 8%, transparent);
   --nav-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 16px 40px -12px rgb(0 0 0 / 55%);
   --nav-item: rgb(0 0 0 / 16%);
-  --nav-item-hover: color-mix(in srgb, var(--white-100) 10%, transparent);
+  --nav-item-hover: color-mix(in srgb, var(--accent) 24%, rgb(255 255 255 / 6%));
   --nav-active: color-mix(in srgb, var(--white-100) 62%, transparent);
   --nav-active-ink: var(--ink-950);
 }

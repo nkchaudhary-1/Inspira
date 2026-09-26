@@ -83,10 +83,15 @@ export function dock() {
     wrap.classList.remove('is-open');
     handle.setAttribute('aria-expanded', 'false');
   };
+  // Track the pointer ourselves: :hover isn't re-evaluated until the mouse
+  // moves, so a still pointer resting on the dock could read as "gone".
+  let inside = false;
+  wrap.addEventListener('pointerenter', () => (inside = true));
+  wrap.addEventListener('pointerleave', () => (inside = false));
   const closeSoon = () => {
     clearTimeout(closeTimer);
     closeTimer = setTimeout(() => {
-      if (wrap.matches(':hover')) return;
+      if (inside || wrap.matches(':hover')) return;
       if (wrap.contains(document.activeElement)) document.activeElement.blur();
       close();
     }, CLOSE_DELAY);
@@ -99,6 +104,18 @@ export function dock() {
   edge.addEventListener('pointerenter', hoverOpen);
   nav.addEventListener('pointerenter', hoverOpen);
   wrap.addEventListener('pointerleave', closeSoon);
+
+  // The dock appears where the handle was: swallow a click that lands while it
+  // is still opening, without making it unhoverable (which would close it).
+  nav.addEventListener(
+    'click',
+    (e) => {
+      if (!wrap.classList.contains('is-opening')) return;
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    true,
+  );
 
   // Touch / click / keyboard.
   handle.addEventListener('click', () => {
