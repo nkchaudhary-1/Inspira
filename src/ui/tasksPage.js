@@ -146,65 +146,43 @@ export function dayCount(key) {
 }
 
 export function addTask(key) {
-  const wrap = h('div', { class: 'board__add' });
-  const full = h('span', { class: 'board__full' }, `Day is full · ${store.MAX_TASKS_PER_DAY} tasks max`);
-  const button = h(
-    'button',
-    {
-      type: 'button',
-      class: 'board__add-btn',
-      dataset: { date: key },
-      onClick: () => open(),
-    },
-    '+ Add task',
-  );
-  const open = () => {
-    const input = h('input', { class: 'board__input', placeholder: 'New task', 'aria-label': `New task for ${weekdayName(key)}`, maxlength: '300' });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (input.readOnly) return;
-        if (addTaskFromText(input.value, { date: key })) input.value = '';
-        sync();
-      }
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        input.value = '';
-        input.blur();
-      }
-    });
-    enableMultiPaste(input, { date: key });
-    input.addEventListener('blur', () => {
-      if (store.dayIsFull(key)) wrap.replaceChildren(full);
-      else if (!input.value.trim()) wrap.replaceChildren(button);
-    });
-    wrap.replaceChildren(input, h('div', { class: 'composer__hint board__hint' }, 'Enter for the next one · paste a list to add many'));
-    input.focus();
-  };
-  // Swap "+ Add task" for a quiet "Day is full" note at the limit, and back.
+  const fullText = `Day is full · ${store.MAX_TASKS_PER_DAY} tasks max`;
+  const input = h('input', {
+    class: 'board__input',
+    placeholder: '+ Add task',
+    'aria-label': `New task for ${weekdayName(key)}`,
+    maxlength: '300',
+    dataset: { date: key },
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!input.readOnly && addTaskFromText(input.value, { date: key })) input.value = '';
+    }
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      input.value = '';
+      input.blur();
+    }
+  });
+  enableMultiPaste(input, { date: key });
+  const wrap = h('div', { class: 'board__add' }, input, h('div', { class: 'composer__hint board__hint' }, 'Enter to add · paste a list for many'));
+  // Always on screen; at the limit it turns read-only with a quiet note.
   const sync = () => {
     if (wrap.dataset.mounted && !wrap.isConnected) return unsub();
     wrap.dataset.mounted = '1';
     const isFull = store.dayIsFull(key);
-    const showing = wrap.firstChild;
-    // Mid-typing: keep the focused input (read-only) so stray keys stay in it
-    // instead of reaching global shortcuts. Blur / Esc then shows the note.
-    if (showing?.matches?.('.board__input') && showing === document.activeElement) {
-      showing.readOnly = isFull;
-      showing.placeholder = isFull ? `Day is full · ${store.MAX_TASKS_PER_DAY} tasks max` : 'New task';
-      return;
-    }
-    if (isFull && showing !== full) wrap.replaceChildren(full);
-    else if (!isFull && showing === full) wrap.replaceChildren(button);
+    input.readOnly = isFull;
+    input.placeholder = isFull ? fullText : '+ Add task';
+    wrap.classList.toggle('is-full', isFull);
   };
   const unsub = store.subscribe(sync);
-  wrap.append(button);
   sync();
   return wrap;
 }
 
 /** Focus the add-task input for a given day (used by the N shortcut). */
 export function focusAddTask(key = todayKey()) {
-  const btn = document.querySelector(`.board__add-btn[data-date="${key}"]`) || document.querySelector('.board__add-btn');
-  btn?.click();
+  const input = document.querySelector(`.board__input[data-date="${key}"]`) || document.querySelector('.board__input');
+  input?.focus();
 }
