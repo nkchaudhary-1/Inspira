@@ -123,9 +123,8 @@ function hexToRgb(hex) {
 function themeColors() {
   const css = getComputedStyle(root);
   const get = (name) => css.getPropertyValue(name);
-  return root.dataset.theme === 'dark'
-    ? [get('--black-100'), get('--black-80'), get('--black-60')]
-    : [get('--white-90'), get('--white-60'), get('--white-100')];
+  // Per-theme shader colours live in tokens.css (--shader-a/b/c).
+  return [get('--shader-a'), get('--shader-b'), get('--shader-c')];
 }
 
 const shader = {

@@ -898,7 +898,7 @@ body:has(.dock-wrap.is-open) .hint,
 .chip.is-active {
   background: var(--accent-soft);
   border-color: transparent;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .chips {
@@ -1040,9 +1040,9 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .task.is-done .task__check {
-  background: var(--text);
-  border-color: var(--text);
-  color: var(--bg);
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
 }
 
 .task.is-dragging {
@@ -1219,7 +1219,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .event.is-now .event__time {
-  color: var(--accent);
+  color: var(--accent-text);
   font-weight: 600;
 }
 
@@ -1678,8 +1678,8 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .pill-tabs__tab.is-active {
-  background: var(--text);
-  color: var(--bg);
+  background: var(--primary);
+  color: var(--on-primary);
   font-weight: 600;
 }
 
@@ -1778,13 +1778,13 @@ body:has(.dock-wrap.is-open) .hint,
 
 .pill-btn--primary,
 .pill-btn--primary:hover {
-  background: var(--text);
-  color: var(--bg);
+  background: var(--primary);
+  color: var(--on-primary);
   font-weight: 600;
 }
 
 .pill-btn--primary:hover {
-  opacity: 0.9;
+  background: var(--primary-hover);
 }
 
 .pomodoro__sessions {
@@ -2017,7 +2017,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .board__col.is-today .board__weekday {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .board__col.is-past .board__num {
@@ -2941,27 +2941,16 @@ body:has(.dock-wrap.is-open) .hint,
     auto;
 }
 
-:root[data-theme='dark'] .preset__swatch--aurora {
-  background: radial-gradient(120% 60% at 40% 30%, var(--black-60), transparent 70%), var(--black-100);
+.preset__swatch--aurora {
+  background: radial-gradient(120% 60% at 40% 30%, var(--shader-c), transparent 70%), var(--shader-a);
 }
-:root[data-theme='dark'] .preset__swatch--mesh {
+.preset__swatch--mesh {
   background:
-    radial-gradient(50% 60% at 25% 35%, var(--black-70), transparent 70%), radial-gradient(45% 55% at 75% 70%, var(--black-80), transparent 70%),
-    var(--black-100);
+    radial-gradient(50% 60% at 25% 35%, var(--shader-c), transparent 70%), radial-gradient(45% 55% at 75% 70%, var(--shader-b), transparent 70%),
+    var(--shader-a);
 }
-:root[data-theme='dark'] .preset__swatch--waves {
-  background: repeating-linear-gradient(170deg, var(--black-100) 0 6px, var(--black-80) 6px 8px);
-}
-:root[data-theme='light'] .preset__swatch--aurora {
-  background: radial-gradient(120% 60% at 40% 30%, var(--white-100), transparent 70%), var(--white-70);
-}
-:root[data-theme='light'] .preset__swatch--mesh {
-  background:
-    radial-gradient(50% 60% at 25% 35%, var(--white-100), transparent 70%), radial-gradient(45% 55% at 75% 70%, var(--white-60), transparent 70%),
-    var(--white-90);
-}
-:root[data-theme='light'] .preset__swatch--waves {
-  background: repeating-linear-gradient(170deg, var(--white-90) 0 6px, var(--white-60) 6px 8px);
+.preset__swatch--waves {
+  background: repeating-linear-gradient(170deg, var(--shader-a) 0 6px, var(--shader-b) 6px 8px);
 }
 
 .slider {
@@ -3090,7 +3079,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .focus-mini__ring .focus-mini__arc {
-  stroke: var(--text);
+  stroke: var(--accent);
   stroke-linecap: round;
   transition: stroke-dashoffset 1s linear;
 }

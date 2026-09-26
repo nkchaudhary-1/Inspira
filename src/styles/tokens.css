@@ -2,8 +2,11 @@
    Inspira design tokens
    Layer 1: primitives (raw values)  →  Layer 2: semantic (what it's for)
    →  Layer 3: component tokens (clock face, quote, dock…).
-   Palette: "Shades of gray" (black-100…60 / white-100…60). To re-skin, change
-   Layer 1 + the type families; components only reference semantic tokens.
+   Palettes from Figma (Inspira 2.0): "Light Theme" (node 50:622) and
+   "Dark Theme 2" (node 50:253) — neutral surfaces with a mint accent.
+   Older "Shades of gray" primitives (the black and white scales) remain for glow/grain.
+   To re-skin, change Layer 1 + the type families; components only reference
+   semantic tokens.
    ========================================================================== */
 
 /* Inter with its optical-size axis: text sizes get Inter Text, large sizes get
@@ -38,6 +41,56 @@
   --white-80: #e0e4eb; /* AAA 15:1 */
   --white-70: #d1d6e0; /* AAA 13:1 */
   --white-60: #bfc6d4; /* AA 11:1 */
+
+  /* "Dark Theme 2" (Figma, Inspira 2.0 · node 50:253) — ink scale, darkest first. */
+  --ink-950: #080a0e; /* Background / Primary */
+  --ink-900: #0e1117; /* Background / Secondary */
+  --ink-850: #151921; /* Background / Tertiary */
+  --ink-800: #181c25; /* Card / Default */
+  --ink-780: #1c2230; /* Card / Elevated */
+  --ink-750: #1f2430; /* Card / Hover */
+  --ink-700: #232a36; /* Card / Border */
+  --ink-650: #272d3b; /* Card / Active */
+  --ink-500: #3a4050; /* Text / Disabled */
+  --ink-400: #5c6478; /* Text / Tertiary — AA large 3.35:1 */
+  --ink-200: #9ca3b4; /* Text / Secondary — AAA 7.84:1 */
+  --ink-150: #bcc2d0; /* Hover Text / Secondary */
+  --ink-100: #e8ecf4; /* Hover Text / Primary */
+  --mint-400: #5eedb8; /* Accent / Hover */
+  --mint-500: #2dd4a0; /* Accent / Default — AAA 10.41:1 */
+  --mint-600: #1faf82; /* Accent / Pressed */
+  --mint-900: #1a3d33; /* Accent / Muted BG */
+  --mint-950: #162b24; /* Nav / Active BG */
+  --pink-400: #f772a0; /* Secondary / Hover */
+  --pink-500: #f24e80; /* Secondary / Default — AA 5.83:1 */
+  --pink-600: #d43a68; /* Secondary / Pressed */
+  --state-warning: #f5a623;
+  --state-error: #ef4444;
+  --state-info: #3b82f6;
+
+  /* "Light Theme" (Figma, Inspira 2.0 · node 50:622) — paper scale, lightest first. */
+  --paper-0: #ffffff; /* Background / Primary · Card / Default · Elevated */
+  --paper-50: #f7f8fa; /* Background / Secondary · Card / Hover */
+  --paper-100: #f0f2f5; /* Background / Tertiary */
+  --paper-150: #eef0f4; /* Card / Active */
+  --paper-200: #e2e5eb; /* Card / Border */
+  --paper-400: #b0b7c3; /* Text / Disabled */
+  --paper-500: #7c8393; /* Text / Tertiary — AA large 3.80:1 */
+  --paper-700: #4b5163; /* Text / Secondary — AAA 7.91:1 */
+  --paper-800: #2e3440; /* Hover Text / Secondary */
+  --paper-900: #111318; /* Text / Primary — AAA 18.58:1 */
+  --paper-950: #0a0c10; /* Hover Text / Primary */
+  --mint-l-500: #1ea87c; /* Accent / Default (light) — fills, 3.02:1 */
+  --mint-l-600: #17956e; /* Accent / Hover (light) */
+  --mint-l-700: #128060; /* Accent / Pressed (light) — AA 4.90:1, used for mint text */
+  --mint-l-800: #0f6b51; /* derived: primary button hover (darker keeps white text AA) */
+  --mint-l-50: #e6f7f1; /* Accent / Muted BG · Nav / Active BG (light) */
+  --pink-l-500: #e23d6d;
+  --pink-l-600: #cc2e5c;
+  --pink-l-700: #b12350;
+  --state-l-warning: #d4910a;
+  --state-l-error: #dc2626;
+  --state-l-info: #2563eb;
 
   /* Semantic accents kept for meaning only (priority, danger). */
   --amber-400: #d9a066;
@@ -118,111 +171,128 @@
 }
 
 /* ---- Layer 2 · semantic (light) ---- */
-/* Text roles from the palette: header = black-100, description = black-80. */
+/* Figma "Light Theme": paper surfaces, #111318 / #4B5163 / #7C8393 text, mint accent. */
 :root,
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: var(--white-90);
-  --text: var(--black-100); /* d.header (reversed) */
-  --text-2: var(--black-80); /* d.description (reversed) */
-  --text-3: var(--black-60);
-  --line: color-mix(in srgb, var(--black-100) 8%, transparent);
-  --line-strong: color-mix(in srgb, var(--black-100) 15%, transparent);
-  --surface: color-mix(in srgb, var(--white-100) 70%, transparent);
-  --surface-solid: var(--white-100);
-  --surface-hover: color-mix(in srgb, var(--black-100) 5%, transparent);
-  --accent: var(--black-100);
-  --accent-soft: color-mix(in srgb, var(--black-100) 7%, transparent);
-  --danger: #b4534c;
-  --focus-ring: color-mix(in srgb, var(--black-70) 55%, transparent);
-  --shadow-pop: 0 1px 1px rgb(10 14 21 / 4%), 0 12px 32px -8px rgb(10 14 21 / 16%);
-  --scrim: rgb(10 14 21 / 22%);
+  --bg: var(--paper-50); /* Background / Secondary — the page */
+  --text: var(--paper-900);
+  --text-2: var(--paper-700);
+  --text-3: var(--paper-500);
+  --line: var(--paper-200); /* Card / Border */
+  --line-strong: var(--paper-400);
+  --surface: color-mix(in srgb, var(--paper-0) 80%, transparent);
+  --surface-solid: var(--paper-0); /* Card / Elevated (with shadow) */
+  --surface-hover: var(--paper-100);
+  --accent: var(--mint-l-500);
+  --accent-text: var(--mint-l-700); /* mint as small text needs the darker step for AA */
+  --accent-soft: var(--mint-l-50);
+  --danger: var(--state-l-error);
+  --focus-ring: var(--mint-l-500); /* Focus Ring */
+  --shadow-pop: 0 1px 2px rgb(17 19 24 / 6%), 0 12px 32px -8px rgb(17 19 24 / 16%);
+  --scrim: rgb(17 19 24 / 22%);
   /* Figma "Home" screens */
-  --cell-active: var(--white-80);
-  --text-soft: var(--black-80);
-  --label: var(--black-60);
-  --check-bg: var(--white-100);
-  --check-border: var(--white-60);
-  --matrix-bezel: var(--white-100);
-  --matrix-card: var(--white-90);
-  --matrix-edge: color-mix(in srgb, var(--black-100) 6%, transparent);
-  --dot-off: color-mix(in srgb, var(--black-100) 8%, transparent);
-  --dot-on: var(--black-100);
+  --cell-active: var(--paper-0);
+  --text-soft: var(--paper-800);
+  --label: var(--paper-700); /* 10px labels stay AA on paper */
+  --check-bg: var(--paper-0);
+  --check-border: var(--paper-400);
+  --matrix-bezel: var(--paper-0);
+  --matrix-card: var(--paper-50);
+  --matrix-edge: var(--paper-200);
+  --dot-off: color-mix(in srgb, var(--paper-900) 7%, transparent);
+  --dot-on: var(--paper-900);
   --dot-glow: none;
-  --pill-bg: color-mix(in srgb, var(--black-100) 5%, transparent);
-  --pill-border: color-mix(in srgb, var(--black-100) 8%, transparent);
-  --tabs-bg: color-mix(in srgb, var(--black-100) 6%, transparent);
-  --tab-active: var(--white-100);
-  --outline: color-mix(in srgb, var(--black-100) 20%, transparent);
-  --grain-opacity: 0.05;
+  --pill-bg: color-mix(in srgb, var(--paper-0) 80%, transparent);
+  --pill-border: var(--paper-200);
+  --tabs-bg: var(--paper-100);
+  --tab-active: var(--paper-0);
+  --outline: var(--paper-400);
+  --grain-opacity: 0.04;
+  /* primary action fill (Start, active pill tab, done checkbox) */
+  --primary: var(--mint-l-700);
+  --primary-hover: var(--mint-l-800);
+  --on-primary: var(--paper-0);
+  /* shader + preset swatches: ground, mid, highlight */
+  --shader-a: var(--paper-50);
+  --shader-b: var(--paper-200);
+  --shader-c: var(--mint-l-50);
 }
 
 /* ---- Layer 2 · semantic (dark) ---- */
-/* Text roles from the palette: header = white-100, description = white-80. */
+/* Figma "Dark Theme 2": ink surfaces, white / #9CA3B4 / #5C6478 text, mint accent.
+   Mint marks the few things that are "on" or "now"; everything else stays ink. */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: var(--black-100);
-  --text: var(--white-100); /* d.header */
-  --text-2: var(--white-80); /* d.description */
-  --text-3: var(--black-60);
-  --line: color-mix(in srgb, var(--white-100) 8%, transparent);
-  --line-strong: color-mix(in srgb, var(--white-100) 15%, transparent);
-  --surface: color-mix(in srgb, var(--black-90) 72%, transparent);
-  --surface-solid: var(--black-90);
-  --surface-hover: color-mix(in srgb, var(--white-100) 6%, transparent);
-  --accent: var(--white-100);
-  --accent-soft: color-mix(in srgb, var(--white-100) 9%, transparent);
-  --danger: #e08a82;
-  --focus-ring: color-mix(in srgb, var(--white-60) 55%, transparent);
-  --shadow-pop: 0 1px 1px rgb(0 0 0 / 30%), 0 16px 40px -8px rgb(0 0 0 / 60%);
-  --scrim: rgb(0 0 0 / 45%);
+  --bg: var(--ink-950);
+  --text: var(--white-100); /* Text / Primary — AAA 19.81:1 */
+  --text-2: var(--ink-200); /* Text / Secondary */
+  --text-3: var(--ink-400); /* Text / Tertiary */
+  --line: var(--ink-700); /* Card / Border */
+  --line-strong: var(--ink-500);
+  --surface: color-mix(in srgb, var(--ink-800) 82%, transparent);
+  --surface-solid: var(--ink-780); /* Card / Elevated — popovers, sheets */
+  --surface-hover: var(--ink-750); /* Card / Hover */
+  --accent: var(--mint-500);
+  --accent-text: var(--mint-500);
+  --accent-soft: var(--mint-900);
+  --danger: var(--state-error);
+  --focus-ring: var(--mint-500); /* Focus Ring */
+  --shadow-pop: 0 1px 1px rgb(0 0 0 / 35%), 0 16px 40px -8px rgb(0 0 0 / 70%);
+  --scrim: rgb(0 0 0 / 55%);
   /* Figma "Home" screens */
-  --cell-active: var(--black-90);
-  --text-soft: var(--white-70);
-  --label: #8a93a6; /* between black-60 and white-60 for 10px labels (AA) */
-  --check-bg: var(--black-90);
-  --check-border: var(--black-70);
-  --matrix-bezel: var(--black-100);
-  --matrix-card: #151a23; /* black-100 → black-90 */
-  --matrix-edge: color-mix(in srgb, var(--white-100) 5%, transparent);
-  --dot-off: color-mix(in srgb, var(--white-100) 7%, transparent);
+  --cell-active: var(--ink-800);
+  --text-soft: var(--ink-150);
+  --label: var(--ink-200); /* 10px labels stay AA on ink */
+  --check-bg: var(--ink-850);
+  --check-border: var(--ink-500);
+  --matrix-bezel: var(--ink-950);
+  --matrix-card: var(--ink-850);
+  --matrix-edge: var(--ink-700);
+  --dot-off: color-mix(in srgb, var(--white-100) 6%, transparent);
   --dot-on: var(--white-100);
   --dot-glow: 0 0 6px rgb(255 255 255 / 55%);
-  --pill-bg: color-mix(in srgb, var(--white-100) 5%, transparent);
-  --pill-border: color-mix(in srgb, var(--white-100) 8%, transparent);
-  --tabs-bg: color-mix(in srgb, var(--white-100) 8%, transparent);
-  --tab-active: color-mix(in srgb, var(--white-100) 15%, transparent);
-  --outline: color-mix(in srgb, var(--white-100) 25%, transparent);
-  --grain-opacity: 0.07;
+  --pill-bg: color-mix(in srgb, var(--ink-850) 85%, transparent);
+  --pill-border: var(--ink-700);
+  --tabs-bg: var(--ink-850);
+  --tab-active: var(--ink-650); /* Card / Active */
+  --outline: var(--ink-500);
+  --grain-opacity: 0.06;
+  --primary: var(--mint-500);
+  --primary-hover: var(--mint-400);
+  --on-primary: var(--ink-950);
+  --shader-a: var(--ink-950);
+  --shader-b: var(--ink-650);
+  --shader-c: var(--mint-900);
 }
 
 /* ---- Atmosphere: palette ground + a faint daypart glow ---- */
 :root[data-theme='light'] {
-  --sky-a: var(--white-90);
-  --sky-b: var(--white-80);
-  --sky-glow: rgb(255 255 255 / 60%);
+  --sky-a: var(--paper-50);
+  --sky-b: var(--paper-100);
+  --sky-glow: rgb(255 255 255 / 70%);
 }
 :root[data-theme='light'][data-daypart='dawn'],
 :root[data-theme='light'][data-daypart='evening'] {
-  --sky-glow: rgb(255 255 255 / 70%);
+  --sky-glow: rgb(230 247 241 / 60%); /* a breath of mint at the day's edges */
 }
 :root[data-theme='light'][data-daypart='night'] {
-  --sky-b: var(--white-70);
-  --sky-glow: rgb(240 241 245 / 60%);
+  --sky-b: var(--paper-150);
+  --sky-glow: rgb(255 255 255 / 55%);
 }
 
 :root[data-theme='dark'] {
-  --sky-a: var(--black-100);
-  --sky-b: #0d121b;
-  --sky-glow: rgb(102 112 133 / 6%);
+  --sky-a: var(--ink-950);
+  --sky-b: var(--ink-900);
+  --sky-glow: rgb(92 100 120 / 7%);
 }
 :root[data-theme='dark'][data-daypart='dawn'],
 :root[data-theme='dark'][data-daypart='evening'] {
-  --sky-glow: rgb(102 112 133 / 7%);
+  --sky-glow: rgb(45 212 160 / 4%); /* a breath of mint at the day's edges */
 }
 :root[data-theme='dark'][data-daypart='night'] {
-  --sky-b: var(--black-100);
-  --sky-glow: rgb(102 112 133 / 5%);
+  --sky-b: var(--ink-950);
+  --sky-glow: rgb(92 100 120 / 5%);
 }
 
 /* Weather tints are a thin wash on top — atmosphere, not illustration. */
