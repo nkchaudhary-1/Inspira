@@ -11,9 +11,9 @@ import { authAvailability, signIn, signOut, connectCalendar, disconnectCalendar 
 import { syncNow, syncLabel } from '../services/sync.js';
 import { refreshCalendar, clearCalendar } from '../services/calendar.js';
 import { h, icon, reactive } from './dom.js';
-import { openSheet, toast } from './overlay.js';
+import { openSheet, closeOverlay, toast } from './overlay.js';
 import { openLocation } from './hero.js';
-import { PRESETS, SKY_PHASES, backdrop, setBackdrop, activePreset, skyPhaseAt } from './backdrop.js';
+import { PRESETS, SKY_PHASES, DEFAULT_BACKDROP, backdrop, setBackdrop, activePreset, skyPhaseAt } from './backdrop.js';
 
 const TABS = [
   ['appearance', 'Appearance'],
@@ -58,6 +58,24 @@ function render() {
       ),
     ),
     h('div', { class: 'settings__panel', role: 'tabpanel' }, panels[tab]()),
+    h(
+      'footer',
+      { class: 'settings__footer' },
+      tab === 'appearance' &&
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'glass-btn',
+            onClick: () => {
+              store.setPrefs({ theme: 'system', backdrop: { ...DEFAULT_BACKDROP } });
+              toast('Appearance reset');
+            },
+          },
+          'Reset appearance',
+        ),
+      h('button', { type: 'button', class: 'glass-btn glass-btn--primary', onClick: () => closeOverlay() }, 'Done'),
+    ),
   ];
 }
 
@@ -66,10 +84,10 @@ function card(title, ...children) {
   return h('section', { class: 'settings__card' }, title && h('h3', { class: 'settings__title' }, title), h('div', { class: 'settings__rows' }, ...children));
 }
 
-function row(label, control, hint) {
+function row(label, control, hint, { stack = false } = {}) {
   return h(
     'div',
-    { class: 'settings__row' },
+    { class: ['settings__row', stack && 'settings__row--stack'] },
     h('div', { class: 'settings__text' }, h('div', { class: 'settings__label' }, label), hint && h('div', { class: 'settings__hint' }, hint)),
     control,
   );
@@ -185,6 +203,27 @@ function accountCard(d) {
   );
 }
 
+/** A tiny app window: sidebar with dots and lines, content with three cards. */
+const windowPreview = () =>
+  h(
+    'span',
+    { class: 'wp' },
+    h(
+      'span',
+      { class: 'wp__side' },
+      h('span', { class: 'wp__dots' }, h('i'), h('i'), h('i')),
+      h('i', { class: 'wp__line' }),
+      h('i', { class: 'wp__line wp__line--short' }),
+    ),
+    h(
+      'span',
+      { class: 'wp__main' },
+      h('i', { class: 'wp__line' }),
+      h('i', { class: 'wp__line wp__line--faint' }),
+      h('span', { class: 'wp__cards' }, h('i'), h('i'), h('i')),
+    ),
+  );
+
 const MODE_OPTIONS = [
   ['system', 'Auto'],
   ['light', 'Light'],
@@ -208,7 +247,7 @@ function modeCard(p) {
               class: ['mode-opt', p.theme === id && 'is-active'],
               onClick: () => store.setPrefs({ theme: id }),
             },
-            h('span', { class: `mode-opt__thumb mode-opt__thumb--${id}`, 'aria-hidden': 'true' }, h('i'), h('i'), h('i')),
+            h('span', { class: `mode-opt__thumb mode-opt__thumb--${id}`, 'aria-hidden': 'true' }, windowPreview()),
             h('span', { class: 'mode-opt__label' }, label),
           ),
         ),
@@ -336,6 +375,8 @@ function fineTuneCard() {
           (v) => setBackdrop({ light: v }),
           'Light',
         ),
+        null,
+        { stack: true },
       ),
       b.light !== 'none' &&
         block(

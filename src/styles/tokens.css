@@ -106,6 +106,7 @@
   --font-display:
     'Inter Variable', ui-sans-serif, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI Variable Display', 'Segoe UI', Inter, Roboto, sans-serif;
   --font-clock: 'Boldonse', var(--font-display);
+  --font-mono: 'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, 'Liberation Mono', monospace;
   --font-serif: 'New York', ui-serif, 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
 
   /* ---- type scale ---- */
@@ -229,6 +230,15 @@
   --glow-2: var(--state-l-info);
   --glow-3: var(--pink-l-500);
   --light-a: 0.3;
+  /* Floating glass panel (Settings, Shortcuts) */
+  --glass-bg: linear-gradient(180deg, rgb(255 255 255 / 88%), rgb(244 245 248 / 92%));
+  --glass-border: rgb(17 19 24 / 8%);
+  --glass-hi: rgb(255 255 255 / 90%);
+  --glass-sheen: rgb(255 255 255 / 60%);
+  --glass-well: rgb(17 19 24 / 4%);
+  --glass-well-hover: rgb(17 19 24 / 7%);
+  --glass-inset: rgb(17 19 24 / 8%);
+  --glass-raised: #ffffff;
   /* Navigation (Figma 56:7576) */
   --nav-bg: color-mix(in srgb, var(--paper-0) 78%, transparent);
   --nav-border: var(--paper-200);
@@ -293,6 +303,14 @@
   --glow-2: var(--state-info);
   --glow-3: var(--pink-500);
   --light-a: 0.34;
+  --glass-bg: linear-gradient(180deg, rgb(40 42 48 / 84%), rgb(14 15 19 / 90%));
+  --glass-border: rgb(255 255 255 / 8%);
+  --glass-hi: rgb(255 255 255 / 7%);
+  --glass-sheen: rgb(255 255 255 / 6%);
+  --glass-well: rgb(0 0 0 / 22%);
+  --glass-well-hover: rgb(255 255 255 / 6%);
+  --glass-inset: rgb(0 0 0 / 45%);
+  --glass-raised: rgb(255 255 255 / 9%);
   --nav-bg: color-mix(in srgb, var(--ink-650) 72%, transparent);
   --nav-border: color-mix(in srgb, var(--white-100) 8%, transparent);
   --nav-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 16px 40px -12px rgb(0 0 0 / 55%);
