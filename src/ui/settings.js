@@ -13,7 +13,7 @@ import { refreshCalendar, clearCalendar } from '../services/calendar.js';
 import { h, icon, reactive } from './dom.js';
 import { openSheet, toast } from './overlay.js';
 import { openLocation } from './hero.js';
-import { PRESETS, backdrop, setBackdrop, activePreset } from './backdrop.js';
+import { PRESETS, SKY_PHASES, backdrop, setBackdrop, activePreset, skyPhaseAt } from './backdrop.js';
 
 const TABS = [
   ['appearance', 'Appearance'],
@@ -34,7 +34,7 @@ function render() {
   const d = store.getDevice();
   const tab = TABS.some(([id]) => id === store.ui.settingsTab) ? store.ui.settingsTab : 'appearance';
   const panels = {
-    appearance: () => [modeCard(p), backgroundCard(), fineTuneCard()],
+    appearance: () => [modeCard(p), backgroundCard(), skyCard(), fineTuneCard()],
     general: () => [youCard(p), clockCard(p), inspirationCard(p), weatherCard(d, p)],
     focus: () => [focusCard(p)],
     account: () => [accountCard(d), dataCard(), h('p', { class: 'settings__hint settings__foot' }, 'Press ? anywhere for keyboard shortcuts.')],
@@ -235,12 +235,46 @@ function backgroundCard() {
               class: ['preset', current === preset.id && 'is-active'],
               onClick: () => setBackdrop(preset.value),
             },
-            h('span', { class: `preset__swatch preset__swatch--${preset.id}`, 'aria-hidden': 'true' }),
+            h('span', { class: `preset__swatch preset__swatch--${preset.id}`, 'aria-hidden': 'true', dataset: { phase: skyPhaseAt(new Date().getHours()) } }),
             h('span', { class: 'preset__label' }, preset.label, current === preset.id && icon('check', 14)),
           ),
         ),
       ),
       !current && h('p', { class: 'settings__hint' }, 'Custom — tweaked below. Pick a style to reset.'),
+    ),
+  );
+}
+
+/** Sky gradients: Auto follows the time of day, or pin one. */
+function skyCard() {
+  const b = backdrop();
+  const on = b.light === 'sky';
+  const now = skyPhaseAt(new Date().getHours());
+  const opt = (id, label, range, iconName, phase) =>
+    h(
+      'button',
+      {
+        type: 'button',
+        role: 'radio',
+        'aria-checked': String(on && b.sky === id),
+        class: ['sky-opt', on && b.sky === id && 'is-active'],
+        dataset: { phase },
+        onClick: () => setBackdrop({ light: 'sky', sky: id }),
+      },
+      h('span', { class: 'sky-opt__name' }, label),
+      h('span', { class: 'sky-opt__icon' }, icon(iconName, 18)),
+      h('span', { class: 'sky-opt__range' }, range),
+    );
+  return card(
+    'Sky',
+    block(
+      h(
+        'div',
+        { class: 'sky-opts', role: 'radiogroup', 'aria-label': 'Sky gradient' },
+        opt('auto', 'Auto', 'Follows the time', 'refresh', now),
+        SKY_PHASES.map((p) => opt(p.id, p.label, p.range.replace(' – ', '\n'), p.icon, p.id)),
+      ),
+      h('p', { class: 'settings__hint' }, on ? 'Auto shifts from dawn to deep night through the day.' : 'Pick one to use the sky as your background.'),
     ),
   );
 }
@@ -290,6 +324,7 @@ function fineTuneCard() {
             ['horizon', 'Horizon'],
             ['mesh', 'Mesh'],
             ['spotlight', 'Spot'],
+            ['sky', 'Sky'],
           ],
           b.light,
           (v) => setBackdrop({ light: v }),

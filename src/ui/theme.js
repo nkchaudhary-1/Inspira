@@ -4,7 +4,7 @@
 import * as store from '../core/store.js';
 import { daypart } from '../core/dates.js';
 import { describe } from '../services/weather.js';
-import { applyBackdrop, backdrop } from './backdrop.js';
+import { applyBackdrop, applySkyPhase, backdrop } from './backdrop.js';
 
 const media = window.matchMedia('(prefers-color-scheme: dark)');
 const root = document.documentElement;
@@ -29,6 +29,7 @@ export function applyTheme() {
 export function applyDaypart(now = new Date()) {
   const part = daypart(now.getHours());
   if (root.dataset.daypart !== part) root.dataset.daypart = part;
+  applySkyPhase(now);
 }
 
 export function cycleTheme() {

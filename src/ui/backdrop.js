@@ -10,8 +10,9 @@
 import * as store from '../core/store.js';
 
 export const DEFAULT_BACKDROP = {
-  light: 'halo', // none | halo | horizon | mesh | spotlight
+  light: 'halo', // none | halo | horizon | mesh | spotlight | sky
   lightIntensity: 0.6,
+  sky: 'auto', // auto (follows the time of day) | dawn | day | evening | night | late | deep
   texture: 'none', // none | grain  (noise)
   textureAmount: 0.3,
   grid: 'none', // none | lines | dots
@@ -26,6 +27,7 @@ export const PRESETS = [
   { id: 'clean', label: 'Clean', value: { light: 'none', texture: 'none', grid: 'none', shader: 'none' } },
   { id: 'halo', label: 'Halo', value: { light: 'halo', lightIntensity: 0.6, texture: 'none', grid: 'none', shader: 'none' } },
   { id: 'horizon', label: 'Horizon', value: { light: 'horizon', lightIntensity: 0.6, texture: 'none', grid: 'none', shader: 'none' } },
+  { id: 'sky', label: 'Sky', value: { light: 'sky', texture: 'grain', textureAmount: 0.3, grid: 'none', shader: 'none' } },
   { id: 'mesh', label: 'Mesh', value: { light: 'mesh', lightIntensity: 0.6, texture: 'grain', textureAmount: 0.3, grid: 'none', shader: 'none' } },
   { id: 'grid', label: 'Grid', value: { light: 'halo', lightIntensity: 0.5, texture: 'none', grid: 'lines', gridSize: 48, gridOpacity: 0.5, shader: 'none' } },
   { id: 'dots', label: 'Dots', value: { light: 'none', texture: 'none', grid: 'dots', gridSize: 24, gridOpacity: 0.6, shader: 'none' } },
@@ -40,6 +42,32 @@ export const PRESETS = [
     value: { light: 'none', texture: 'grain', textureAmount: 0.3, grid: 'none', shader: 'aurora', shaderIntensity: 0.7, shaderSpeed: 0.4 },
   },
 ];
+
+/**
+ * Sky: time-of-day gradients (dark sky melting into a warm or cool glow).
+ * Slots follow the reference: Evening 4–7 PM, Night 7–10 PM, Late night
+ * 10 PM–1 AM, Deep night 1–4 AM; Dawn and Day complete the 24 hours.
+ */
+export const SKY_PHASES = [
+  { id: 'dawn', label: 'Dawn', from: 4, to: 8, range: '4AM – 8AM', icon: 'sunrise' },
+  { id: 'day', label: 'Day', from: 8, to: 16, range: '8AM – 4PM', icon: 'sun' },
+  { id: 'evening', label: 'Evening', from: 16, to: 19, range: '4PM – 7PM', icon: 'sunset' },
+  { id: 'night', label: 'Night', from: 19, to: 22, range: '7PM – 10PM', icon: 'moon' },
+  { id: 'late', label: 'Late night', from: 22, to: 25, range: '10PM – 1AM', icon: 'moonStar' },
+  { id: 'deep', label: 'Deep night', from: 1, to: 4, range: '1AM – 4AM', icon: 'stars' },
+];
+
+export function skyPhaseAt(hour) {
+  const h = hour < 1 ? hour + 24 : hour; // 00:xx belongs to Late night (22–25)
+  return SKY_PHASES.find((p) => h >= p.from && h < p.to)?.id ?? 'deep';
+}
+
+/** Set the sky phase on <html>: the pinned one, or the current time's. */
+export function applySkyPhase(now = new Date()) {
+  const pick = backdrop().sky;
+  const phase = pick === 'auto' ? skyPhaseAt(now.getHours()) : pick;
+  if (root.dataset.skyphase !== phase) root.dataset.skyphase = phase;
+}
 
 // Older styles map onto their closest modern equivalent.
 const LEGACY = { texture: { paper: 'grain', static: 'grain' }, grid: { blueprint: 'lines' }, shader: { waves: 'aurora' } };
@@ -75,6 +103,7 @@ export function applyBackdrop() {
   root.style.setProperty('--grid-size', `${b.gridSize}px`);
   root.style.setProperty('--grid-alpha', `${Math.round(b.gridOpacity * 18)}%`);
   spotlight(b.light === 'spotlight');
+  applySkyPhase();
   shader.configure(b);
 }
 
