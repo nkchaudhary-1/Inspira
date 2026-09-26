@@ -43,6 +43,18 @@ function taskRow(task, { showDate, showProject, compact, draggable }) {
       class: ['task', Date.now() - task.createdAt < 600 && 'is-new', task.done && 'is-done', task.priority && `task--p${task.priority}`],
       dataset: { id: task.id },
       draggable: draggable ? 'true' : null,
+      // Delete / Backspace on a focused row (checkbox, title or its buttons) removes it.
+      onKeydown: (e) => {
+        if ((e.key !== 'Delete' && e.key !== 'Backspace') || e.target.closest('input, textarea, [contenteditable="true"]')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        // The list re-renders, so find the neighbour again by id to keep focus in place.
+        const row = e.currentTarget;
+        const nextId = (row.nextElementSibling || row.previousElementSibling)?.dataset.id;
+        const region = row.closest('.task-list')?.parentElement;
+        removeTask(task.id);
+        requestAnimationFrame(() => nextId && region?.querySelector(`.task[data-id="${nextId}"] .task__title`)?.focus());
+      },
       onDragstart: draggable
         ? (e) => {
             e.dataTransfer.setData(TASK_MIME, task.id);
@@ -65,7 +77,12 @@ function taskRow(task, { showDate, showProject, compact, draggable }) {
       icon('check', 14),
     ),
     h('div', { class: 'task__body' }, title, meta.length ? h('div', { class: 'task__meta' }, meta) : null),
-    iconButton('more', 'Task details', (e) => openTaskMenu(e.currentTarget, task.id), { class: 'task__more', size: 16 }),
+    h(
+      'div',
+      { class: 'task__actions' },
+      iconButton('trash', `Delete “${task.title}”`, () => removeTask(task.id), { class: 'task__delete', size: 16, title: 'Delete (Del)' }),
+      iconButton('more', 'Task details', (e) => openTaskMenu(e.currentTarget, task.id), { class: 'task__more', size: 16 }),
+    ),
   );
 }
 

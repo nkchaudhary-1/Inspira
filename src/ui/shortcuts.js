@@ -19,6 +19,7 @@ export const SHORTCUTS = [
   ['C', 'Calendar'],
   ['P', 'Projects'],
   ['N', 'New task for today'],
+  ['Del', 'Delete the focused task (Undo in the toast)'],
   ['M', 'New note for the selected day'],
   ['Q', 'Another quote'],
   ['Space', 'Start / pause the timer (Focus)'],
