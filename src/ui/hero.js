@@ -156,7 +156,16 @@ export function openLocation(anchor) {
     : null;
   openPopover(
     anchor,
-    h('div', { class: 'loc' }, h('div', { class: 'field__label' }, 'Weather location'), input, results, h('div', { class: 'loc__foot' }, locate, remove)),
+    h(
+      'div',
+      { class: 'loc' },
+      h('div', { class: 'field__label' }, 'Weather location'),
+      input,
+      results,
+      h('div', { class: 'loc__foot' }, locate, remove),
+      // Prominent disclosure (Chrome Web Store user-data policy).
+      h('p', { class: 'loc__note' }, 'Your search or approximate location is sent only to Open-Meteo to fetch the forecast.'),
+    ),
     { align: 'center' },
   );
 }

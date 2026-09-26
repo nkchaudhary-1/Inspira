@@ -3489,6 +3489,13 @@ body:has(.dock-wrap.is-open) .hint,
   color: var(--text);
 }
 
+.loc__note {
+  margin-top: var(--space-3);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--text-3);
+}
+
 .ghost-btn--sm {
   height: 32px;
   padding: 0 var(--space-3);

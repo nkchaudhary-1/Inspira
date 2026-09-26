@@ -15,7 +15,7 @@ export function authAvailability() {
   if (!identity?.getAuthToken) return { ok: false, reason: 'Google sign-in works when Inspira runs as a Chrome extension.' };
   const clientId = chrome.runtime.getManifest().oauth2?.client_id || '';
   if (!clientId || clientId.startsWith('YOUR_')) {
-    return { ok: false, reason: 'Google sign-in isn’t configured in this build (missing OAuth client ID).' };
+    return { ok: false, reason: 'Google sign-in isn’t available in this version yet.' };
   }
   return { ok: true };
 }

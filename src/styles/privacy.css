@@ -1,0 +1,97 @@
+/* Privacy page: plain, readable, both colour schemes. Uses the bundled Inter. */
+@font-face {
+  font-family: 'Inter Variable';
+  src: url('../fonts/InterVariable-opsz-latin.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --bg: #f7f8fa;
+  --text: #111318;
+  --text-2: #4b5163;
+  --line: #e2e5eb;
+  --link: #128060;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #080a0e;
+    --text: #ffffff;
+    --text-2: #9ca3b4;
+    --line: #232a36;
+    --link: #2dd4a0;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    16px/1.65 'Inter Variable',
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+}
+
+main {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 72px 24px 96px;
+}
+
+h1 {
+  margin: 0 0 16px;
+  font-size: 40px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  margin: 40px 0 8px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+p,
+li {
+  color: var(--text-2);
+}
+
+strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.lead {
+  font-size: 19px;
+  color: var(--text);
+}
+
+.meta {
+  font-size: 14px;
+}
+
+a {
+  color: var(--link);
+}
+
+code {
+  font:
+    14px ui-monospace,
+    Menlo,
+    Consolas,
+    monospace;
+}
+
+ul {
+  padding-left: 20px;
+}

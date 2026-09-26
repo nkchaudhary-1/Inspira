@@ -607,6 +607,11 @@ function dataCard() {
   return card(
     'Your data',
     row(
+      'Privacy',
+      h('a', { class: 'ghost-btn ghost-btn--sm', href: 'privacy.html', target: '_blank', rel: 'noopener' }, 'Read policy'),
+      'What Inspira stores and where it goes',
+    ),
+    row(
       'Export',
       h('button', { type: 'button', class: 'ghost-btn ghost-btn--sm', onClick: exportJson }, 'Download'),
       'Tasks, notes, projects and settings as JSON',

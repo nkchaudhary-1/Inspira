@@ -109,3 +109,21 @@ Quick-add tokens: `#project`, `!`/`!!`/`!!!` (priority), `@6pm` or `@18:30` (tim
 ## Credits
 
 Inter typeface by Rasmus Andersson and Boldonse (both SIL OFL 1.1, see `src/fonts/`). Weather by [Open-Meteo](https://open-meteo.com/) (CC BY 4.0).
+
+## Publishing to the Chrome Web Store
+
+The package follows Manifest V3 and the Web Store program policies; `npm test` checks the parts that can be automated (MV3, name/description length, icons, minimal permissions, no remote code or inline scripts, network calls only to disclosed services, privacy policy coverage). Before submitting:
+
+1. **OAuth client** — create a Chrome-extension OAuth client in Google Cloud and put its ID in `manifest.json` → `oauth2.client_id`. Until then sign-in shows as unavailable and everything else works locally.
+2. **OAuth consent screen** — `calendar.readonly` is a sensitive scope, so the consent screen needs Google verification before public release. Link the privacy policy there.
+3. **Privacy policy URL** — `privacy.html` ships inside the extension; also publish it at a public URL and paste that into the listing.
+4. **Permission justifications** (Privacy tab of the listing):
+   - `storage` — saves tasks, notes, projects and settings on the device.
+   - `alarms` — schedules focus-session ends and task reminders.
+   - `identity` — optional Google sign-in for Drive sync and read-only Calendar.
+   - `notifications` (optional, asked on first use) — focus and reminder alerts.
+   - No host permissions; no remote code.
+5. **Single purpose** — "Replaces the new tab page with a calm daily workspace: clock, inspiration, weather, focus timer, tasks and calendar."
+6. **Data disclosure** — collects personal communications/content only for sync (Google Drive app folder) and approximate location only for weather (Open-Meteo); not sold, not used for unrelated purposes, not used for creditworthiness.
+7. **Package** — `npm run zip` builds `inspira.zip` with only what ships (no tests, docs or sources of icons).
+8. **Listing assets** — 128×128 icon (included), at least one 1280×800 screenshot, 440×280 small promo tile.

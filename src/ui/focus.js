@@ -23,8 +23,15 @@ const setFocus = (patch) => store.setDevice({ focus: { ...focusState(), ...patch
 const phaseMs = (phase) => (store.prefs()[PHASES[phase].pref] || 25) * 60000;
 const cycleToday = (f) => (f.cycleDate === todayKey() ? f.cycle || 0 : 0);
 
+/**
+ * Ask for notifications once, on the first Start (a user gesture, as Chrome
+ * requires). If declined, don't ask again every session — reminders in a
+ * task's menu can still ask when someone explicitly turns one on.
+ */
 function requestNotifications() {
-  if (typeof chrome !== 'undefined' && chrome.permissions?.request) chrome.permissions.request({ permissions: ['notifications'] }).catch(() => {});
+  if (typeof chrome === 'undefined' || !chrome.permissions?.request || store.getDevice().notifyAsked) return;
+  store.setDevice({ notifyAsked: true });
+  chrome.permissions.request({ permissions: ['notifications'] }).catch(() => {});
 }
 
 export function startFocus() {

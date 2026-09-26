@@ -94,7 +94,11 @@ export async function searchCity(query) {
   }));
 }
 
-/** Browser geolocation → nearest place name. */
+/**
+ * Browser geolocation → a place name. Coordinates go only to Open-Meteo for
+ * the forecast; the name comes from the device's time zone (offline), so no
+ * other service ever sees the user's location.
+ */
 export function locateMe() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) return reject(new Error('Location unavailable'));
@@ -102,20 +106,18 @@ export function locateMe() {
       async ({ coords }) => {
         const lat = Number(coords.latitude.toFixed(3));
         const lon = Number(coords.longitude.toFixed(3));
-        let name = 'Current location';
-        try {
-          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
-          const json = await res.json();
-          name = json.city || json.locality || json.principalSubdivision || name;
-        } catch {
-          /* keep generic name */
-        }
-        resolve({ lat, lon, name });
+        resolve({ lat, lon, name: placeFromTimeZone() });
       },
       (err) => reject(err),
       { timeout: 10000, maximumAge: 60 * 60 * 1000 },
     );
   });
+}
+
+/** "Asia/Kolkata" → "Kolkata"; falls back to a generic label. */
+export function placeFromTimeZone(tz = Intl.DateTimeFormat().resolvedOptions().timeZone) {
+  const city = tz?.split('/').pop()?.replace(/_/g, ' ');
+  return city && city !== 'UTC' && !/^Etc|GMT/.test(tz) ? city : 'Current location';
 }
 
 export async function setLocation(location) {
