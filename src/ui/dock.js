@@ -14,7 +14,7 @@ const MAX_SCALE = 1.45;
 const REACH = 130; // px from pointer where magnification fades out
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function item({ id, label, keyHint, iconName, active, badge, onClick }) {
+function item({ id, label, keyHint, iconName, active, badge, onClick, index = 0 }) {
   return h(
     'button',
     {
@@ -23,6 +23,7 @@ function item({ id, label, keyHint, iconName, active, badge, onClick }) {
       'aria-label': keyHint ? `${label} (${keyHint})` : label,
       'aria-current': active ? 'page' : null,
       dataset: { id },
+      style: `--i: ${index}`,
       onClick,
     },
     h('span', { class: 'dock__tile' }, icon(iconName, 20), badge && h('i', { class: 'dock__badge' })),
@@ -39,17 +40,18 @@ export function dock() {
     const dark = document.documentElement.dataset.theme === 'dark';
     const pref = store.prefs().theme;
     return [
-      MODES.map((m) => item({ id: m.id, label: m.label, keyHint: m.key, iconName: m.icon, active: m.id === mode, onClick: () => setMode(m.id) })),
+      MODES.map((m, i) => item({ index: i, id: m.id, label: m.label, keyHint: m.key, iconName: m.icon, active: m.id === mode, onClick: () => setMode(m.id) })),
       h('span', { class: 'dock__divider', 'aria-hidden': 'true' }),
-      item({ id: 'shortcuts', label: 'Shortcuts', keyHint: '?', iconName: 'keyboard', onClick: openShortcuts }),
+      item({ index: 5, id: 'shortcuts', label: 'Shortcuts', keyHint: '?', iconName: 'keyboard', onClick: openShortcuts }),
       item({
+        index: 6,
         id: 'theme',
         label: `Theme · ${pref === 'system' ? 'Auto' : pref[0].toUpperCase() + pref.slice(1)}`,
         keyHint: 'D',
         iconName: dark ? 'moon' : 'sun',
         onClick: cycleTheme,
       }),
-      item({ id: 'settings', label: 'Settings', keyHint: ',', iconName: 'settings', badge: store.ui.syncStatus === 'error', onClick: openSettings }),
+      item({ index: 7, id: 'settings', label: 'Settings', keyHint: ',', iconName: 'settings', badge: store.ui.syncStatus === 'error', onClick: openSettings }),
     ];
   });
 
@@ -112,20 +114,58 @@ export function dock() {
     }
   });
 
-  // Magnification.
+  // Magnification: targets come from the pointer against each icon's *resting*
+  // centre (measured once at scale 1, so growing icons don't feed back into the
+  // maths), and a rAF loop eases every icon toward its target for smooth motion.
+  let rest = null; // [{ el, x }]
+  let pointerX = null;
+  let raf = 0;
+  const items = () => [...nav.querySelectorAll('.dock__item')];
+  const measureRest = () => {
+    const els = items();
+    if (els.some((el) => Math.abs(parseFloat(el.style.getPropertyValue('--s') || '1') - 1) > 0.001)) return;
+    rest = els.map((el) => {
+      const r = el.getBoundingClientRect();
+      return { el, x: r.left + r.width / 2 };
+    });
+  };
+  const tick = () => {
+    raf = 0;
+    if (!rest || rest[0]?.el.isConnected === false) measureRest();
+    if (!rest) return;
+    let moving = false;
+    for (const { el, x } of rest) {
+      let target = 1;
+      if (pointerX !== null) {
+        const t = Math.max(0, 1 - Math.abs(pointerX - x) / REACH);
+        target = 1 + (MAX_SCALE - 1) * t * t * (3 - 2 * t);
+      }
+      const cur = parseFloat(el.style.getPropertyValue('--s') || '1');
+      const next = cur + (target - cur) * 0.24;
+      const settled = Math.abs(target - next) < 0.002;
+      el.style.setProperty('--s', (settled ? target : next).toFixed(4));
+      if (!settled) moving = true;
+    }
+    if (moving) raf = requestAnimationFrame(tick);
+  };
+  const kick = () => {
+    if (!raf) raf = requestAnimationFrame(tick);
+  };
   function resetScale() {
-    for (const el of nav.querySelectorAll('.dock__item')) el.style.removeProperty('--s');
+    pointerX = null;
+    kick();
   }
+  nav.addEventListener('pointerenter', (e) => {
+    if (e.pointerType !== 'mouse' || reduceMotion()) return;
+    measureRest();
+  });
   nav.addEventListener('pointermove', (e) => {
     if (e.pointerType !== 'mouse' || reduceMotion()) return;
-    for (const el of nav.querySelectorAll('.dock__item')) {
-      const r = el.getBoundingClientRect();
-      const d = Math.abs(e.clientX - (r.left + r.width / 2));
-      const t = Math.max(0, 1 - d / REACH);
-      el.style.setProperty('--s', (1 + (MAX_SCALE - 1) * t * t * (3 - 2 * t)).toFixed(3));
-    }
+    pointerX = e.clientX;
+    kick();
   });
   nav.addEventListener('pointerleave', resetScale);
+  window.addEventListener('resize', () => (rest = null));
 
   return [edge, wrap];
 }
