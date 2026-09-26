@@ -48,6 +48,12 @@ export function formatLong(key) {
   return `${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`;
 }
 
+/** "Saturday, 02 September 2026" */
+export function formatFull(key) {
+  const d = fromKey(key);
+  return `${WEEKDAYS[d.getDay()]}, ${pad(d.getDate())} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 /** "September 26" */
 export function formatMonthDay(key) {
   const d = fromKey(key);

@@ -2,12 +2,12 @@
 // start the ticker and background services (weather, calendar, sync).
 
 import * as store from './core/store.js';
-import { clockParts, formatLong, todayKey, greeting, formatDuration } from './core/dates.js';
+import { clockParts, formatLong, formatFull, todayKey, greeting, formatDuration } from './core/dates.js';
 import { refreshWeather } from './services/weather.js';
 import { loadMonth } from './services/calendar.js';
 import { startSync } from './services/sync.js';
 import { h, icon } from './ui/dom.js';
-import { clock, dateLine, greetingLine, quote, weather } from './ui/hero.js';
+import { clock, fullDateLine, greetingLine, quote, weather } from './ui/hero.js';
 import { rail } from './ui/rail.js';
 import { workspace } from './ui/workspace.js';
 import { focusView, focusTick, focusRemaining } from './ui/focus.js';
@@ -45,7 +45,14 @@ function renderMode(mode) {
       return h(
         'div',
         { class: ['layout layout--clock', p.showRail && 'has-rail'] },
-        h('div', { class: 'hero' }, dateLine(), clock('hero'), p.showQuoteOnClock && quote('hero'), weather('full')),
+        // Figma "Inspira 2.0 / Clock": date + line top-left, display clock, weather bottom-left.
+        h(
+          'div',
+          { class: 'clockface' },
+          h('header', { class: 'clockface__top' }, fullDateLine(), p.showQuoteOnClock && quote('line')),
+          clock('display'),
+          weather('display'),
+        ),
         p.showRail && rail(),
       );
   }
@@ -67,6 +74,7 @@ function tick() {
   setAll('meridiem', meridiem);
   const today = todayKey(now);
   setAll('date', formatLong(today));
+  setAll('date-full', formatFull(today));
   setAll('greeting', `${greeting(now.getHours())}${p.name ? `, ${p.name}` : ''}`);
 
   focusTick(now.getTime());

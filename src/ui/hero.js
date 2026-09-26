@@ -2,7 +2,7 @@
 // attributes that the app ticker updates every second — no re-render needed.
 
 import * as store from '../core/store.js';
-import { todayKey, clockParts, formatLong, greeting } from '../core/dates.js';
+import { todayKey, clockParts, formatLong, formatFull, greeting } from '../core/dates.js';
 import { quoteFor, CATEGORIES } from '../data/quotes.js';
 import { describe, convert, searchCity, locateMe, setLocation } from '../services/weather.js';
 import { h, icon, reactive } from './dom.js';
@@ -21,6 +21,9 @@ export function clock(variant = 'hero') {
 }
 
 export const dateLine = (className = 'hero-date') => h('div', { class: className, dataset: { bind: 'date' } }, formatLong(todayKey()));
+
+/** "Saturday, 02 September 2026" — the Clock face's date. */
+export const fullDateLine = (className = 'clockface__date') => h('div', { class: className, dataset: { bind: 'date-full' } }, formatFull(todayKey()));
 
 export function greetingLine() {
   const name = store.prefs().name;
@@ -45,6 +48,9 @@ export function weather(variant = 'full') {
       h('span', { class: 'weather__place' }, location.name),
     );
     if (variant === 'inline') return [btn, h('span', { class: 'weather__label' }, label)];
+    if (variant === 'display') {
+      return [btn, h('div', { class: 'weather__detail' }, `${label} H ${convert(w.high)}° / L ${convert(w.low)}°`)];
+    }
     return [
       btn,
       h('div', { class: 'weather__detail' }, h('span', null, label), h('span', { class: 'weather__range' }, `H ${convert(w.high)}°  /  L ${convert(w.low)}°`)),
@@ -144,7 +150,8 @@ export function quote(variant = 'hero') {
     const q = currentQuote();
     const fresh = q.text !== lastText;
     lastText = q.text;
-    const text = h('blockquote', { class: ['quote__text', fresh && 'is-entering'] }, `“${q.text}”`);
+    // The Clock face shows the line plainly; other variants keep quotation marks.
+    const text = h('blockquote', { class: ['quote__text', fresh && 'is-entering'] }, variant === 'line' ? q.text : `“${q.text}”`);
     if (variant !== 'feature') return text;
     return [
       text,

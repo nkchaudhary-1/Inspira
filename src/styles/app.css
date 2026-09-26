@@ -117,16 +117,19 @@
 
 /* ---------- entrance ---------- */
 
+.is-entering .clockface > *,
 .is-entering .hero > *,
 .is-entering .motivation > *,
 .is-entering .focus > * {
   animation: rise var(--dur-slow) var(--ease-out) both;
 }
+.is-entering .clockface > :nth-child(2),
 .is-entering .hero > :nth-child(2),
 .is-entering .motivation > :nth-child(2),
 .is-entering .focus > :nth-child(2) {
   animation-delay: 60ms;
 }
+.is-entering .clockface > :nth-child(3),
 .is-entering .hero > :nth-child(3),
 .is-entering .focus > :nth-child(3) {
   animation-delay: 120ms;
@@ -348,11 +351,119 @@
   color: var(--text-3);
 }
 
+/* ---------- clock face (Clock mode · Figma "Inspira 2.0 / Clock") ---------- */
+
+.layout--clock {
+  padding: 0;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.clockface {
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-8);
+  padding: var(--face-pad);
+  font-family: var(--font-display);
+  font-variation-settings: var(--display-opsz);
+  line-height: normal;
+}
+
+.clockface__top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: min(100%, calc(var(--face-line) * 17.3)); /* 553px at 32px */
+}
+
+.clockface__date {
+  font-size: var(--face-date);
+  font-weight: 400;
+  color: var(--face-muted);
+}
+
+.quote--line {
+  color: var(--text);
+}
+
+.quote--line .quote__text {
+  font-family: var(--font-display);
+  font-size: var(--face-line);
+  font-weight: 300;
+  font-style: normal;
+  line-height: 1.2;
+  text-wrap: pretty;
+}
+
+.clock--display {
+  align-items: baseline;
+  gap: calc(var(--face-clock) * 0.23); /* 42px at 182px */
+  font-family: var(--font-clock);
+  font-variation-settings: normal;
+  color: var(--text);
+}
+
+.clock--display .clock__time {
+  font-size: var(--face-clock);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.clock--display .clock__meridiem {
+  font-size: var(--face-meridiem);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.1;
+  color: var(--text);
+  margin: 0;
+}
+
+.weather--display {
+  align-items: flex-start;
+  gap: 0;
+  color: var(--face-muted);
+}
+
+.weather--display .weather__btn,
+.weather--display .weather__add {
+  padding: 0;
+  margin: 0;
+  gap: 0.35em;
+}
+
+.weather--display .weather__btn:hover {
+  background: none;
+  opacity: 0.85;
+}
+
+.weather--display .weather__temp {
+  font-size: var(--face-temp);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.weather--display .weather__place,
+.weather--display .weather__detail {
+  font-size: var(--face-date);
+  color: var(--face-muted);
+}
+
+.weather--display .weather__add {
+  font-size: var(--face-date);
+}
+
 /* ---------- rail (Today, beside the clock) ---------- */
 
 .rail {
   position: absolute;
-  right: clamp(24px, 4vw, 64px);
+  right: var(--face-pad);
   top: 50%;
   transform: translateY(-50%);
   width: var(--rail-width);
@@ -2049,8 +2160,11 @@ body:has(.dock-wrap.is-open) .hint,
 
 @media (max-width: 1100px) {
   .layout--clock.has-rail {
-    justify-content: flex-start;
-    padding-top: 12vh;
+    padding-bottom: 96px;
+  }
+
+  .layout--clock .rail {
+    margin: 0 var(--face-pad);
   }
 
   .rail {

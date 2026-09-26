@@ -92,4 +92,4 @@ Quick-add tokens: `#project`, `!`/`!!`/`!!!` (priority), `@6pm` or `@18:30` (tim
 
 ## Credits
 
-Inter typeface by Rasmus Andersson (SIL OFL 1.1, `src/fonts/Inter-LICENSE.txt`). Weather by [Open-Meteo](https://open-meteo.com/) (CC BY 4.0).
+Inter typeface by Rasmus Andersson and Boldonse (both SIL OFL 1.1, see `src/fonts/`). Weather by [Open-Meteo](https://open-meteo.com/) (CC BY 4.0).

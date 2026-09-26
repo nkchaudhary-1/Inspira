@@ -16,6 +16,15 @@
   font-display: block;
 }
 
+/* Clock display face (Figma: Inspira 2.0 / Clock). SIL OFL 1.1. */
+@font-face {
+  font-family: 'Boldonse';
+  src: url('../fonts/Boldonse-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
 :root {
   /* ---- Layer 1 · primitives ---- */
   --sand-0: #fbf9f5;
@@ -48,6 +57,7 @@
     Arial, sans-serif;
   --font-display:
     'Inter Variable', ui-sans-serif, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI Variable Display', 'Segoe UI', Inter, Roboto, sans-serif;
+  --font-clock: 'Boldonse', var(--font-display);
   --font-serif: 'New York', ui-serif, 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
 
   /* ---- type scale ---- */
@@ -94,6 +104,15 @@
   --quote-hero-size: clamp(1rem, 1.5vw, 1.25rem);
   --quote-feature-size: clamp(1.75rem, 3.6vw, 3rem);
   --rail-width: 272px;
+
+  /* Clock face — values from the 1920 × 1024 Figma frame, scaled with the viewport. */
+  --face-pad: clamp(32px, 6.25vw, 120px); /* 120 */
+  --face-clock: clamp(88px, 9.5vw, 182px); /* 182 */
+  --face-meridiem: clamp(34px, 3.75vw, 72px); /* 72 */
+  --face-date: clamp(15px, 1.25vw, 24px); /* 24 */
+  --face-line: clamp(20px, 1.67vw, 32px); /* 32 */
+  --face-temp: clamp(40px, 3.33vw, 64px); /* 64 */
+  --face-muted: color-mix(in srgb, var(--text) 60%, transparent); /* rgba(255,255,255,.6) */
   --content-max: 1180px;
 }
 
@@ -121,9 +140,10 @@
 
 /* ---- Layer 2 · semantic (dark) ---- */
 :root[data-theme='dark'] {
+  /* Dark ground is pure black, per the Figma Clock frame. */
   color-scheme: dark;
-  --bg: var(--ink-900);
-  --text: var(--ink-0);
+  --bg: #000000;
+  --text: #ffffff;
   --text-2: var(--ink-200);
   --text-3: var(--ink-400);
   --line: color-mix(in srgb, #ffffff 8%, transparent);
@@ -173,34 +193,34 @@
 }
 
 :root[data-theme='dark'] {
-  --sky-a: #15161b;
-  --sky-b: #1b1d25;
-  --sky-glow: rgb(120 110 200 / 12%);
+  --sky-a: #000000;
+  --sky-b: #050506;
+  --sky-glow: rgb(120 110 200 / 3%);
 }
 :root[data-theme='dark'][data-daypart='dawn'] {
-  --sky-a: #19181f;
-  --sky-b: #2a2230;
-  --sky-glow: rgb(230 140 120 / 14%);
+  --sky-a: #000000;
+  --sky-b: #050506;
+  --sky-glow: rgb(230 140 120 / 3%);
 }
 :root[data-theme='dark'][data-daypart='morning'] {
-  --sky-a: #15181e;
-  --sky-b: #1c2230;
-  --sky-glow: rgb(230 190 130 / 11%);
+  --sky-a: #000000;
+  --sky-b: #050506;
+  --sky-glow: rgb(230 190 130 / 3%);
 }
 :root[data-theme='dark'][data-daypart='afternoon'] {
-  --sky-a: #16181c;
-  --sky-b: #1f2226;
-  --sky-glow: rgb(230 210 170 / 9%);
+  --sky-a: #000000;
+  --sky-b: #050506;
+  --sky-glow: rgb(230 210 170 / 3%);
 }
 :root[data-theme='dark'][data-daypart='evening'] {
-  --sky-a: #18151d;
-  --sky-b: #291c25;
-  --sky-glow: rgb(230 130 110 / 14%);
+  --sky-a: #000000;
+  --sky-b: #050506;
+  --sky-glow: rgb(230 130 110 / 3%);
 }
 :root[data-theme='dark'][data-daypart='night'] {
-  --sky-a: #0d0e13;
-  --sky-b: #151823;
-  --sky-glow: rgb(110 120 220 / 12%);
+  --sky-a: #000000;
+  --sky-b: #050506;
+  --sky-glow: rgb(110 120 220 / 3%);
 }
 
 /* Weather tints are a thin wash on top — atmosphere, not illustration. */
