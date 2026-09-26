@@ -1,0 +1,220 @@
+/* ==========================================================================
+   Inspira design tokens
+   Layer 1: primitives (raw values)  →  Layer 2: semantic (what it's for)
+   →  Layer 3: component tokens (clock, quote, rail…).
+   To re-skin toward the original Inspira identity, change Layer 1 + the
+   type families; components only reference semantic/component tokens.
+   ========================================================================== */
+
+/* Bundled so the thin clock looks identical on every OS, offline. SIL OFL 1.1. */
+@font-face {
+  font-family: 'Inter Variable';
+  src: url('../fonts/InterVariable-latin.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  /* ---- Layer 1 · primitives ---- */
+  --sand-0: #fbf9f5;
+  --sand-50: #f5f2ec;
+  --sand-100: #ece7de;
+  --sand-200: #ddd6ca;
+  --sand-400: #a79f92;
+  --sand-600: #6f685e;
+  --sand-800: #3b3731;
+  --sand-900: #211f1c;
+
+  --ink-0: #eeeae4;
+  --ink-200: #bdb8b0;
+  --ink-400: #8a867f;
+  --ink-600: #5b5852;
+  --ink-800: #25252a;
+  --ink-850: #1c1c21;
+  --ink-900: #141418;
+  --ink-950: #0d0d10;
+
+  --amber-400: #d9a066;
+  --amber-500: #c98b4f;
+  --amber-600: #a86f38;
+  --rose-500: #c9716b;
+  --sage-500: #7f9c8a;
+
+  /* ---- type families ---- */
+  --font-sans:
+    'Inter Variable', ui-sans-serif, -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI', Inter, Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-display:
+    'Inter Variable', ui-sans-serif, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI Variable Display', 'Segoe UI', Inter, Roboto, sans-serif;
+  --font-serif: 'New York', ui-serif, 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+
+  /* ---- type scale ---- */
+  --text-2xs: 0.6875rem; /* 11 */
+  --text-xs: 0.75rem; /* 12 */
+  --text-sm: 0.8125rem; /* 13 */
+  --text-md: 0.9375rem; /* 15 */
+  --text-lg: 1.125rem; /* 18 */
+  --text-xl: 1.375rem; /* 22 */
+  --text-2xl: 1.75rem; /* 28 */
+  --tracking-eyebrow: 0.16em;
+
+  /* ---- spacing (4px base) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ---- radius ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* ---- motion ---- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur-base: 220ms;
+  --dur-slow: 600ms;
+  --dur-ambient: 60s;
+
+  /* ---- Layer 3 · component tokens ---- */
+  --clock-size: clamp(88px, 14vw, 184px);
+  --clock-weight: 200;
+  --clock-tracking: -0.045em;
+  --quote-hero-size: clamp(1rem, 1.5vw, 1.25rem);
+  --quote-feature-size: clamp(1.75rem, 3.6vw, 3rem);
+  --rail-width: 272px;
+  --content-max: 1180px;
+}
+
+/* ---- Layer 2 · semantic (light) ---- */
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: var(--sand-50);
+  --text: var(--sand-900);
+  --text-2: var(--sand-600);
+  --text-3: var(--sand-400);
+  --line: color-mix(in srgb, var(--sand-900) 9%, transparent);
+  --line-strong: color-mix(in srgb, var(--sand-900) 16%, transparent);
+  --surface: color-mix(in srgb, #ffffff 62%, transparent);
+  --surface-solid: var(--sand-0);
+  --surface-hover: color-mix(in srgb, var(--sand-900) 5%, transparent);
+  --accent: var(--amber-600);
+  --accent-soft: color-mix(in srgb, var(--amber-500) 16%, transparent);
+  --danger: #b4534c;
+  --focus-ring: color-mix(in srgb, var(--amber-500) 55%, transparent);
+  --shadow-pop: 0 1px 1px rgb(40 30 20 / 4%), 0 12px 32px -8px rgb(40 30 20 / 18%);
+  --scrim: rgb(30 25 20 / 18%);
+  --grain-opacity: 0.05;
+}
+
+/* ---- Layer 2 · semantic (dark) ---- */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: var(--ink-900);
+  --text: var(--ink-0);
+  --text-2: var(--ink-200);
+  --text-3: var(--ink-400);
+  --line: color-mix(in srgb, #ffffff 8%, transparent);
+  --line-strong: color-mix(in srgb, #ffffff 15%, transparent);
+  --surface: color-mix(in srgb, var(--ink-800) 55%, transparent);
+  --surface-solid: var(--ink-850);
+  --surface-hover: color-mix(in srgb, #ffffff 6%, transparent);
+  --accent: var(--amber-400);
+  --accent-soft: color-mix(in srgb, var(--amber-400) 16%, transparent);
+  --danger: #e08a82;
+  --focus-ring: color-mix(in srgb, var(--amber-400) 55%, transparent);
+  --shadow-pop: 0 1px 1px rgb(0 0 0 / 30%), 0 16px 40px -8px rgb(0 0 0 / 55%);
+  --scrim: rgb(0 0 0 / 40%);
+  --grain-opacity: 0.07;
+}
+
+/* ---- Atmosphere: sky gradient per daypart × theme ---- */
+:root[data-theme='light'] {
+  --sky-a: #f3efe8;
+  --sky-b: #e9ecef;
+  --sky-glow: rgb(255 214 170 / 30%);
+}
+:root[data-theme='light'][data-daypart='dawn'] {
+  --sky-a: #f6e9df;
+  --sky-b: #ebeaf2;
+  --sky-glow: rgb(255 190 160 / 38%);
+}
+:root[data-theme='light'][data-daypart='morning'] {
+  --sky-a: #f4f1ea;
+  --sky-b: #e6eef3;
+  --sky-glow: rgb(255 226 170 / 34%);
+}
+:root[data-theme='light'][data-daypart='afternoon'] {
+  --sky-a: #f3f1ec;
+  --sky-b: #e8ecef;
+  --sky-glow: rgb(255 240 210 / 30%);
+}
+:root[data-theme='light'][data-daypart='evening'] {
+  --sky-a: #f4e8df;
+  --sky-b: #e8e5ee;
+  --sky-glow: rgb(250 180 150 / 32%);
+}
+:root[data-theme='light'][data-daypart='night'] {
+  --sky-a: #eceae8;
+  --sky-b: #e3e5ec;
+  --sky-glow: rgb(190 200 240 / 26%);
+}
+
+:root[data-theme='dark'] {
+  --sky-a: #15161b;
+  --sky-b: #1b1d25;
+  --sky-glow: rgb(120 110 200 / 12%);
+}
+:root[data-theme='dark'][data-daypart='dawn'] {
+  --sky-a: #19181f;
+  --sky-b: #2a2230;
+  --sky-glow: rgb(230 140 120 / 14%);
+}
+:root[data-theme='dark'][data-daypart='morning'] {
+  --sky-a: #15181e;
+  --sky-b: #1c2230;
+  --sky-glow: rgb(230 190 130 / 11%);
+}
+:root[data-theme='dark'][data-daypart='afternoon'] {
+  --sky-a: #16181c;
+  --sky-b: #1f2226;
+  --sky-glow: rgb(230 210 170 / 9%);
+}
+:root[data-theme='dark'][data-daypart='evening'] {
+  --sky-a: #18151d;
+  --sky-b: #291c25;
+  --sky-glow: rgb(230 130 110 / 14%);
+}
+:root[data-theme='dark'][data-daypart='night'] {
+  --sky-a: #0d0e13;
+  --sky-b: #151823;
+  --sky-glow: rgb(110 120 220 / 12%);
+}
+
+/* Weather tints are a thin wash on top — atmosphere, not illustration. */
+:root {
+  --sky-wash: transparent;
+}
+:root[data-sky='cloudy'] {
+  --sky-wash: color-mix(in srgb, var(--text-3) 10%, transparent);
+}
+:root[data-sky='fog'] {
+  --sky-wash: color-mix(in srgb, var(--text-3) 16%, transparent);
+}
+:root[data-sky='rain'],
+:root[data-sky='storm'] {
+  --sky-wash: rgb(90 120 160 / 10%);
+}
+:root[data-sky='snow'] {
+  --sky-wash: rgb(220 230 245 / 14%);
+}
