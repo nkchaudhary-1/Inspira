@@ -24,3 +24,16 @@ test('parseTime edge cases', () => {
   assert.equal(parseTime('@25'), null);
   assert.equal(parseTime('@13pm'), null);
 });
+
+import { splitTaskLines } from '../src/core/quickadd.js';
+
+test('pasted lists split into task lines', () => {
+  assert.deepEqual(splitTaskLines('- Buy milk\n• Call mom #home\n\n1. Ship v2 !!\n[ ] Review @4pm\r\nPlain'), [
+    'Buy milk',
+    'Call mom #home',
+    'Ship v2 !!',
+    'Review @4pm',
+    'Plain',
+  ]);
+  assert.deepEqual(splitTaskLines('single'), ['single']);
+});

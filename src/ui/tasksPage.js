@@ -4,9 +4,8 @@
 
 import * as store from '../core/store.js';
 import { todayKey, weekKeys, addDays, fromKey, weekdayName, formatWeekRange } from '../core/dates.js';
-import { parseQuickAdd } from '../core/quickadd.js';
 import { h, reactive, transition, tab } from './dom.js';
-import { taskList, taskDropTarget } from './tasks.js';
+import { taskList, taskDropTarget, addTaskFromText, enableMultiPaste } from './tasks.js';
 import { projectsView } from './projects.js';
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -129,8 +128,11 @@ function dayColumn(key, today) {
   return taskDropTarget(col, key);
 }
 
-/** "+ ADD TASK" that turns into an inline input; stays open for rapid entry. */
-function addTask(key) {
+/**
+ * "+ ADD TASK" that turns into an inline input. It stays open after Enter so
+ * you can type several tasks in a row; pasting a list adds one task per line.
+ */
+export function addTask(key) {
   const wrap = h('div', { class: 'board__add' });
   const button = h(
     'button',
@@ -147,14 +149,7 @@ function addTask(key) {
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        const parsed = parseQuickAdd(input.value);
-        if (!parsed.title) return;
-        const fields = { title: parsed.title, date: key };
-        if (parsed.priority) fields.priority = parsed.priority;
-        if (parsed.time) fields.time = parsed.time;
-        if (parsed.project) fields.projectId = store.findOrCreateProject(parsed.project).id;
-        input.value = '';
-        store.addTask(fields);
+        if (addTaskFromText(input.value, { date: key })) input.value = '';
       }
       if (e.key === 'Escape') {
         e.stopPropagation();
@@ -162,10 +157,11 @@ function addTask(key) {
         input.blur();
       }
     });
+    enableMultiPaste(input, { date: key });
     input.addEventListener('blur', () => {
       if (!input.value.trim()) wrap.replaceChildren(button);
     });
-    wrap.replaceChildren(input, h('div', { class: 'composer__hint board__hint' }, '#project  ! priority  @6pm'));
+    wrap.replaceChildren(input, h('div', { class: 'composer__hint board__hint' }, 'Enter for the next one · paste a list to add many'));
     input.focus();
   };
   wrap.append(button);

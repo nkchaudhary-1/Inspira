@@ -43,3 +43,11 @@ export function parseQuickAdd(input) {
   out.title = keep.join(' ');
   return out;
 }
+
+/** Split pasted text into task lines, dropping list markers ("- ", "• ", "1.", "[ ]"). */
+export function splitTaskLines(text) {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\s*(?:[-*•]|\d+[.)]|\[[ xX]?\])\s*/, '').trim())
+    .filter(Boolean);
+}

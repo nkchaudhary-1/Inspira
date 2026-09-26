@@ -2,7 +2,7 @@
 // tucked behind a "⋯" popover so the list itself stays quiet.
 
 import * as store from '../core/store.js';
-import { parseQuickAdd } from '../core/quickadd.js';
+import { parseQuickAdd, splitTaskLines } from '../core/quickadd.js';
 import { formatTime, formatShort, todayKey, addDays } from '../core/dates.js';
 import { h, icon, iconButton } from './dom.js';
 import { openPopover, closeOverlay, toast } from './overlay.js';
@@ -125,6 +125,31 @@ export function removeTask(id) {
  * Quick-add input. Lives outside reactive regions so it keeps focus while the
  * list above re-renders. `defaults()` returns fields for new tasks.
  */
+/** Create a task from one line of quick-add text. Returns the task, or null. */
+export function addTaskFromText(text, defaults = {}) {
+  const parsed = parseQuickAdd(text);
+  if (!parsed.title) return null;
+  const fields = { ...defaults, title: parsed.title };
+  if (parsed.priority) fields.priority = parsed.priority;
+  if (parsed.time) fields.time = parsed.time;
+  if (parsed.project) fields.projectId = store.findOrCreateProject(parsed.project).id;
+  return store.addTask(fields);
+}
+
+/** Pasting several lines into a task input adds one task per line. */
+export function enableMultiPaste(input, defaults) {
+  input.addEventListener('paste', (e) => {
+    const text = e.clipboardData?.getData('text/plain') || '';
+    const lines = splitTaskLines(text);
+    if (lines.length < 2) return;
+    e.preventDefault();
+    const d = typeof defaults === 'function' ? defaults() : defaults;
+    const added = lines.map((line) => addTaskFromText(line, d)).filter(Boolean).length;
+    input.value = '';
+    toast(`Added ${added} tasks`);
+  });
+}
+
 export function taskComposer({ placeholder = 'Add task', defaults = () => ({}), id } = {}) {
   const input = h('input', {
     class: 'composer__input',
@@ -139,15 +164,9 @@ export function taskComposer({ placeholder = 'Add task', defaults = () => ({}), 
   const form = h('form', { class: 'composer' }, h('span', { class: 'composer__plus' }, icon('plus', 16)), input, hint);
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const parsed = parseQuickAdd(input.value);
-    if (!parsed.title) return;
-    const fields = { ...defaults(), title: parsed.title };
-    if (parsed.priority) fields.priority = parsed.priority;
-    if (parsed.time) fields.time = parsed.time;
-    if (parsed.project) fields.projectId = store.findOrCreateProject(parsed.project).id;
-    store.addTask(fields);
-    input.value = '';
+    if (addTaskFromText(input.value, defaults())) input.value = '';
   });
+  enableMultiPaste(input, defaults);
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       input.value = '';

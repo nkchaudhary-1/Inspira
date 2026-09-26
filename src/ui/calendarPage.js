@@ -26,6 +26,7 @@ import {
 import { loadMonth } from '../services/calendar.js';
 import { h, reactive, transition, tab } from './dom.js';
 import { taskList, taskComposer, taskDropTarget } from './tasks.js';
+import { addTask } from './tasksPage.js';
 import { noteList, noteButton, closeNote } from './notes.js';
 import { eventList } from './schedule.js';
 
@@ -274,6 +275,7 @@ function weekView(d) {
             h('span', { class: 'board__num' }, pad(day.getDate())),
           ),
           content,
+          addTask(key),
         ),
         key,
       );
