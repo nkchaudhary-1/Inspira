@@ -1733,7 +1733,7 @@ body:has(.dock-wrap.is-open) .hint,
   border-radius: calc(var(--dot) * 3); /* 48 */
   background: var(--matrix-bezel);
   border: 1px solid var(--matrix-edge);
-  filter: drop-shadow(0 32px 32px rgb(0 0 0 / 35%));
+  box-shadow: var(--matrix-shadow);
 }
 
 .matrix__card {

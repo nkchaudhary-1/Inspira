@@ -202,6 +202,8 @@
   --matrix-bezel: var(--paper-0);
   --matrix-card: var(--paper-50);
   --matrix-edge: var(--paper-200);
+  /* Soft, layered lift: a hairline contact shadow plus a wide, faint ambient one. */
+  --matrix-shadow: 0 1px 2px rgb(17 19 24 / 4%), 0 8px 24px -12px rgb(17 19 24 / 8%), 0 24px 64px -24px rgb(17 19 24 / 10%);
   --dot-off: color-mix(in srgb, var(--paper-900) 7%, transparent);
   --dot-on: var(--paper-900);
   --dot-glow: none;
@@ -253,6 +255,7 @@
   --matrix-bezel: var(--ink-950);
   --matrix-card: var(--ink-850);
   --matrix-edge: var(--ink-700);
+  --matrix-shadow: 0 1px 2px rgb(0 0 0 / 20%), 0 12px 32px -16px rgb(0 0 0 / 35%), 0 32px 80px -32px rgb(0 0 0 / 40%);
   --dot-off: color-mix(in srgb, var(--white-100) 6%, transparent);
   --dot-on: var(--white-100);
   --dot-glow: 0 0 6px rgb(255 255 255 / 55%);
