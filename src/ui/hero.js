@@ -11,7 +11,25 @@ import { openPopover, closeOverlay, toast } from './overlay.js';
 // Bound text is filled at creation so re-rendered regions never flash empty.
 export function clock(variant = 'hero') {
   const p = store.prefs();
-  const { time, meridiem } = clockParts(new Date(), p.clock24, p.showSeconds);
+  const now = new Date();
+  // The display face (Boldonse) has proportional digits — "0" is more than twice
+  // as wide as "1" — so ticking seconds inline would shove AM/PM around every
+  // second. There, seconds sit small under AM/PM instead; HH:MM stays put.
+  if (variant === 'display' && p.showSeconds) {
+    const { time, meridiem } = clockParts(now, p.clock24, false);
+    return h(
+      'div',
+      { class: 'clock clock--display has-seconds', role: 'timer', 'aria-live': 'off' },
+      h('span', { class: 'clock__time', dataset: { bind: 'time-hm' } }, time),
+      h(
+        'span',
+        { class: 'clock__side' },
+        meridiem && h('span', { class: 'clock__meridiem', dataset: { bind: 'meridiem' } }, meridiem),
+        h('span', { class: 'clock__seconds', dataset: { bind: 'seconds' } }, String(now.getSeconds()).padStart(2, '0')),
+      ),
+    );
+  }
+  const { time, meridiem } = clockParts(now, p.clock24, p.showSeconds);
   return h(
     'div',
     { class: `clock clock--${variant}`, role: 'timer', 'aria-live': 'off' },

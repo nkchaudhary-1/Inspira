@@ -485,6 +485,28 @@
   line-height: 1.1;
 }
 
+.clock--display .clock__side {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  justify-content: flex-end;
+  gap: 0.15em;
+  font-size: var(--face-meridiem);
+  line-height: 1.1;
+  /* Sit on the digits' baseline like the plain AM/PM does. */
+  padding-bottom: calc(var(--face-clock) * 0.06);
+}
+
+.clock--display .clock__side .clock__meridiem {
+  font-size: 1em;
+}
+
+.clock--display .clock__seconds {
+  font-size: 1em;
+  color: var(--face-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .clock--display .clock__meridiem {
   font-size: var(--face-meridiem);
   font-weight: 400;
@@ -1968,20 +1990,30 @@ body:has(.dock-wrap.is-open) .hint,
   flex: 1;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 1px;
+  gap: clamp(6px, 0.56vw, 10px);
 }
 
+/* Each day is a card (Figma Card / Default + Card / Border). */
 .board__col {
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
   border-radius: var(--radius-md);
-  transition: background var(--dur-fast);
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast);
+}
+
+.board__col.is-today {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--card-border));
 }
 
 .board__col.is-drop {
-  background: var(--cell-active);
+  background: var(--surface-hover);
+  border-color: var(--accent);
 }
 
 .board__head {

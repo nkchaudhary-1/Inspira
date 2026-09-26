@@ -184,6 +184,8 @@
   --surface: color-mix(in srgb, var(--paper-0) 80%, transparent);
   --surface-solid: var(--paper-0); /* Card / Elevated (with shadow) */
   --surface-hover: var(--paper-100);
+  --card: var(--paper-0); /* Card / Default */
+  --card-border: var(--paper-200); /* Card / Border */
   --accent: var(--mint-l-500);
   --accent-text: var(--mint-l-700); /* mint as small text needs the darker step for AA */
   --accent-soft: var(--mint-l-50);
@@ -233,6 +235,8 @@
   --surface: color-mix(in srgb, var(--ink-800) 82%, transparent);
   --surface-solid: var(--ink-780); /* Card / Elevated — popovers, sheets */
   --surface-hover: var(--ink-750); /* Card / Hover */
+  --card: var(--ink-800); /* Card / Default */
+  --card-border: var(--ink-700); /* Card / Border */
   --accent: var(--mint-500);
   --accent-text: var(--mint-500);
   --accent-soft: var(--mint-900);

@@ -61,6 +61,10 @@ function tick() {
   const { time, meridiem } = clockParts(now, p.clock24, p.showSeconds);
   setAll('time', time);
   setAll('meridiem', meridiem);
+  if (p.showSeconds) {
+    setAll('time-hm', clockParts(now, p.clock24, false).time);
+    setAll('seconds', String(now.getSeconds()).padStart(2, '0'));
+  }
   const today = todayKey(now);
   setAll('date', formatLong(today));
   setAll('date-full', formatFull(today));
@@ -102,7 +106,7 @@ let paint;
 let signature = '';
 const signatureOf = (mode) => {
   const p = store.prefs();
-  return `${mode}|${p.showQuoteOnClock}`;
+  return `${mode}|${p.showQuoteOnClock}|${p.showSeconds}|${p.clock24}`;
 };
 
 function rerender() {
