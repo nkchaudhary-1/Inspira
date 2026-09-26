@@ -25,8 +25,8 @@ import {
 } from '../core/dates.js';
 import { loadMonth } from '../services/calendar.js';
 import { h, reactive, transition, tab } from './dom.js';
-import { taskList, taskComposer, taskDropTarget } from './tasks.js';
-import { addTask } from './tasksPage.js';
+import { taskList, taskComposer, taskDropTarget, moveTasksTo } from './tasks.js';
+import { addTask, dayCount } from './tasksPage.js';
 import { noteList, noteButton, closeNote } from './notes.js';
 import { eventList } from './schedule.js';
 
@@ -271,7 +271,7 @@ function weekView(d) {
           h(
             'button',
             { type: 'button', class: 'board__head board__head--link', onClick: () => openDay(key), title: 'Open day' },
-            h('span', { class: 'board__weekday' }, key === today ? 'Today' : weekdayName(key)),
+            h('span', { class: 'board__weekday' }, key === today ? 'Today' : weekdayName(key), dayCount(key)),
             h('span', { class: 'board__num' }, pad(day.getDate())),
           ),
           content,
@@ -353,7 +353,7 @@ function dayView(date) {
           'div',
           { class: 'carry' },
           h('span', null, `${earlier.length} unfinished from earlier`),
-          h('button', { type: 'button', class: 'text-btn', onClick: () => earlier.forEach((t) => store.updateTask(t.id, { date })) }, 'Move to today'),
+          h('button', { type: 'button', class: 'text-btn', onClick: () => moveTasksTo(earlier, date) }, 'Move to today'),
         ),
       list.length ? taskList(list) : h('p', { class: 'empty' }, date < todayKey() ? 'No tasks this day.' : 'Nothing planned yet.'),
     ];

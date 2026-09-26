@@ -86,7 +86,7 @@ export function taskDropTarget(el, key) {
     if (!id) return;
     e.preventDefault();
     const task = store.getData().tasks[id];
-    if (task && task.date !== key) store.updateTask(id, { date: key });
+    if (task && task.date !== key && !store.updateTask(id, { date: key })) dayFullToast(key);
   });
   return el;
 }
@@ -118,22 +118,39 @@ function editTitle(titleEl, task) {
 
 export function removeTask(id) {
   store.deleteTask(id);
-  toast('Task deleted', { label: 'Undo', run: () => store.updateTask(id, { deleted: false }) });
+  toast('Task deleted', { label: 'Undo', run: () => store.updateTask(id, { deleted: false }) || dayFullToast(store.getData().tasks[id]?.date) });
 }
 
 /**
  * Quick-add input. Lives outside reactive regions so it keeps focus while the
  * list above re-renders. `defaults()` returns fields for new tasks.
  */
+const dayName = (key) => (key === todayKey() ? 'Today' : formatShort(key));
+
+/** Toast shown whenever the per-day limit blocks an add or a move. */
+export function dayFullToast(key) {
+  toast(`${dayName(key)} already has ${store.MAX_TASKS_PER_DAY} tasks — finish or move one first`);
+}
+
+/** Move tasks to a day, as many as fit. Returns how many moved. */
+export function moveTasksTo(tasks, key) {
+  let moved = 0;
+  for (const t of tasks) if (store.updateTask(t.id, { date: key })) moved++;
+  if (moved < tasks.length) toast(`Moved ${moved} of ${tasks.length} — ${dayName(key)} holds up to ${store.MAX_TASKS_PER_DAY} tasks`);
+  return moved;
+}
+
 /** Create a task from one line of quick-add text. Returns the task, or null. */
-export function addTaskFromText(text, defaults = {}) {
+export function addTaskFromText(text, defaults = {}, { quiet = false } = {}) {
   const parsed = parseQuickAdd(text);
   if (!parsed.title) return null;
   const fields = { ...defaults, title: parsed.title };
   if (parsed.priority) fields.priority = parsed.priority;
   if (parsed.time) fields.time = parsed.time;
   if (parsed.project) fields.projectId = store.findOrCreateProject(parsed.project).id;
-  return store.addTask(fields);
+  const task = store.addTask(fields);
+  if (!task && !quiet) dayFullToast(fields.date ?? store.ui.date);
+  return task;
 }
 
 /** Pasting several lines into a task input adds one task per line. */
@@ -144,9 +161,10 @@ export function enableMultiPaste(input, defaults) {
     if (lines.length < 2) return;
     e.preventDefault();
     const d = typeof defaults === 'function' ? defaults() : defaults;
-    const added = lines.map((line) => addTaskFromText(line, d)).filter(Boolean).length;
+    const added = lines.map((line) => addTaskFromText(line, d, { quiet: true })).filter(Boolean).length;
     input.value = '';
-    toast(`Added ${added} tasks`);
+    const key = d.date ?? store.ui.date;
+    toast(added === lines.length ? `Added ${added} tasks` : `Added ${added} of ${lines.length} — ${dayName(key)} holds up to ${store.MAX_TASKS_PER_DAY} tasks`);
   });
 }
 
@@ -167,6 +185,18 @@ export function taskComposer({ placeholder = 'Add task', defaults = () => ({}), 
     if (addTaskFromText(input.value, defaults())) input.value = '';
   });
   enableMultiPaste(input, defaults);
+  // Dated composers go quiet when their day reaches the task limit.
+  const syncFull = () => {
+    if (form.dataset.mounted && !form.isConnected) return unsub();
+    form.dataset.mounted = '1';
+    const key = defaults().date;
+    const isFull = store.dayIsFull(key);
+    input.disabled = isFull;
+    input.placeholder = isFull ? `Day is full · ${store.MAX_TASKS_PER_DAY} tasks max` : placeholder;
+    form.classList.toggle('is-full', isFull);
+  };
+  const unsub = store.subscribe(syncFull);
+  syncFull();
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       input.value = '';
@@ -303,7 +333,7 @@ export function openTaskMenu(anchor, id) {
   let pop;
   const refresh = () => pop?.replaceChildren(render());
   const update = (patch) => {
-    store.updateTask(id, patch);
+    if (!store.updateTask(id, patch) && 'date' in patch) dayFullToast(patch.date);
     refresh();
   };
   pop = openPopover(anchor, render(), { align: 'end', className: 'popover--menu' });

@@ -2062,6 +2062,37 @@ body:has(.dock-wrap.is-open) .hint,
   padding: 0 var(--board-pad) var(--board-pad);
 }
 
+.board__count {
+  margin-left: 6px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.board__count-n {
+  color: var(--label);
+  opacity: 0.8;
+}
+
+.board__count-n.is-full {
+  color: var(--text);
+  opacity: 1;
+}
+
+.board__full {
+  display: block;
+  padding-top: 16px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--label);
+  opacity: 0.7;
+}
+
+.composer.is-full .composer__plus {
+  opacity: 0.4;
+}
+
 .board__add-btn {
   padding: 16px 0 0;
   font-size: 10px;

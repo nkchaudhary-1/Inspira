@@ -5,7 +5,7 @@
 import * as store from '../core/store.js';
 import { todayKey, weekKeys, addDays, fromKey, weekdayName, formatWeekRange } from '../core/dates.js';
 import { h, reactive, transition, tab } from './dom.js';
-import { taskList, taskDropTarget, addTaskFromText, enableMultiPaste } from './tasks.js';
+import { taskList, taskDropTarget, addTaskFromText, enableMultiPaste, moveTasksTo } from './tasks.js';
 import { projectsView } from './projects.js';
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -91,7 +91,7 @@ function board() {
       'div',
       { class: 'carry' },
       h('span', null, `${earlier.length} unfinished from earlier`),
-      h('button', { type: 'button', class: 'text-btn', onClick: () => earlier.forEach((t) => store.updateTask(t.id, { date: today })) }, 'Move to today'),
+      h('button', { type: 'button', class: 'text-btn', onClick: () => moveTasksTo(earlier, today) }, 'Move to today'),
     );
   });
   return h(
@@ -118,7 +118,7 @@ function dayColumn(key, today) {
     h(
       'header',
       { class: 'board__head' },
-      h('span', { class: 'board__weekday' }, key === today ? 'Today' : weekdayName(key)),
+      h('span', { class: 'board__weekday' }, key === today ? 'Today' : weekdayName(key), dayCount(key)),
       h('span', { class: 'board__num' }, pad(d.getDate())),
     ),
     list,
@@ -132,8 +132,22 @@ function dayColumn(key, today) {
  * "+ ADD TASK" that turns into an inline input. It stays open after Enter so
  * you can type several tasks in a row; pasting a list adds one task per line.
  */
+/** "3/10" beside the weekday once a day has tasks; highlighted when full. */
+export function dayCount(key) {
+  return reactive(h('span', { class: 'board__count' }), () => {
+    const n = store.dayTaskCount(key);
+    if (!n) return null;
+    return h(
+      'span',
+      { class: ['board__count-n', n >= store.MAX_TASKS_PER_DAY && 'is-full'], title: `${n} of ${store.MAX_TASKS_PER_DAY} tasks` },
+      `${n}/${store.MAX_TASKS_PER_DAY}`,
+    );
+  });
+}
+
 export function addTask(key) {
   const wrap = h('div', { class: 'board__add' });
+  const full = h('span', { class: 'board__full' }, `Day is full · ${store.MAX_TASKS_PER_DAY} tasks max`);
   const button = h(
     'button',
     {
@@ -149,7 +163,9 @@ export function addTask(key) {
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
+        if (input.readOnly) return;
         if (addTaskFromText(input.value, { date: key })) input.value = '';
+        sync();
       }
       if (e.key === 'Escape') {
         e.stopPropagation();
@@ -159,12 +175,31 @@ export function addTask(key) {
     });
     enableMultiPaste(input, { date: key });
     input.addEventListener('blur', () => {
-      if (!input.value.trim()) wrap.replaceChildren(button);
+      if (store.dayIsFull(key)) wrap.replaceChildren(full);
+      else if (!input.value.trim()) wrap.replaceChildren(button);
     });
     wrap.replaceChildren(input, h('div', { class: 'composer__hint board__hint' }, 'Enter for the next one · paste a list to add many'));
     input.focus();
   };
+  // Swap "+ Add task" for a quiet "Day is full" note at the limit, and back.
+  const sync = () => {
+    if (wrap.dataset.mounted && !wrap.isConnected) return unsub();
+    wrap.dataset.mounted = '1';
+    const isFull = store.dayIsFull(key);
+    const showing = wrap.firstChild;
+    // Mid-typing: keep the focused input (read-only) so stray keys stay in it
+    // instead of reaching global shortcuts. Blur / Esc then shows the note.
+    if (showing?.matches?.('.board__input') && showing === document.activeElement) {
+      showing.readOnly = isFull;
+      showing.placeholder = isFull ? `Day is full · ${store.MAX_TASKS_PER_DAY} tasks max` : 'New task';
+      return;
+    }
+    if (isFull && showing !== full) wrap.replaceChildren(full);
+    else if (!isFull && showing === full) wrap.replaceChildren(button);
+  };
+  const unsub = store.subscribe(sync);
   wrap.append(button);
+  sync();
   return wrap;
 }
 

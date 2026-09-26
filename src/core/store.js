@@ -180,6 +180,13 @@ export function snapshot() {
 
 // ---------- tasks ----------
 
+/** A day holds at most this many tasks (open + done). Undated project tasks are unlimited. */
+export const MAX_TASKS_PER_DAY = 10;
+
+export const dayTaskCount = (key) => Object.values(data.tasks).filter((t) => !t.deleted && t.date === key).length;
+export const dayIsFull = (key) => Boolean(key) && dayTaskCount(key) >= MAX_TASKS_PER_DAY;
+
+/** Adds a task. Returns null (and adds nothing) when its day is already full. */
 export function addTask(fields) {
   const now = Date.now();
   const task = {
@@ -197,16 +204,22 @@ export function addTask(fields) {
     deleted: false,
     ...fields,
   };
+  if (dayIsFull(task.date)) return null;
   data.tasks = { ...data.tasks, [task.id]: task };
   commitData();
   return task;
 }
 
+/** Updates a task. Returns false (and changes nothing) if it would overfill a day. */
 export function updateTask(id, patch) {
   const t = data.tasks[id];
-  if (!t) return;
+  if (!t) return false;
+  const movingTo = 'date' in patch && patch.date !== t.date ? patch.date : null;
+  const restoringTo = patch.deleted === false && t.deleted ? (patch.date ?? t.date) : null;
+  if ((movingTo && dayIsFull(movingTo)) || (restoringTo && dayIsFull(restoringTo))) return false;
   data.tasks = { ...data.tasks, [id]: { ...t, ...patch, updatedAt: Date.now() } };
   commitData();
+  return true;
 }
 
 export function toggleTask(id) {
