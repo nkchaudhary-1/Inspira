@@ -85,11 +85,10 @@ a {
 }
 
 code {
-  font:
-    14px ui-monospace,
-    Menlo,
-    Consolas,
-    monospace;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 14px;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
 }
 
 ul {

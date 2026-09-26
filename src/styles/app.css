@@ -552,7 +552,7 @@
 }
 
 .quote__text {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   text-wrap: balance;
 }
 
@@ -567,7 +567,6 @@
 
 .quote--hero .quote__text {
   font-size: var(--quote-hero-size);
-  font-style: italic;
   line-height: 1.5;
 }
 
@@ -2831,7 +2830,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .daypop__weekday {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 400;
   letter-spacing: 0;
@@ -2874,7 +2873,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .daypop__body .empty {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 13px;
 }
 
@@ -3184,7 +3183,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .popover .field__label {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 12.5px;
   font-weight: 400;
   letter-spacing: 0;
@@ -3252,9 +3251,9 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .settings__title {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 500;
   color: var(--text);
 }
 
@@ -3286,15 +3285,16 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .settings__label {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 14px;
+  font-weight: 450;
   color: var(--text);
 }
 
 .settings__hint {
-  margin-top: 4px;
-  font-family: var(--font-mono);
-  font-size: 12.5px;
+  margin-top: 3px;
+  font-family: var(--font-sans);
+  font-size: 13px;
   line-height: 1.5;
   color: var(--text-3);
 }
@@ -3325,7 +3325,7 @@ body:has(.dock-wrap.is-open) .hint,
   flex: 1;
   height: 52px;
   border-radius: 18px;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 14px;
   color: var(--text-2);
   background: var(--glass-well);
@@ -3374,7 +3374,7 @@ body:has(.dock-wrap.is-open) .hint,
   align-items: baseline;
   gap: var(--space-3);
   padding: 18px 0;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 15px;
   cursor: pointer;
   list-style: none;
@@ -3533,7 +3533,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .mode-opt__label {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 13px;
   color: var(--text-3);
 }
@@ -3638,7 +3638,7 @@ body:has(.dock-wrap.is-open) .hint,
   align-items: center;
   justify-content: space-between;
   padding: 0 2px;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 12.5px;
   font-weight: 500;
   color: var(--text-2);
