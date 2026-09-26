@@ -1,33 +1,57 @@
-// Theme backdrop: texture, grid and an optional WebGL shader behind every mode.
-// Texture + grid are pure CSS (data attributes + custom properties on <html>);
-// the shader is a small fragment shader drawn at reduced resolution, capped at
-// 30fps, paused when the tab is hidden and frozen for reduced motion.
+// Theme backdrop behind every mode, built from light rather than texture:
+//   light — a soft accent glow: halo (top), horizon (bottom), mesh (drifting
+//           colour fields) or spotlight (follows the pointer)
+//   grid  — hairline lines or dots that fade out towards the edges
+//   noise — a whisper of grain that keeps gradients from banding
+//   shader — optional WebGL aurora / flow, half resolution, 30fps, paused when
+//            hidden and still under reduced motion
+// Everything but the shader is CSS: data attributes + custom properties on <html>.
 
 import * as store from '../core/store.js';
 
 export const DEFAULT_BACKDROP = {
-  texture: 'grain', // none | grain | paper | static
-  textureAmount: 0.4,
-  grid: 'none', // none | dots | lines | blueprint
+  light: 'halo', // none | halo | horizon | mesh | spotlight
+  lightIntensity: 0.6,
+  texture: 'none', // none | grain  (noise)
+  textureAmount: 0.3,
+  grid: 'none', // none | lines | dots
   gridSize: 32,
   gridOpacity: 0.5,
-  shader: 'none', // none | aurora | mesh | waves
+  shader: 'none', // none | aurora | mesh (flow)
   shaderIntensity: 0.6,
   shaderSpeed: 0.4,
 };
 
 export const PRESETS = [
-  { id: 'minimal', label: 'Minimal', value: { texture: 'none', grid: 'none', shader: 'none' } },
-  { id: 'grain', label: 'Grain', value: { texture: 'grain', textureAmount: 0.4, grid: 'none', shader: 'none' } },
-  { id: 'paper', label: 'Paper', value: { texture: 'paper', textureAmount: 0.6, grid: 'none', shader: 'none' } },
-  { id: 'dots', label: 'Dot grid', value: { texture: 'grain', textureAmount: 0.3, grid: 'dots', gridSize: 24, gridOpacity: 0.6, shader: 'none' } },
-  { id: 'blueprint', label: 'Blueprint', value: { texture: 'none', grid: 'blueprint', gridSize: 32, gridOpacity: 0.5, shader: 'none' } },
-  { id: 'aurora', label: 'Aurora', value: { texture: 'grain', textureAmount: 0.3, grid: 'none', shader: 'aurora', shaderIntensity: 0.7, shaderSpeed: 0.4 } },
-  { id: 'mesh', label: 'Mesh', value: { texture: 'grain', textureAmount: 0.3, grid: 'none', shader: 'mesh', shaderIntensity: 0.6, shaderSpeed: 0.3 } },
-  { id: 'waves', label: 'Waves', value: { texture: 'none', grid: 'none', shader: 'waves', shaderIntensity: 0.5, shaderSpeed: 0.4 } },
+  { id: 'clean', label: 'Clean', value: { light: 'none', texture: 'none', grid: 'none', shader: 'none' } },
+  { id: 'halo', label: 'Halo', value: { light: 'halo', lightIntensity: 0.6, texture: 'none', grid: 'none', shader: 'none' } },
+  { id: 'horizon', label: 'Horizon', value: { light: 'horizon', lightIntensity: 0.6, texture: 'none', grid: 'none', shader: 'none' } },
+  { id: 'mesh', label: 'Mesh', value: { light: 'mesh', lightIntensity: 0.6, texture: 'grain', textureAmount: 0.3, grid: 'none', shader: 'none' } },
+  { id: 'grid', label: 'Grid', value: { light: 'halo', lightIntensity: 0.5, texture: 'none', grid: 'lines', gridSize: 48, gridOpacity: 0.5, shader: 'none' } },
+  { id: 'dots', label: 'Dots', value: { light: 'none', texture: 'none', grid: 'dots', gridSize: 24, gridOpacity: 0.6, shader: 'none' } },
+  {
+    id: 'spotlight',
+    label: 'Spotlight',
+    value: { light: 'spotlight', lightIntensity: 0.6, texture: 'none', grid: 'dots', gridSize: 24, gridOpacity: 0.7, shader: 'none' },
+  },
+  {
+    id: 'aurora',
+    label: 'Aurora',
+    value: { light: 'none', texture: 'grain', textureAmount: 0.3, grid: 'none', shader: 'aurora', shaderIntensity: 0.7, shaderSpeed: 0.4 },
+  },
 ];
 
-export const backdrop = () => ({ ...DEFAULT_BACKDROP, ...store.prefs().backdrop });
+// Older styles map onto their closest modern equivalent.
+const LEGACY = { texture: { paper: 'grain', static: 'grain' }, grid: { blueprint: 'lines' }, shader: { waves: 'aurora' } };
+
+export const backdrop = () => {
+  const stored = store.prefs().backdrop || {};
+  const b = { ...DEFAULT_BACKDROP, ...stored };
+  for (const [key, map] of Object.entries(LEGACY)) b[key] = map[b[key]] ?? b[key];
+  // Saved before "light" existed: keep those looks as they were (no glow).
+  if (store.prefs().backdrop && !('light' in stored)) b.light = 'none';
+  return b;
+};
 
 export function setBackdrop(patch) {
   store.setPrefs({ backdrop: { ...backdrop(), ...patch } });
@@ -45,12 +69,31 @@ const root = document.documentElement;
 
 export function applyBackdrop() {
   const b = backdrop();
-  if (root.dataset.texture !== b.texture) root.dataset.texture = b.texture;
-  if (root.dataset.grid !== b.grid) root.dataset.grid = b.grid;
+  for (const key of ['light', 'texture', 'grid']) if (root.dataset[key] !== b[key]) root.dataset[key] = b[key];
+  root.style.setProperty('--light-k', String(b.lightIntensity));
   root.style.setProperty('--texture-amount', String(b.textureAmount));
   root.style.setProperty('--grid-size', `${b.gridSize}px`);
   root.style.setProperty('--grid-alpha', `${Math.round(b.gridOpacity * 18)}%`);
+  spotlight(b.light === 'spotlight');
   shader.configure(b);
+}
+
+// Spotlight: the pointer position drives two custom properties, once per frame.
+let spotOn = false;
+let spotFrame = 0;
+function onPointer(e) {
+  if (spotFrame) return;
+  spotFrame = requestAnimationFrame(() => {
+    spotFrame = 0;
+    root.style.setProperty('--mx', `${e.clientX}px`);
+    root.style.setProperty('--my', `${e.clientY}px`);
+  });
+}
+function spotlight(on) {
+  if (on === spotOn) return;
+  spotOn = on;
+  if (on) window.addEventListener('pointermove', onPointer, { passive: true });
+  else window.removeEventListener('pointermove', onPointer);
 }
 
 // ---------- WebGL shader ----------

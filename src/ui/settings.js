@@ -1,4 +1,9 @@
-// Settings sheet: account + sync, appearance, inspiration, weather, focus, data.
+// Settings sheet, in four tabs so nothing is a long scroll:
+//   Appearance — colour mode, background style, fine-tune
+//   General    — you, clock, calendar, inspiration, weather
+//   Focus      — pomodoro lengths
+//   Account    — Google sign-in, sync, calendar, your data
+// Each tab is a column of cards; each card holds hairline-separated rows.
 
 import * as store from '../core/store.js';
 import { CATEGORIES } from '../data/quotes.js';
@@ -10,7 +15,15 @@ import { openSheet, toast } from './overlay.js';
 import { openLocation } from './hero.js';
 import { PRESETS, backdrop, setBackdrop, activePreset } from './backdrop.js';
 
-export function openSettings() {
+const TABS = [
+  ['appearance', 'Appearance'],
+  ['general', 'General'],
+  ['focus', 'Focus'],
+  ['account', 'Account'],
+];
+
+export function openSettings(tab) {
+  if (tab) store.setUI({ settingsTab: tab });
   const body = reactive(h('div', { class: 'settings' }), render);
   openSheet('Settings', body);
 }
@@ -18,21 +31,51 @@ export function openSettings() {
 function render() {
   const p = store.prefs();
   const d = store.getDevice();
-  return [account(d), themeSection(p), appearance(p), inspiration(p), weatherSection(d, p), focusSection(p), dataSection()];
+  const tab = store.ui.settingsTab || 'appearance';
+  const panels = {
+    appearance: () => [modeCard(p), backgroundCard(), fineTuneCard()],
+    general: () => [youCard(p), clockCard(p), inspirationCard(p), weatherCard(d, p)],
+    focus: () => [focusCard(p)],
+    account: () => [accountCard(d), dataCard(), h('p', { class: 'settings__hint settings__foot' }, 'Press ? anywhere for keyboard shortcuts.')],
+  };
+  return [
+    h(
+      'div',
+      { class: 'settings__tabs', role: 'tablist', 'aria-label': 'Settings sections' },
+      TABS.map(([id, label]) =>
+        h(
+          'button',
+          {
+            type: 'button',
+            role: 'tab',
+            'aria-selected': String(id === tab),
+            class: ['settings__tab', id === tab && 'is-active'],
+            onClick: () => store.setUI({ settingsTab: id }),
+          },
+          label,
+        ),
+      ),
+    ),
+    h('div', { class: 'settings__panel', role: 'tabpanel' }, panels[tab]()),
+  ];
 }
 
-function section(title, ...children) {
-  return h('section', { class: 'settings__section' }, h('h3', { class: 'settings__title' }, title), ...children);
+/** A titled group of rows. */
+function card(title, ...children) {
+  return h('section', { class: 'settings__card' }, title && h('h3', { class: 'settings__title' }, title), h('div', { class: 'settings__rows' }, ...children));
 }
 
 function row(label, control, hint) {
   return h(
     'div',
     { class: 'settings__row' },
-    h('div', null, h('div', { class: 'settings__label' }, label), hint && h('div', { class: 'fineprint' }, hint)),
+    h('div', { class: 'settings__text' }, h('div', { class: 'settings__label' }, label), hint && h('div', { class: 'settings__hint' }, hint)),
     control,
   );
 }
+
+/** A full-width block inside a card (galleries, chips, sliders). */
+const block = (...children) => h('div', { class: 'settings__block' }, ...children);
 
 function segmented(options, value, onChange, label) {
   return h(
@@ -78,58 +121,126 @@ async function guarded(fn, failMsg) {
   }
 }
 
-function account(d) {
+function accountCard(d) {
   const avail = authAvailability();
   if (!d.account) {
-    return section(
-      'Account',
-      h(
-        'p',
-        { class: 'settings__lead' },
-        'Sign in to sync tasks, notes, projects and preferences across your Chrome browsers. Your data is stored in a private app folder in your Google Drive.',
+    return card(
+      'Google account',
+      block(
+        h(
+          'p',
+          { class: 'settings__hint settings__note' },
+          'Sign in to sync tasks, notes, projects and preferences across your Chrome browsers. Stored in a private app folder in your Google Drive.',
+        ),
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'google-btn',
+            disabled: !avail.ok,
+            onClick: () => guarded(async () => (await signIn(), syncNow()), 'Sign-in didn’t complete'),
+          },
+          googleMark(),
+          'Continue with Google',
+        ),
+        !avail.ok && h('p', { class: 'settings__hint' }, avail.reason),
+        h('p', { class: 'settings__hint' }, 'Everything works without an account — it just stays on this device.'),
       ),
-      h(
-        'button',
-        {
-          type: 'button',
-          class: 'google-btn',
-          disabled: !avail.ok,
-          onClick: () => guarded(async () => (await signIn(), syncNow()), 'Sign-in didn’t complete'),
-        },
-        googleMark(),
-        'Continue with Google',
-      ),
-      !avail.ok && h('p', { class: 'fineprint' }, avail.reason),
-      h('p', { class: 'fineprint' }, 'Everything works without an account — it just stays on this device.'),
     );
   }
-  return section(
-    'Account',
-    h(
-      'div',
-      { class: 'account' },
-      d.account.picture
-        ? h('img', { class: 'account__avatar', src: d.account.picture, alt: '', referrerpolicy: 'no-referrer' })
-        : h('span', { class: 'account__avatar' }),
-      h('div', null, h('div', { class: 'settings__label' }, d.account.name || d.account.email), h('div', { class: 'fineprint' }, d.account.email)),
+  return card(
+    'Google account',
+    block(
+      h(
+        'div',
+        { class: 'account' },
+        d.account.picture
+          ? h('img', { class: 'account__avatar', src: d.account.picture, alt: '', referrerpolicy: 'no-referrer' })
+          : h('span', { class: 'account__avatar' }),
+        h('div', null, h('div', { class: 'settings__label' }, d.account.name || d.account.email), h('div', { class: 'settings__hint' }, d.account.email)),
+      ),
     ),
-    row('Sync', h('button', { type: 'button', class: 'text-btn', onClick: () => syncNow() }, icon('sync', 14), ' Sync now'), syncLabel()),
+    row('Sync', h('button', { type: 'button', class: 'ghost-btn ghost-btn--sm', onClick: () => syncNow() }, icon('sync', 14), 'Sync now'), syncLabel()),
     row(
       'Google Calendar',
       d.calendarConnected
-        ? h('button', { type: 'button', class: 'text-btn', onClick: () => (disconnectCalendar(), clearCalendar()) }, 'Disconnect')
+        ? h('button', { type: 'button', class: 'ghost-btn ghost-btn--sm', onClick: () => (disconnectCalendar(), clearCalendar()) }, 'Disconnect')
         : h(
             'button',
             {
               type: 'button',
-              class: 'text-btn text-btn--strong',
+              class: 'ghost-btn ghost-btn--sm',
               onClick: () => guarded(async () => (await connectCalendar(), refreshCalendar()), 'Calendar wasn’t connected'),
             },
             'Connect',
           ),
       d.calendarConnected ? 'Showing events from your selected calendars (read-only).' : 'Read-only. Events appear next to your tasks.',
     ),
-    h('button', { type: 'button', class: 'text-btn text-btn--danger', onClick: () => guarded(signOut, 'Couldn’t sign out') }, 'Sign out'),
+    row(
+      'Sign out',
+      h('button', { type: 'button', class: 'ghost-btn ghost-btn--sm ghost-btn--danger', onClick: () => guarded(signOut, 'Couldn’t sign out') }, 'Sign out'),
+      'Your data stays on this device',
+    ),
+  );
+}
+
+const MODE_OPTIONS = [
+  ['system', 'Auto'],
+  ['light', 'Light'],
+  ['dark', 'Dark'],
+];
+
+function modeCard(p) {
+  return card(
+    'Colour mode',
+    block(
+      h(
+        'div',
+        { class: 'modes', role: 'radiogroup', 'aria-label': 'Colour mode' },
+        MODE_OPTIONS.map(([id, label]) =>
+          h(
+            'button',
+            {
+              type: 'button',
+              role: 'radio',
+              'aria-checked': String(p.theme === id),
+              class: ['mode-opt', p.theme === id && 'is-active'],
+              onClick: () => store.setPrefs({ theme: id }),
+            },
+            h('span', { class: `mode-opt__thumb mode-opt__thumb--${id}`, 'aria-hidden': 'true' }, h('i'), h('i'), h('i')),
+            h('span', { class: 'mode-opt__label' }, label),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function backgroundCard() {
+  const current = activePreset();
+  return card(
+    'Background',
+    block(
+      h(
+        'div',
+        { class: 'presets', role: 'radiogroup', 'aria-label': 'Background style' },
+        PRESETS.map((preset) =>
+          h(
+            'button',
+            {
+              type: 'button',
+              role: 'radio',
+              'aria-checked': String(current === preset.id),
+              class: ['preset', current === preset.id && 'is-active'],
+              onClick: () => setBackdrop(preset.value),
+            },
+            h('span', { class: `preset__swatch preset__swatch--${preset.id}`, 'aria-hidden': 'true' }),
+            h('span', { class: 'preset__label' }, preset.label, current === preset.id && icon('check', 14)),
+          ),
+        ),
+      ),
+      !current && h('p', { class: 'settings__hint' }, 'Custom — tweaked below. Pick a style to reset.'),
+    ),
   );
 }
 
@@ -144,9 +255,11 @@ function slider({ label, value, min, max, step, format, onChange }) {
     step: String(step),
     value: String(value),
     'aria-label': label,
+    style: `--fill: ${((value - min) / (max - min)) * 100}%`,
     onInput: (e) => {
       const v = Number(e.target.value);
       out.textContent = format(v);
+      e.target.style.setProperty('--fill', `${((v - min) / (max - min)) * 100}%`);
       onChange(v);
     },
   });
@@ -155,109 +268,135 @@ function slider({ label, value, min, max, step, format, onChange }) {
 
 const pct = (v) => `${Math.round(v * 100)}%`;
 
-function themeSection(p) {
+// Fine-tune stays folded unless you open it; remembered for the session.
+let fineTuneOpen = false;
+
+function fineTuneCard() {
   const b = backdrop();
-  const current = activePreset();
-  return section(
-    'Theme',
-    row(
-      'Mode',
-      segmented(
-        [
-          ['system', 'Auto'],
-          ['light', 'Light'],
-          ['dark', 'Dark'],
-        ],
-        p.theme,
-        (v) => store.setPrefs({ theme: v }),
-        'Colour mode',
-      ),
-    ),
+  const details = h(
+    'details',
+    { class: 'settings__fold', open: fineTuneOpen || null, onToggle: (e) => (fineTuneOpen = e.currentTarget.open) },
+    h('summary', null, h('span', null, 'Fine-tune'), h('span', { class: 'settings__hint' }, 'Light, grid, noise and motion')),
     h(
       'div',
-      { class: 'presets', role: 'radiogroup', 'aria-label': 'Theme presets' },
-      PRESETS.map((preset) =>
-        h(
-          'button',
-          {
-            type: 'button',
-            role: 'radio',
-            'aria-checked': String(current === preset.id),
-            class: ['preset', current === preset.id && 'is-active'],
-            onClick: () => setBackdrop(preset.value),
-          },
-          h('span', { class: `preset__swatch preset__swatch--${preset.id}`, 'aria-hidden': 'true' }),
-          h('span', { class: 'preset__label' }, preset.label),
+      { class: 'settings__rows' },
+      row(
+        'Light',
+        segmented(
+          [
+            ['none', 'Off'],
+            ['halo', 'Halo'],
+            ['horizon', 'Horizon'],
+            ['mesh', 'Mesh'],
+            ['spotlight', 'Spot'],
+          ],
+          b.light,
+          (v) => setBackdrop({ light: v }),
+          'Light',
         ),
       ),
+      b.light !== 'none' &&
+        block(
+          slider({
+            label: 'Intensity',
+            value: b.lightIntensity,
+            min: 0.1,
+            max: 1,
+            step: 0.05,
+            format: pct,
+            onChange: (v) => setBackdrop({ lightIntensity: v }),
+          }),
+        ),
+      row(
+        'Grid',
+        segmented(
+          [
+            ['none', 'Off'],
+            ['lines', 'Lines'],
+            ['dots', 'Dots'],
+          ],
+          b.grid,
+          (v) => setBackdrop({ grid: v }),
+          'Grid',
+        ),
+      ),
+      b.grid !== 'none' &&
+        block(
+          slider({ label: 'Size', value: b.gridSize, min: 12, max: 96, step: 4, format: (v) => `${v}px`, onChange: (v) => setBackdrop({ gridSize: v }) }),
+          slider({ label: 'Opacity', value: b.gridOpacity, min: 0.1, max: 1, step: 0.05, format: pct, onChange: (v) => setBackdrop({ gridOpacity: v }) }),
+        ),
+      row(
+        'Noise',
+        toggle(b.texture !== 'none', (v) => setBackdrop({ texture: v ? 'grain' : 'none' }), 'Noise'),
+        'A fine grain that smooths gradients',
+      ),
+      b.texture !== 'none' &&
+        block(
+          slider({ label: 'Amount', value: b.textureAmount, min: 0.05, max: 1, step: 0.05, format: pct, onChange: (v) => setBackdrop({ textureAmount: v }) }),
+        ),
+      row(
+        'Motion',
+        segmented(
+          [
+            ['none', 'Off'],
+            ['aurora', 'Aurora'],
+            ['mesh', 'Flow'],
+          ],
+          b.shader,
+          (v) => setBackdrop({ shader: v }),
+          'Animated background',
+        ),
+      ),
+      b.shader !== 'none' &&
+        block(
+          slider({
+            label: 'Intensity',
+            value: b.shaderIntensity,
+            min: 0.1,
+            max: 1,
+            step: 0.05,
+            format: pct,
+            onChange: (v) => setBackdrop({ shaderIntensity: v }),
+          }),
+          slider({
+            label: 'Speed',
+            value: b.shaderSpeed,
+            min: 0,
+            max: 1,
+            step: 0.05,
+            format: (v) => (v === 0 ? 'Still' : pct(v)),
+            onChange: (v) => setBackdrop({ shaderSpeed: v }),
+          }),
+          h('p', { class: 'settings__hint' }, 'Pauses when the tab is hidden and stays still if your system asks for reduced motion.'),
+        ),
     ),
-    !current && h('p', { class: 'fineprint' }, 'Custom theme — pick a preset to reset.'),
+  );
+  return h('section', { class: 'settings__card settings__card--fold' }, details);
+}
 
-    h('h4', { class: 'settings__sub' }, 'Texture'),
-    segmented(
-      [
-        ['none', 'None'],
-        ['grain', 'Grain'],
-        ['paper', 'Paper'],
-        ['static', 'Static'],
-      ],
-      b.texture,
-      (v) => setBackdrop({ texture: v }),
-      'Texture',
-    ),
-    b.texture !== 'none' &&
-      slider({ label: 'Amount', value: b.textureAmount, min: 0.05, max: 1, step: 0.05, format: pct, onChange: (v) => setBackdrop({ textureAmount: v }) }),
-
-    h('h4', { class: 'settings__sub' }, 'Grid'),
-    segmented(
-      [
-        ['none', 'None'],
-        ['dots', 'Dots'],
-        ['lines', 'Lines'],
-        ['blueprint', 'Blueprint'],
-      ],
-      b.grid,
-      (v) => setBackdrop({ grid: v }),
-      'Grid',
-    ),
-    b.grid !== 'none' && [
-      slider({ label: 'Size', value: b.gridSize, min: 12, max: 96, step: 4, format: (v) => `${v}px`, onChange: (v) => setBackdrop({ gridSize: v }) }),
-      slider({ label: 'Opacity', value: b.gridOpacity, min: 0.1, max: 1, step: 0.05, format: pct, onChange: (v) => setBackdrop({ gridOpacity: v }) }),
-    ],
-
-    h('h4', { class: 'settings__sub' }, 'Shader'),
-    segmented(
-      [
-        ['none', 'None'],
-        ['aurora', 'Aurora'],
-        ['mesh', 'Mesh'],
-        ['waves', 'Waves'],
-      ],
-      b.shader,
-      (v) => setBackdrop({ shader: v }),
-      'Shader',
-    ),
-    b.shader !== 'none' && [
-      slider({ label: 'Intensity', value: b.shaderIntensity, min: 0.1, max: 1, step: 0.05, format: pct, onChange: (v) => setBackdrop({ shaderIntensity: v }) }),
-      slider({
-        label: 'Speed',
-        value: b.shaderSpeed,
-        min: 0,
-        max: 1,
-        step: 0.05,
-        format: (v) => (v === 0 ? 'Still' : pct(v)),
-        onChange: (v) => setBackdrop({ shaderSpeed: v }),
+function youCard(p) {
+  return card(
+    'You',
+    row(
+      'Name',
+      h('input', {
+        class: 'field__input settings__input',
+        value: p.name,
+        placeholder: 'Your first name',
+        maxlength: '40',
+        'aria-label': 'Your name',
+        onChange: (e) => store.setPrefs({ name: e.target.value.trim() }),
       }),
-      h('p', { class: 'fineprint' }, 'Animated shaders pause when the tab is hidden and stay still if your system asks for reduced motion.'),
-    ],
+      'For the greeting',
+    ),
   );
 }
 
-function appearance(p) {
-  return section(
-    'Appearance',
+function clockCard(p) {
+  return card(
+    'Clock & calendar',
     row(
-      'Clock',
+      'Time format',
       segmented(
         [
           [false, '12-hour'],
@@ -273,63 +412,60 @@ function appearance(p) {
       toggle(p.showSeconds, (v) => store.setPrefs({ showSeconds: v }), 'Show seconds'),
     ),
     row(
-      'Quote beneath the clock',
-      toggle(p.showQuoteOnClock, (v) => store.setPrefs({ showQuoteOnClock: v }), 'Quote beneath the clock'),
+      'Quote under the clock',
+      toggle(p.showQuoteOnClock, (v) => store.setPrefs({ showQuoteOnClock: v }), 'Quote under the clock'),
     ),
     row(
       'Week starts on',
       segmented(
         [
-          [1, 'Mon'],
-          [0, 'Sun'],
+          [1, 'Monday'],
+          [0, 'Sunday'],
         ],
         p.weekStart,
         (v) => store.setPrefs({ weekStart: v }),
         'Week start',
       ),
     ),
-    row(
-      'Your name',
-      h('input', {
-        class: 'field__input settings__input',
-        value: p.name,
-        placeholder: 'For the greeting',
-        maxlength: '40',
-        onChange: (e) => store.setPrefs({ name: e.target.value.trim() }),
-      }),
-    ),
   );
 }
 
-function inspiration(p) {
-  return section(
+function inspirationCard(p) {
+  return card(
     'Daily inspiration',
-    h(
-      'div',
-      { class: 'chips' },
-      CATEGORIES.map((c) =>
-        h(
-          'button',
-          {
-            type: 'button',
-            class: ['chip', c.id === p.quoteCategory && 'is-active'],
-            'aria-pressed': String(c.id === p.quoteCategory),
-            onClick: () => (store.setPrefs({ quoteCategory: c.id }), store.setDevice({ quoteShift: { date: null, n: 0 } })),
-          },
-          c.label,
+    block(
+      h(
+        'div',
+        { class: 'chips' },
+        CATEGORIES.map((c) =>
+          h(
+            'button',
+            {
+              type: 'button',
+              class: ['chip', c.id === p.quoteCategory && 'is-active'],
+              'aria-pressed': String(c.id === p.quoteCategory),
+              onClick: () => (store.setPrefs({ quoteCategory: c.id }), store.setDevice({ quoteShift: { date: null, n: 0 } })),
+            },
+            c.label,
+          ),
         ),
       ),
     ),
   );
 }
 
-function weatherSection(d, p) {
-  return section(
+function weatherCard(d, p) {
+  return card(
     'Weather',
     row(
       'Location',
-      h('button', { type: 'button', class: 'text-btn', onClick: (e) => openLocation(e.currentTarget) }, d.location ? d.location.name : 'Set location'),
-      'Forecast by Open-Meteo.',
+      h(
+        'button',
+        { type: 'button', class: 'ghost-btn ghost-btn--sm', onClick: (e) => openLocation(e.currentTarget) },
+        icon('location', 14),
+        d.location ? d.location.name : 'Set location',
+      ),
+      'Forecast by Open-Meteo',
     ),
     row(
       'Units',
@@ -346,23 +482,23 @@ function weatherSection(d, p) {
   );
 }
 
-function focusSection(p) {
+function focusCard(p) {
   const minutes = (key, options, label) =>
     segmented(
-      options.map((v) => [v, String(v)]),
+      options.map((v) => [v, `${v}m`]),
       p[key],
       (v) => store.setPrefs({ [key]: v }),
       label,
     );
-  return section(
-    'Focus timer',
-    row('Focus', minutes('focusMinutes', [15, 25, 45, 60], 'Focus minutes'), 'Minutes'),
-    row('Short break', minutes('shortBreakMinutes', [3, 5, 10], 'Short break minutes'), 'Minutes'),
+  return card(
+    'Pomodoro',
+    row('Focus', minutes('focusMinutes', [15, 25, 45, 60], 'Focus minutes')),
+    row('Short break', minutes('shortBreakMinutes', [3, 5, 10], 'Short break minutes')),
     row('Long break', minutes('longBreakMinutes', [10, 15, 20, 30], 'Long break minutes'), 'After every 4th focus session'),
   );
 }
 
-function dataSection() {
+function dataCard() {
   const file = h('input', { type: 'file', accept: 'application/json', hidden: true });
   file.addEventListener('change', async () => {
     const f = file.files?.[0];
@@ -377,31 +513,27 @@ function dataSection() {
     }
     file.value = '';
   });
-  return section(
+  const exportJson = () => {
+    const blob = new Blob([JSON.stringify({ ...store.snapshot(), exportedAt: new Date().toISOString(), app: 'inspira', schema: 2 }, null, 2)], {
+      type: 'application/json',
+    });
+    const a = h('a', { href: URL.createObjectURL(blob), download: `inspira-${new Date().toISOString().slice(0, 10)}.json` });
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  return card(
     'Your data',
-    h(
-      'div',
-      { class: 'settings__actions' },
-      h(
-        'button',
-        {
-          type: 'button',
-          class: 'ghost-btn',
-          onClick: () => {
-            const blob = new Blob([JSON.stringify({ ...store.snapshot(), exportedAt: new Date().toISOString(), app: 'inspira', schema: 2 }, null, 2)], {
-              type: 'application/json',
-            });
-            const a = h('a', { href: URL.createObjectURL(blob), download: `inspira-${new Date().toISOString().slice(0, 10)}.json` });
-            a.click();
-            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-          },
-        },
-        'Export JSON',
-      ),
-      h('button', { type: 'button', class: 'ghost-btn', onClick: () => file.click() }, 'Import'),
-      file,
+    row(
+      'Export',
+      h('button', { type: 'button', class: 'ghost-btn ghost-btn--sm', onClick: exportJson }, 'Download'),
+      'Tasks, notes, projects and settings as JSON',
     ),
-    h('p', { class: 'fineprint' }, 'Press ? anywhere for keyboard shortcuts.'),
+    row(
+      'Import',
+      h('button', { type: 'button', class: 'ghost-btn ghost-btn--sm', onClick: () => file.click() }, 'Choose file'),
+      'Merged with what’s here — nothing is replaced',
+    ),
+    file,
   );
 }
 

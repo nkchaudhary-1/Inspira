@@ -4,8 +4,9 @@
   var root = document.documentElement;
   var theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   var sky = 'clear';
-  var texture = 'grain';
+  var texture = 'none';
   var grid = 'none';
+  var light = 'halo';
   try {
     var cached = JSON.parse(localStorage.getItem('inspira.paint') || 'null');
     if (cached) {
@@ -13,6 +14,7 @@
       sky = cached.sky || sky;
       texture = cached.texture || texture;
       grid = cached.grid || grid;
+      light = cached.light || light;
     }
   } catch (e) {}
   var h = new Date().getHours();
@@ -20,5 +22,6 @@
   root.dataset.sky = sky;
   root.dataset.texture = texture;
   root.dataset.grid = grid;
+  root.dataset.light = light;
   root.dataset.daypart = h >= 5 && h < 8 ? 'dawn' : h < 12 && h >= 8 ? 'morning' : h >= 12 && h < 17 ? 'afternoon' : h >= 17 && h < 21 ? 'evening' : 'night';
 })();

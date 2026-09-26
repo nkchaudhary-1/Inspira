@@ -219,8 +219,13 @@
   --on-primary: var(--paper-0);
   /* shader + preset swatches: ground, mid, highlight */
   --shader-a: var(--paper-50);
-  --shader-b: var(--paper-200);
-  --shader-c: var(--mint-l-50);
+  --shader-b: #dfe8fb;
+  --shader-c: #cdeee2;
+  /* backdrop light: mint, blue, pink (Figma accent / info / secondary) */
+  --glow-1: var(--mint-l-500);
+  --glow-2: var(--state-l-info);
+  --glow-3: var(--pink-l-500);
+  --light-a: 0.3;
 }
 
 /* ---- Layer 2 · semantic (dark) ---- */
@@ -269,8 +274,12 @@
   --primary-hover: var(--mint-400);
   --on-primary: var(--ink-950);
   --shader-a: var(--ink-950);
-  --shader-b: var(--ink-650);
-  --shader-c: var(--mint-900);
+  --shader-b: #152441;
+  --shader-c: #1d5a47;
+  --glow-1: var(--mint-500);
+  --glow-2: var(--state-info);
+  --glow-3: var(--pink-500);
+  --light-a: 0.34;
 }
 
 /* ---- Atmosphere: palette ground + a faint daypart glow ---- */

@@ -1,6 +1,6 @@
 // Popovers, sheets and toasts. One overlay at a time keeps the page calm.
 
-import { h } from './dom.js';
+import { h, icon } from './dom.js';
 
 let current = null;
 
@@ -87,7 +87,7 @@ export function openSheet(title, content, { onClose } = {}) {
         'header',
         { class: 'sheet__head' },
         h('h2', { class: 'sheet__title' }, title),
-        h('button', { type: 'button', class: 'text-btn', onClick: () => closeOverlay() }, 'Done'),
+        h('button', { type: 'button', class: 'sheet__close', 'aria-label': 'Close', title: 'Close (Esc)', onClick: () => closeOverlay() }, icon('close', 18)),
       ),
       h('div', { class: 'sheet__body' }, content),
     ),
