@@ -322,6 +322,17 @@
   background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
 }
 
+/* Tasks and Calendar have their own structure (columns, cells); a second
+   grid behind them just competes, so it fades out there. */
+.sky__grid {
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+
+:root:has(.app[data-mode='tasks']) .sky__grid,
+:root:has(.app[data-mode='calendar']) .sky__grid {
+  opacity: 0;
+}
+
 /* With the spotlight, the grid shows mostly where the light falls. */
 :root[data-light='spotlight'] .sky__grid {
   --grid-mask: radial-gradient(360px circle at var(--mx, 50%) var(--my, 35%), #000 0%, rgb(0 0 0 / 22%) 60%, rgb(0 0 0 / 12%) 100%);
@@ -2207,6 +2218,13 @@ body:has(.dock-wrap.is-open) .hint,
   background: var(--tabs-bg);
 }
 
+/* Translucent tab bars frost whatever sky is behind them. */
+.tabs,
+.pill-tabs {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
 .tabs__tab {
   padding: 8px 16px;
   border-radius: 6px;
@@ -2543,8 +2561,8 @@ body:has(.dock-wrap.is-open) .hint,
   padding: 16px;
   overflow: hidden;
   text-align: left;
-  border-right: 1px solid var(--bg);
-  border-bottom: 1px solid var(--bg);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   transition:
     background var(--dur-fast),
     box-shadow var(--dur-fast);
