@@ -159,9 +159,17 @@ export function quote(variant = 'hero') {
     // Clock and Quote faces show the line plainly (Figma); others keep quotation marks.
     const plain = variant === 'line' || variant === 'display';
     const body = variant === 'display' ? q.text.replace(/\.$/, '') : q.text;
-    const text = h('blockquote', { class: ['quote__text', fresh && 'is-entering'] }, plain ? body : `“${body}”`);
+    const long = body.length > 90;
+    // Laws of UX carry a name: prefix it on the Clock line, headline it on the Quote face.
+    const text = h(
+      'blockquote',
+      { class: ['quote__text', fresh && 'is-entering', long && 'is-long'] },
+      variant === 'line' && q.title && h('strong', { class: 'quote__law' }, `${q.title} · `),
+      plain ? body : `“${body}”`,
+    );
     if (variant === 'display') {
       return [
+        q.title && h('div', { class: 'quote__title' }, q.title),
         text,
         h(
           'div',
@@ -170,7 +178,8 @@ export function quote(variant = 'hero') {
           h('span', { class: 'sep' }, '·'),
           h('button', { type: 'button', class: 'text-btn', onClick: nextQuote, title: 'Another one (Q)' }, 'Another one'),
           h('span', { class: 'sep' }, '·'),
-          h('button', { type: 'button', class: 'text-btn', onClick: () => copyQuote(q.text) }, 'Copy'),
+          h('button', { type: 'button', class: 'text-btn', onClick: () => copyQuote(q.title ? `${q.title} — ${q.text}` : q.text) }, 'Copy'),
+          q.url && [h('span', { class: 'sep' }, '·'), h('a', { class: 'text-btn', href: q.url, target: '_blank', rel: 'noopener' }, `Read on ${q.author} ↗`)],
         ),
       ];
     }

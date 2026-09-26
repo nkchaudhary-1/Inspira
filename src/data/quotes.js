@@ -4,6 +4,7 @@
 // shows the same line until the user asks for another.
 
 import { hash } from '../core/ids.js';
+import { UX_LAWS, UX_LAWS_SOURCE } from './uxLaws.js';
 
 export const CATEGORIES = [
   { id: 'motivation', label: 'Motivation' },
@@ -11,6 +12,7 @@ export const CATEGORIES = [
   { id: 'calm', label: 'Calm' },
   { id: 'creativity', label: 'Creativity' },
   { id: 'confidence', label: 'Confidence' },
+  { id: 'uxlaws', label: 'Laws of UX' },
   { id: 'mixed', label: 'A bit of everything' },
 ];
 
@@ -129,16 +131,20 @@ export const QUOTES = {
 
 const ATTRIBUTION = 'Daily Inspiration';
 
+const lines = (cat) => QUOTES[cat].map((text) => ({ text, category: cat, author: ATTRIBUTION }));
+
+/** A law reads as "name + definition", credited to Laws of UX with a link. */
+const laws = () => UX_LAWS.map((law) => ({ text: law.summary, title: law.name, url: law.url, category: 'uxlaws', author: UX_LAWS_SOURCE.name }));
+
 function poolFor(category) {
-  if (category === 'mixed' || !QUOTES[category]) {
-    return Object.entries(QUOTES).flatMap(([cat, list]) => list.map((text) => ({ text, category: cat })));
-  }
-  return QUOTES[category].map((text) => ({ text, category }));
+  if (category === 'uxlaws') return laws();
+  if (category === 'mixed' || !QUOTES[category]) return [...Object.keys(QUOTES).flatMap(lines), ...laws()];
+  return lines(category);
 }
 
-/** Deterministic quote for a day key + category, shifted by `n` for "another one". */
+/** Deterministic pick for a day key + category, shifted by `n` for "another one". */
 export function quoteFor(dayKey, category, n = 0) {
   const pool = poolFor(category);
   const idx = (hash(`${dayKey}:${category}`) + n) % pool.length;
-  return { ...pool[idx], author: ATTRIBUTION };
+  return { ...pool[idx] };
 }

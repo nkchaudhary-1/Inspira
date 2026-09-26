@@ -607,43 +607,31 @@
   box-shadow: var(--shadow-pop);
   backdrop-filter: blur(24px) saturate(1.4);
   -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  /* Hidden: tucked down and slightly narrow, like it is rising out of the handle. */
+  /* Hidden: a plain fade in place — no genie rise, no scaling. */
   opacity: 0;
   visibility: hidden;
-  transform: translateY(18px) scale(0.86, 0.8);
-  transform-origin: bottom center;
-  will-change: transform, opacity;
   transition:
     opacity 160ms var(--ease-out),
-    transform 220ms var(--ease-in-out),
-    visibility 0s linear 220ms;
+    visibility 0s linear 160ms;
 }
 
 .dock-wrap.is-open .dock {
   opacity: 1;
   visibility: visible;
-  transform: none;
   transition:
     opacity 200ms var(--ease-out),
-    transform 460ms var(--dock-spring),
     visibility 0s;
 }
 
-/* Icons rise in one after another on open; they leave together on close. */
+/* Icons fade in one after another on open; they leave together on close. */
 .dock__item {
   opacity: 0;
-  translate: 0 10px;
-  transition:
-    opacity 120ms var(--ease-out),
-    translate 160ms var(--ease-out);
+  transition: opacity 120ms var(--ease-out);
 }
 
 .dock-wrap.is-open .dock__item {
   opacity: 1;
-  translate: 0 0;
-  transition:
-    opacity 260ms var(--ease-out) calc(60ms + var(--i, 0) * 24ms),
-    translate 420ms var(--dock-spring) calc(60ms + var(--i, 0) * 24ms);
+  transition: opacity 240ms var(--ease-out) calc(40ms + var(--i, 0) * 18ms);
 }
 
 .dock-wrap.is-opening .dock {
@@ -652,23 +640,18 @@
 
 .dock-wrap.is-open .dock-handle {
   opacity: 0;
-  transform: translateY(10px) scale(0.7);
   pointer-events: none;
-  transition:
-    opacity 120ms var(--ease-out),
-    transform 200ms var(--ease-out);
+  transition: opacity 120ms var(--ease-out);
 }
 
 .dock__item {
-  --s: 1;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  /* --s is eased per frame in dock.js — no CSS transition, so no fighting. */
-  width: calc(var(--tile) * var(--s));
-  height: calc(var(--tile) * var(--s));
+  width: var(--tile);
+  height: var(--tile);
 }
 
 .dock__tile {
@@ -677,15 +660,11 @@
   place-items: center;
   width: 100%;
   height: 100%;
-  border-radius: calc(12px * var(--s));
+  border-radius: 12px;
   color: var(--text-2);
   transition:
     background var(--dur-fast),
     color var(--dur-fast);
-}
-
-.dock__tile .icon {
-  transform: scale(var(--s));
 }
 
 .dock__item:hover .dock__tile,
@@ -707,7 +686,7 @@
 }
 
 .dock__item:active .dock__tile {
-  transform: scale(0.94);
+  background: var(--tabs-bg);
 }
 
 .dock__dot {
@@ -1606,6 +1585,24 @@ body:has(.dock-wrap.is-open) .hint,
   color: var(--text);
   max-width: 18em;
   text-wrap: pretty;
+}
+
+.quote--display .quote__text.is-long {
+  font-size: calc(var(--quote-display) * 0.72);
+  max-width: 22em;
+}
+
+.quote__title {
+  font-family: var(--font-display);
+  font-variation-settings: var(--display-opsz);
+  font-size: var(--face-date);
+  letter-spacing: 0.02em;
+  color: var(--face-muted);
+  margin-bottom: calc(var(--space-8) * -0.5);
+}
+
+.quote__law {
+  font-weight: 500;
 }
 
 .quote--display .quote__tools {
