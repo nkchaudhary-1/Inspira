@@ -6,10 +6,11 @@
    type families; components only reference semantic/component tokens.
    ========================================================================== */
 
-/* Bundled so the thin clock looks identical on every OS, offline. SIL OFL 1.1. */
+/* Inter with its optical-size axis: text sizes get Inter Text, large sizes get
+   Inter Display. Bundled so the clock looks identical on every OS, offline. SIL OFL 1.1. */
 @font-face {
   font-family: 'Inter Variable';
-  src: url('../fonts/InterVariable-latin.woff2') format('woff2');
+  src: url('../fonts/InterVariable-opsz-latin.woff2') format('woff2');
   font-weight: 100 900;
   font-style: normal;
   font-display: block;
@@ -88,6 +89,7 @@
   /* ---- Layer 3 · component tokens ---- */
   --clock-size: clamp(88px, 14vw, 184px);
   --clock-weight: 200;
+  --display-opsz: 'opsz' 32; /* Inter Display cut */
   --clock-tracking: -0.045em;
   --quote-hero-size: clamp(1rem, 1.5vw, 1.25rem);
   --quote-feature-size: clamp(1.75rem, 3.6vw, 3rem);

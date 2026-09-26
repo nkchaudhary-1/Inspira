@@ -158,6 +158,14 @@
 
 /* ---------- clock ---------- */
 
+.clock,
+.focus__timer,
+.daynav__date,
+.weather__temp,
+.project__name {
+  font-variation-settings: var(--display-opsz);
+}
+
 .clock {
   display: inline-flex;
   align-items: flex-start;
