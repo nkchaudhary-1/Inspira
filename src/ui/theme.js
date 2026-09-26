@@ -4,6 +4,7 @@
 import * as store from '../core/store.js';
 import { daypart } from '../core/dates.js';
 import { describe } from '../services/weather.js';
+import { applyBackdrop, backdrop } from './backdrop.js';
 
 const media = window.matchMedia('(prefers-color-scheme: dark)');
 const root = document.documentElement;
@@ -15,9 +16,11 @@ export function applyTheme() {
   const w = store.getDevice().weather;
   const sky = w ? describe(w.code).group : 'clear';
   if (root.dataset.sky !== sky) root.dataset.sky = sky;
-  // Cache for first paint on the next tab (see inline script in newtab.html).
+  applyBackdrop();
+  // Cache for first paint on the next tab (see src/paint.js).
+  const { texture, grid } = backdrop();
   try {
-    localStorage.setItem('inspira.paint', JSON.stringify({ theme, sky }));
+    localStorage.setItem('inspira.paint', JSON.stringify({ theme, sky, texture, grid }));
   } catch {
     /* ignore */
   }

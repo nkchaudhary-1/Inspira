@@ -11,6 +11,16 @@ Inspira replaces Chrome's New Tab page with a calm clock, daily inspiration and 
 
 ---
 
+## Theme
+
+Settings → **Theme** controls the look behind every mode:
+
+- **Mode:** Auto / Light / Dark, built on a "Shades of gray" palette: `black-100…60` (#0A0E15 → #667085) and `white-100…60` (#FFFFFF → #BFC6D4). Text roles: header = white-100 / black-100, description = white-80 / black-80.
+- **Presets:** Minimal, Grain, Paper, Dot grid, Blueprint, Aurora, Mesh and Waves.
+- **Texture:** none / grain / paper / static, with an amount slider.
+- **Grid:** none / dots / lines / blueprint, with size and opacity sliders. It fades out at the edges.
+- **Shader:** none / aurora / mesh / waves, a WebGL fragment shader tinted with the palette, with intensity and speed sliders. It renders at half resolution, is capped at 30fps, pauses in hidden tabs and stays still under reduced motion.
+
 ## Run it locally
 
 1. Open `chrome://extensions` and turn on **Developer mode**.
@@ -62,6 +72,7 @@ src/
     calendarPage.js    Calendar mode: day workspace / week / month grid / year
     focus.js           Focus mode: pomodoro cycle + dot-matrix display
     dock.js            hidden macOS-style dock
+    backdrop.js        theme texture / grid (CSS) + WebGL shader
   data/quotes.js       100 original lines across 5 categories
   styles/              tokens.css → base.css → app.css
 ```

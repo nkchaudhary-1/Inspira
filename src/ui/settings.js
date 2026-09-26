@@ -8,6 +8,7 @@ import { refreshCalendar, clearCalendar } from '../services/calendar.js';
 import { h, icon, reactive } from './dom.js';
 import { openSheet, toast } from './overlay.js';
 import { openLocation } from './hero.js';
+import { PRESETS, backdrop, setBackdrop, activePreset } from './backdrop.js';
 
 export function openSettings() {
   const body = reactive(h('div', { class: 'settings' }), render);
@@ -17,7 +18,7 @@ export function openSettings() {
 function render() {
   const p = store.prefs();
   const d = store.getDevice();
-  return [account(d), appearance(p), inspiration(p), weatherSection(d, p), focusSection(p), dataSection()];
+  return [account(d), themeSection(p), appearance(p), inspiration(p), weatherSection(d, p), focusSection(p), dataSection()];
 }
 
 function section(title, ...children) {
@@ -132,11 +133,35 @@ function account(d) {
   );
 }
 
-function appearance(p) {
+/** Range slider with a live value readout. */
+function slider({ label, value, min, max, step, format, onChange }) {
+  const out = h('output', { class: 'slider__value' }, format(value));
+  const input = h('input', {
+    type: 'range',
+    class: 'slider__input',
+    min: String(min),
+    max: String(max),
+    step: String(step),
+    value: String(value),
+    'aria-label': label,
+    onInput: (e) => {
+      const v = Number(e.target.value);
+      out.textContent = format(v);
+      onChange(v);
+    },
+  });
+  return h('div', { class: 'slider' }, h('span', { class: 'slider__label' }, label), input, out);
+}
+
+const pct = (v) => `${Math.round(v * 100)}%`;
+
+function themeSection(p) {
+  const b = backdrop();
+  const current = activePreset();
   return section(
-    'Appearance',
+    'Theme',
     row(
-      'Theme',
+      'Mode',
       segmented(
         [
           ['system', 'Auto'],
@@ -145,9 +170,92 @@ function appearance(p) {
         ],
         p.theme,
         (v) => store.setPrefs({ theme: v }),
-        'Theme',
+        'Colour mode',
       ),
     ),
+    h(
+      'div',
+      { class: 'presets', role: 'radiogroup', 'aria-label': 'Theme presets' },
+      PRESETS.map((preset) =>
+        h(
+          'button',
+          {
+            type: 'button',
+            role: 'radio',
+            'aria-checked': String(current === preset.id),
+            class: ['preset', current === preset.id && 'is-active'],
+            onClick: () => setBackdrop(preset.value),
+          },
+          h('span', { class: `preset__swatch preset__swatch--${preset.id}`, 'aria-hidden': 'true' }),
+          h('span', { class: 'preset__label' }, preset.label),
+        ),
+      ),
+    ),
+    !current && h('p', { class: 'fineprint' }, 'Custom theme — pick a preset to reset.'),
+
+    h('h4', { class: 'settings__sub' }, 'Texture'),
+    segmented(
+      [
+        ['none', 'None'],
+        ['grain', 'Grain'],
+        ['paper', 'Paper'],
+        ['static', 'Static'],
+      ],
+      b.texture,
+      (v) => setBackdrop({ texture: v }),
+      'Texture',
+    ),
+    b.texture !== 'none' &&
+      slider({ label: 'Amount', value: b.textureAmount, min: 0.05, max: 1, step: 0.05, format: pct, onChange: (v) => setBackdrop({ textureAmount: v }) }),
+
+    h('h4', { class: 'settings__sub' }, 'Grid'),
+    segmented(
+      [
+        ['none', 'None'],
+        ['dots', 'Dots'],
+        ['lines', 'Lines'],
+        ['blueprint', 'Blueprint'],
+      ],
+      b.grid,
+      (v) => setBackdrop({ grid: v }),
+      'Grid',
+    ),
+    b.grid !== 'none' && [
+      slider({ label: 'Size', value: b.gridSize, min: 12, max: 96, step: 4, format: (v) => `${v}px`, onChange: (v) => setBackdrop({ gridSize: v }) }),
+      slider({ label: 'Opacity', value: b.gridOpacity, min: 0.1, max: 1, step: 0.05, format: pct, onChange: (v) => setBackdrop({ gridOpacity: v }) }),
+    ],
+
+    h('h4', { class: 'settings__sub' }, 'Shader'),
+    segmented(
+      [
+        ['none', 'None'],
+        ['aurora', 'Aurora'],
+        ['mesh', 'Mesh'],
+        ['waves', 'Waves'],
+      ],
+      b.shader,
+      (v) => setBackdrop({ shader: v }),
+      'Shader',
+    ),
+    b.shader !== 'none' && [
+      slider({ label: 'Intensity', value: b.shaderIntensity, min: 0.1, max: 1, step: 0.05, format: pct, onChange: (v) => setBackdrop({ shaderIntensity: v }) }),
+      slider({
+        label: 'Speed',
+        value: b.shaderSpeed,
+        min: 0,
+        max: 1,
+        step: 0.05,
+        format: (v) => (v === 0 ? 'Still' : pct(v)),
+        onChange: (v) => setBackdrop({ shaderSpeed: v }),
+      }),
+      h('p', { class: 'fineprint' }, 'Animated shaders pause when the tab is hidden and stay still if your system asks for reduced motion.'),
+    ],
+  );
+}
+
+function appearance(p) {
+  return section(
+    'Appearance',
     row(
       'Clock',
       segmented(

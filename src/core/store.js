@@ -20,6 +20,7 @@ export const DEFAULT_PREFS = {
   units: 'c',
   name: '',
   focusMinutes: 25,
+  backdrop: null, // theme texture / grid / shader — see ui/backdrop.js
   shortBreakMinutes: 5,
   longBreakMinutes: 15,
   weekStart: 1,

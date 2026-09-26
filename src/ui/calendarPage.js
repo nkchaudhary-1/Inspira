@@ -171,7 +171,13 @@ function monthView(d) {
         {
           type: 'button',
           role: 'gridcell',
-          class: ['month__cell', day.getMonth() !== month && 'is-outside', key === today && 'is-today', key === d && 'is-selected'],
+          class: [
+            'month__cell',
+            day.getMonth() !== month && 'is-outside',
+            key === today && 'is-today',
+            key === d && 'is-selected',
+            (items.length > 0 || notes > 0) && 'has-items',
+          ],
           'aria-label': `${formatFull(key)}${items.length ? `, ${items.length} items` : ''}`,
           dataset: { date: key },
           tabindex: key === d ? '0' : '-1',

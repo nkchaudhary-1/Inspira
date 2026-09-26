@@ -2,8 +2,8 @@
    Inspira design tokens
    Layer 1: primitives (raw values)  →  Layer 2: semantic (what it's for)
    →  Layer 3: component tokens (clock face, quote, dock…).
-   To re-skin toward the original Inspira identity, change Layer 1 + the
-   type families; components only reference semantic/component tokens.
+   Palette: "Shades of gray" (black-100…60 / white-100…60). To re-skin, change
+   Layer 1 + the type families; components only reference semantic tokens.
    ========================================================================== */
 
 /* Inter with its optical-size axis: text sizes get Inter Text, large sizes get
@@ -26,25 +26,20 @@
 }
 
 :root {
-  /* ---- Layer 1 · primitives ---- */
-  --sand-0: #fbf9f5;
-  --sand-50: #f5f2ec;
-  --sand-100: #ece7de;
-  --sand-200: #ddd6ca;
-  --sand-400: #a79f92;
-  --sand-600: #6f685e;
-  --sand-800: #3b3731;
-  --sand-900: #211f1c;
+  /* ---- Layer 1 · primitives — "Shades of gray" palette ---- */
+  /* Black & White scales; contrast ratios from the palette sheet. */
+  --black-100: #0a0e15; /* AAA 19:1 */
+  --black-90: #212631; /* AAA 15:1 */
+  --black-80: #373f4e; /* AAA 10:1 */
+  --black-70: #4e576a; /* AAA 7:1 */
+  --black-60: #667085; /* AA 5:1 */
+  --white-100: #ffffff; /* AAA 19:1 */
+  --white-90: #f0f1f5; /* AAA 17:1 */
+  --white-80: #e0e4eb; /* AAA 15:1 */
+  --white-70: #d1d6e0; /* AAA 13:1 */
+  --white-60: #bfc6d4; /* AA 11:1 */
 
-  --ink-0: #eeeae4;
-  --ink-200: #bdb8b0;
-  --ink-400: #8a867f;
-  --ink-600: #5b5852;
-  --ink-800: #25252a;
-  --ink-850: #1c1c21;
-  --ink-900: #141418;
-  --ink-950: #0d0d10;
-
+  /* Semantic accents kept for meaning only (priority, danger). */
   --amber-400: #d9a066;
   --amber-500: #c98b4f;
   --amber-600: #a86f38;
@@ -122,144 +117,111 @@
 }
 
 /* ---- Layer 2 · semantic (light) ---- */
+/* Text roles from the palette: header = black-100, description = black-80. */
 :root,
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: var(--sand-50);
-  --text: var(--sand-900);
-  --text-2: var(--sand-600);
-  --text-3: var(--sand-400);
-  --line: color-mix(in srgb, var(--sand-900) 9%, transparent);
-  --line-strong: color-mix(in srgb, var(--sand-900) 16%, transparent);
-  --surface: color-mix(in srgb, #ffffff 62%, transparent);
-  --surface-solid: var(--sand-0);
-  --surface-hover: color-mix(in srgb, var(--sand-900) 5%, transparent);
-  --accent: var(--amber-600);
-  --accent-soft: color-mix(in srgb, var(--amber-500) 16%, transparent);
+  --bg: var(--white-90);
+  --text: var(--black-100); /* d.header (reversed) */
+  --text-2: var(--black-80); /* d.description (reversed) */
+  --text-3: var(--black-60);
+  --line: color-mix(in srgb, var(--black-100) 8%, transparent);
+  --line-strong: color-mix(in srgb, var(--black-100) 15%, transparent);
+  --surface: color-mix(in srgb, var(--white-100) 70%, transparent);
+  --surface-solid: var(--white-100);
+  --surface-hover: color-mix(in srgb, var(--black-100) 5%, transparent);
+  --accent: var(--black-100);
+  --accent-soft: color-mix(in srgb, var(--black-100) 7%, transparent);
   --danger: #b4534c;
-  --focus-ring: color-mix(in srgb, var(--amber-500) 55%, transparent);
-  --shadow-pop: 0 1px 1px rgb(40 30 20 / 4%), 0 12px 32px -8px rgb(40 30 20 / 18%);
-  --scrim: rgb(30 25 20 / 18%);
-  /* Figma "Home" screens — light counterparts */
-  --cell-active: #e8e5df;
-  --text-soft: #4a4640;
-  --label: #8b857b;
-  --check-bg: #ffffff;
-  --check-border: #c9c2b6;
-  --matrix-bezel: #fbfaf7;
-  --matrix-card: #ebe8e2;
-  --matrix-edge: rgb(0 0 0 / 5%);
-  --dot-off: rgb(0 0 0 / 7%);
-  --dot-on: #211f1c;
+  --focus-ring: color-mix(in srgb, var(--black-70) 55%, transparent);
+  --shadow-pop: 0 1px 1px rgb(10 14 21 / 4%), 0 12px 32px -8px rgb(10 14 21 / 16%);
+  --scrim: rgb(10 14 21 / 22%);
+  /* Figma "Home" screens */
+  --cell-active: var(--white-80);
+  --text-soft: var(--black-80);
+  --label: var(--black-60);
+  --check-bg: var(--white-100);
+  --check-border: var(--white-60);
+  --matrix-bezel: var(--white-100);
+  --matrix-card: var(--white-90);
+  --matrix-edge: color-mix(in srgb, var(--black-100) 6%, transparent);
+  --dot-off: color-mix(in srgb, var(--black-100) 8%, transparent);
+  --dot-on: var(--black-100);
   --dot-glow: none;
-  --pill-bg: rgb(0 0 0 / 4%);
-  --pill-border: rgb(0 0 0 / 7%);
-  --tabs-bg: rgb(0 0 0 / 5%);
-  --tab-active: #ffffff;
-  --outline: rgb(0 0 0 / 20%);
+  --pill-bg: color-mix(in srgb, var(--black-100) 5%, transparent);
+  --pill-border: color-mix(in srgb, var(--black-100) 8%, transparent);
+  --tabs-bg: color-mix(in srgb, var(--black-100) 6%, transparent);
+  --tab-active: var(--white-100);
+  --outline: color-mix(in srgb, var(--black-100) 20%, transparent);
   --grain-opacity: 0.05;
 }
 
 /* ---- Layer 2 · semantic (dark) ---- */
+/* Text roles from the palette: header = white-100, description = white-80. */
 :root[data-theme='dark'] {
-  /* Dark ground is pure black, per the Figma Clock frame. */
   color-scheme: dark;
-  --bg: #000000;
-  --text: #ffffff;
-  --text-2: var(--ink-200);
-  --text-3: var(--ink-400);
-  --line: color-mix(in srgb, #ffffff 8%, transparent);
-  --line-strong: color-mix(in srgb, #ffffff 15%, transparent);
-  --surface: color-mix(in srgb, var(--ink-800) 55%, transparent);
-  --surface-solid: var(--ink-850);
-  --surface-hover: color-mix(in srgb, #ffffff 6%, transparent);
-  --accent: var(--amber-400);
-  --accent-soft: color-mix(in srgb, var(--amber-400) 16%, transparent);
+  --bg: var(--black-100);
+  --text: var(--white-100); /* d.header */
+  --text-2: var(--white-80); /* d.description */
+  --text-3: var(--black-60);
+  --line: color-mix(in srgb, var(--white-100) 8%, transparent);
+  --line-strong: color-mix(in srgb, var(--white-100) 15%, transparent);
+  --surface: color-mix(in srgb, var(--black-90) 72%, transparent);
+  --surface-solid: var(--black-90);
+  --surface-hover: color-mix(in srgb, var(--white-100) 6%, transparent);
+  --accent: var(--white-100);
+  --accent-soft: color-mix(in srgb, var(--white-100) 9%, transparent);
   --danger: #e08a82;
-  --focus-ring: color-mix(in srgb, var(--amber-400) 55%, transparent);
-  --shadow-pop: 0 1px 1px rgb(0 0 0 / 30%), 0 16px 40px -8px rgb(0 0 0 / 55%);
-  --scrim: rgb(0 0 0 / 40%);
+  --focus-ring: color-mix(in srgb, var(--white-60) 55%, transparent);
+  --shadow-pop: 0 1px 1px rgb(0 0 0 / 30%), 0 16px 40px -8px rgb(0 0 0 / 60%);
+  --scrim: rgb(0 0 0 / 45%);
   /* Figma "Home" screens */
-  --cell-active: #2e2e38;
-  --text-soft: #d9d9e0;
-  --label: #8c8f9e;
-  --check-bg: #292933;
-  --check-border: #4d4d5c;
-  --matrix-bezel: #000000;
-  --matrix-card: #161719;
-  --matrix-edge: rgb(255 255 255 / 4%);
-  --dot-off: rgb(255 255 255 / 6%);
-  --dot-on: #ffffff;
+  --cell-active: var(--black-90);
+  --text-soft: var(--white-70);
+  --label: #8a93a6; /* between black-60 and white-60 for 10px labels (AA) */
+  --check-bg: var(--black-90);
+  --check-border: var(--black-70);
+  --matrix-bezel: var(--black-100);
+  --matrix-card: #151a23; /* black-100 → black-90 */
+  --matrix-edge: color-mix(in srgb, var(--white-100) 5%, transparent);
+  --dot-off: color-mix(in srgb, var(--white-100) 7%, transparent);
+  --dot-on: var(--white-100);
   --dot-glow: 0 0 6px rgb(255 255 255 / 55%);
-  --pill-bg: rgb(255 255 255 / 5%);
-  --pill-border: rgb(255 255 255 / 7%);
-  --tabs-bg: rgb(255 255 255 / 8%);
-  --tab-active: rgb(255 255 255 / 15%);
-  --outline: rgb(255 255 255 / 25%);
+  --pill-bg: color-mix(in srgb, var(--white-100) 5%, transparent);
+  --pill-border: color-mix(in srgb, var(--white-100) 8%, transparent);
+  --tabs-bg: color-mix(in srgb, var(--white-100) 8%, transparent);
+  --tab-active: color-mix(in srgb, var(--white-100) 15%, transparent);
+  --outline: color-mix(in srgb, var(--white-100) 25%, transparent);
   --grain-opacity: 0.07;
 }
 
-/* ---- Atmosphere: sky gradient per daypart × theme ---- */
+/* ---- Atmosphere: palette ground + a faint daypart glow ---- */
 :root[data-theme='light'] {
-  --sky-a: #f3efe8;
-  --sky-b: #e9ecef;
-  --sky-glow: rgb(255 214 170 / 30%);
+  --sky-a: var(--white-90);
+  --sky-b: var(--white-80);
+  --sky-glow: rgb(255 255 255 / 60%);
 }
-:root[data-theme='light'][data-daypart='dawn'] {
-  --sky-a: #f6e9df;
-  --sky-b: #ebeaf2;
-  --sky-glow: rgb(255 190 160 / 38%);
-}
-:root[data-theme='light'][data-daypart='morning'] {
-  --sky-a: #f4f1ea;
-  --sky-b: #e6eef3;
-  --sky-glow: rgb(255 226 170 / 34%);
-}
-:root[data-theme='light'][data-daypart='afternoon'] {
-  --sky-a: #f3f1ec;
-  --sky-b: #e8ecef;
-  --sky-glow: rgb(255 240 210 / 30%);
-}
+:root[data-theme='light'][data-daypart='dawn'],
 :root[data-theme='light'][data-daypart='evening'] {
-  --sky-a: #f4e8df;
-  --sky-b: #e8e5ee;
-  --sky-glow: rgb(250 180 150 / 32%);
+  --sky-glow: rgb(255 255 255 / 70%);
 }
 :root[data-theme='light'][data-daypart='night'] {
-  --sky-a: #eceae8;
-  --sky-b: #e3e5ec;
-  --sky-glow: rgb(190 200 240 / 26%);
+  --sky-b: var(--white-70);
+  --sky-glow: rgb(240 241 245 / 60%);
 }
 
 :root[data-theme='dark'] {
-  --sky-a: #000000;
-  --sky-b: #050506;
-  --sky-glow: rgb(120 110 200 / 3%);
+  --sky-a: var(--black-100);
+  --sky-b: #0d121b;
+  --sky-glow: rgb(102 112 133 / 6%);
 }
-:root[data-theme='dark'][data-daypart='dawn'] {
-  --sky-a: #000000;
-  --sky-b: #050506;
-  --sky-glow: rgb(230 140 120 / 3%);
-}
-:root[data-theme='dark'][data-daypart='morning'] {
-  --sky-a: #000000;
-  --sky-b: #050506;
-  --sky-glow: rgb(230 190 130 / 3%);
-}
-:root[data-theme='dark'][data-daypart='afternoon'] {
-  --sky-a: #000000;
-  --sky-b: #050506;
-  --sky-glow: rgb(230 210 170 / 3%);
-}
+:root[data-theme='dark'][data-daypart='dawn'],
 :root[data-theme='dark'][data-daypart='evening'] {
-  --sky-a: #000000;
-  --sky-b: #050506;
-  --sky-glow: rgb(230 130 110 / 3%);
+  --sky-glow: rgb(102 112 133 / 7%);
 }
 :root[data-theme='dark'][data-daypart='night'] {
-  --sky-a: #000000;
-  --sky-b: #050506;
-  --sky-glow: rgb(110 120 220 / 3%);
+  --sky-b: var(--black-100);
+  --sky-glow: rgb(102 112 133 / 5%);
 }
 
 /* Weather tints are a thin wash on top — atmosphere, not illustration. */

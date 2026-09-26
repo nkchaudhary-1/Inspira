@@ -60,8 +60,10 @@ export function dock() {
   const open = () => {
     clearTimeout(closeTimer);
     if (wrap.classList.contains('is-open')) return;
-    wrap.classList.add('is-open');
+    wrap.classList.add('is-open', 'is-opening');
     handle.setAttribute('aria-expanded', 'true');
+    // The dock appears where the handle was: ignore the click that opened it.
+    setTimeout(() => wrap.classList.remove('is-opening'), 350);
   };
   const close = () => {
     clearTimeout(closeTimer);
@@ -79,9 +81,11 @@ export function dock() {
   };
 
   // Hover: handle or bottom edge opens; leaving the dock closes after a beat.
-  handle.addEventListener('pointerenter', open);
-  edge.addEventListener('pointerenter', open);
-  nav.addEventListener('pointerenter', open);
+  // Hover-to-open is for mice only; touch opens with a tap on the handle.
+  const hoverOpen = (e) => e.pointerType === 'mouse' && open();
+  handle.addEventListener('pointerenter', hoverOpen);
+  edge.addEventListener('pointerenter', hoverOpen);
+  nav.addEventListener('pointerenter', hoverOpen);
   wrap.addEventListener('pointerleave', closeSoon);
 
   // Touch / click / keyboard.

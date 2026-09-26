@@ -7,6 +7,7 @@
 .sky {
   position: fixed;
   inset: 0;
+  overflow: hidden;
   z-index: -1;
   background: linear-gradient(165deg, var(--sky-a) 0%, var(--sky-b) 100%);
   transition: background var(--dur-slow) var(--ease-in-out);
@@ -29,12 +30,83 @@
   animation: drift var(--dur-ambient) var(--ease-in-out) infinite alternate;
 }
 
+.sky__shader {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.sky__shader[hidden] {
+  display: none;
+}
+
+/* ---- Theme · texture (Settings → Theme). Amount 0–1 scales opacity. ---- */
 .sky__grain {
   position: absolute;
   inset: 0;
-  opacity: var(--grain-opacity);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: calc(var(--grain-opacity) * var(--texture-amount, 0.4) * 2.5);
   pointer-events: none;
+}
+
+:root[data-texture='none'] .sky__grain {
+  display: none;
+}
+
+:root[data-texture='grain'] .sky__grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Paper: softer, larger fibres. */
+:root[data-texture='paper'] .sky__grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.035 .6' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1.4 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Static: coarse, high-contrast noise like an old screen. */
+:root[data-texture='static'] .sky__grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='turbulence' baseFrequency='1.4' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  image-rendering: pixelated;
+}
+
+/* ---- Theme · grid. Size + opacity come from Settings. Fades at the edges. ---- */
+.sky__grid {
+  --grid-color: color-mix(in srgb, var(--text) var(--grid-alpha, 9%), transparent);
+  --grid-major: color-mix(in srgb, var(--text) calc(var(--grid-alpha, 9%) * 1.8), transparent);
+  position: absolute;
+  inset: 0;
+  display: none;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 80% 75% at 50% 45%, #000 35%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 75% at 50% 45%, #000 35%, transparent 100%);
+}
+
+:root[data-grid='dots'] .sky__grid {
+  display: block;
+  background-image: radial-gradient(circle, var(--grid-major) 1.2px, transparent 1.6px);
+  background-size: var(--grid-size) var(--grid-size);
+  background-position: center;
+}
+
+:root[data-grid='lines'] .sky__grid {
+  display: block;
+  background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  background-position: center;
+}
+
+/* Blueprint: fine lines plus a stronger line every 4 cells. */
+:root[data-grid='blueprint'] .sky__grid {
+  display: block;
+  background-image:
+    linear-gradient(to right, var(--grid-major) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-color) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+  background-size:
+    calc(var(--grid-size) * 4) calc(var(--grid-size) * 4),
+    calc(var(--grid-size) * 4) calc(var(--grid-size) * 4),
+    var(--grid-size) var(--grid-size),
+    var(--grid-size) var(--grid-size);
+  background-position: center;
 }
 
 @keyframes drift {
@@ -541,6 +613,10 @@
     opacity 180ms var(--ease-out),
     transform 320ms var(--ease-out),
     visibility 0s;
+}
+
+.dock-wrap.is-opening .dock {
+  pointer-events: none;
 }
 
 .dock-wrap.is-open .dock-handle {
@@ -1528,6 +1604,8 @@ body:has(.dock-wrap.is-open) .hint,
 
 .pomodoro {
   flex: 1;
+  align-self: stretch;
+  min-width: 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -2544,6 +2622,169 @@ body:has(.dock-wrap.is-open) .hint,
   color: var(--text-2);
 }
 
+/* ---------- Settings · Theme ---------- */
+
+.settings__sub {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.settings__section .segmented {
+  justify-self: start;
+  align-self: flex-start;
+  flex-wrap: wrap;
+}
+
+.presets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.preset {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  text-align: left;
+  transition:
+    border-color var(--dur-fast),
+    background var(--dur-fast);
+}
+
+.preset:hover {
+  background: var(--surface-hover);
+}
+
+.preset.is-active {
+  border-color: var(--text);
+}
+
+.preset__label {
+  font-size: var(--text-xs);
+  color: var(--text-2);
+  padding: 0 2px 2px;
+}
+
+.preset.is-active .preset__label {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Swatches: tiny static previews of each preset in the current mode. */
+.preset__swatch {
+  --sw-a: var(--sky-a);
+  --sw-b: var(--sky-b);
+  --sw-line: color-mix(in srgb, var(--text) 16%, transparent);
+  display: block;
+  height: 44px;
+  border-radius: 6px;
+  background: linear-gradient(165deg, var(--sw-a), var(--sw-b));
+  border: 1px solid var(--line);
+}
+
+.preset__swatch--grain,
+.preset__swatch--paper {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E"),
+    linear-gradient(165deg, var(--sw-a), var(--sw-b));
+}
+
+.preset__swatch--paper {
+  background-size:
+    160px 160px,
+    auto;
+  filter: contrast(0.9);
+}
+
+.preset__swatch--dots {
+  background-image: radial-gradient(circle, var(--sw-line) 1px, transparent 1.4px), linear-gradient(165deg, var(--sw-a), var(--sw-b));
+  background-size:
+    8px 8px,
+    auto;
+}
+
+.preset__swatch--blueprint {
+  background-image:
+    linear-gradient(to right, var(--sw-line) 1px, transparent 1px), linear-gradient(to bottom, var(--sw-line) 1px, transparent 1px),
+    linear-gradient(165deg, var(--sw-a), var(--sw-b));
+  background-size:
+    10px 10px,
+    10px 10px,
+    auto;
+}
+
+:root[data-theme='dark'] .preset__swatch--aurora {
+  background: radial-gradient(120% 60% at 40% 30%, var(--black-60), transparent 70%), var(--black-100);
+}
+:root[data-theme='dark'] .preset__swatch--mesh {
+  background:
+    radial-gradient(50% 60% at 25% 35%, var(--black-70), transparent 70%), radial-gradient(45% 55% at 75% 70%, var(--black-80), transparent 70%),
+    var(--black-100);
+}
+:root[data-theme='dark'] .preset__swatch--waves {
+  background: repeating-linear-gradient(170deg, var(--black-100) 0 6px, var(--black-80) 6px 8px);
+}
+:root[data-theme='light'] .preset__swatch--aurora {
+  background: radial-gradient(120% 60% at 40% 30%, var(--white-100), transparent 70%), var(--white-70);
+}
+:root[data-theme='light'] .preset__swatch--mesh {
+  background:
+    radial-gradient(50% 60% at 25% 35%, var(--white-100), transparent 70%), radial-gradient(45% 55% at 75% 70%, var(--white-60), transparent 70%),
+    var(--white-90);
+}
+:root[data-theme='light'] .preset__swatch--waves {
+  background: repeating-linear-gradient(170deg, var(--white-90) 0 6px, var(--white-60) 6px 8px);
+}
+
+.slider {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.slider__label {
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+
+.slider__value {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.slider__input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--line-strong);
+  outline: none;
+}
+
+.slider__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 2px solid var(--surface-solid);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+  cursor: pointer;
+}
+
+.slider__input:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
 /* ---------- toast ---------- */
 
 .toast {
@@ -2571,10 +2812,23 @@ body:has(.dock-wrap.is-open) .hint,
 
 /* ---------- responsive ---------- */
 
+/* Touch screens have no hover: keep per-item actions visible. */
+@media (hover: none) {
+  .task__more,
+  .board .task__more {
+    opacity: 1;
+  }
+
+  .quote--display .quote__tools {
+    opacity: 0.6;
+  }
+}
+
+/* Laptop / tablet landscape: task boards wrap instead of scrolling sideways. */
 @media (max-width: 1100px) {
   .board {
-    grid-template-columns: repeat(7, minmax(150px, 1fr));
-    overflow-x: auto;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    row-gap: var(--space-6);
   }
 
   .year {
@@ -2582,25 +2836,8 @@ body:has(.dock-wrap.is-open) .hint,
   }
 }
 
+/* Tablet portrait and below. */
 @media (max-width: 900px) {
-  .month__weekday,
-  .month__items {
-    display: none;
-  }
-
-  .month__cell {
-    padding: 8px;
-    align-items: center;
-  }
-
-  .year {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .pill-tabs__tab {
-    padding: 8px 14px;
-  }
-
   .cols,
   .cols--two,
   .projects {
@@ -2609,6 +2846,158 @@ body:has(.dock-wrap.is-open) .hint,
 
   .col--tasks {
     order: -1;
+  }
+
+  .page--calendar {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .month__grid {
+    grid-template-rows: none !important;
+    grid-auto-rows: minmax(64px, auto);
+  }
+
+  .month__weekday,
+  .month__items {
+    display: none;
+  }
+
+  .month__cell {
+    position: relative;
+    padding: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .month__cell.has-items::after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-soft);
+  }
+
+  .year {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pagenav {
+    row-gap: var(--space-3);
+  }
+}
+
+/* Phones. */
+@media (max-width: 600px) {
+  :root {
+    --face-pad: 20px;
+    --face-clock: 17vw;
+    --face-meridiem: 6.5vw;
+    --face-date: 15px;
+    --face-line: 19px;
+    --face-temp: 36px;
+    --quote-display: 26px;
+    --dot: 1.7vw;
+  }
+
+  .page {
+    padding-bottom: 96px;
+  }
+
+  .page__title {
+    line-height: 1.5;
+  }
+
+  .pagenav__left {
+    gap: 14px;
+  }
+
+  .pagenav__label {
+    font-size: 15px;
+  }
+
+  .tabs {
+    width: 100%;
+  }
+
+  .tabs__tab {
+    flex: 1;
+    padding: 8px 10px;
+  }
+
+  .page__body {
+    margin-top: var(--space-6);
+  }
+
+  .board {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-4);
+  }
+
+  .year {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .month__num {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .month__dow span {
+    padding-left: 0;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .pomodoro {
+    padding: calc(var(--face-pad) * 2) var(--face-pad) 96px;
+  }
+
+  .pill-tabs {
+    gap: 0;
+    padding: 4px;
+    max-width: 100%;
+  }
+
+  .pill-tabs__tab {
+    padding: 8px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .pomodoro__controls {
+    gap: 8px;
+  }
+
+  .pill-btn {
+    min-width: 0;
+    padding: 10px 20px;
+  }
+
+  .layout--quote,
+  .clockface {
+    padding-bottom: 96px;
+  }
+
+  .dock {
+    --tile: 36px;
+    gap: 2px;
+    padding: 5px 6px;
+  }
+
+  .dock__divider {
+    margin: 6px 2px;
+  }
+
+  .sheet__body {
+    padding: 0 var(--space-5) var(--space-8);
+  }
+
+  .popover--menu {
+    width: calc(100vw - 24px);
   }
 }
 

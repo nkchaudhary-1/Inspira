@@ -32,6 +32,12 @@ Figma: *Inspira 2.0 — Home — Clock / Daily Quote / Pomodoro / Tasks / Calend
 
 Navigation lives in a hidden dock. A faint ••• handle at the bottom (or the very bottom edge of the screen, like macOS auto-hide) reveals a glass dock with the five modes plus shortcuts, theme and settings; icons magnify toward the pointer. Number keys are the fast path.
 
+## Theme and responsiveness
+
+- **Palette:** "Shades of gray" (black-100…60 / white-100…60). Dark mode uses a black-100 ground and light mode a white-90 ground. The accent is monochrome; amber and rose remain only for priority and danger.
+- **Backdrop:** texture, grid and shader are independent layers, so presets are just saved combinations. Shaders are opt-in, since they cost battery on a page that's open all day.
+- **Responsive:** desktop matches the 1920 Figma frames and scales fluidly. Below 1100px the task boards wrap into a grid; below 900px Day view stacks and Month shows numbers with a dot; below 600px everything goes single-column, the dock shrinks, and touch devices always show per-item actions.
+
 ## Key decisions and tradeoffs
 
 - **Three columns, not a merged list.** The brief says not to mix scheduled / to-do / remember. They share the date and nothing else. Events are colour bars with a time column; tasks are checkboxes; notes are cards.
