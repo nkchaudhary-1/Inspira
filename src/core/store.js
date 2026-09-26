@@ -343,6 +343,14 @@ export const projectList = () => live(data.projects).sort((a, b) => a.order - b.
 export const getProject = (id) => (id && data.projects[id] && !data.projects[id].deleted ? data.projects[id] : null);
 
 /** Set of day keys that have tasks or notes (for calendar dots). */
+// Render dependencies for reactive regions (see reactive() in ui/dom.js).
+/** One day's task rows: the tasks themselves plus what a row shows (project, time format). */
+export const dayTaskDeps = (key) => [data.projects, data.prefs, ...tasksForDate(key)];
+/** Any task list that isn't scoped to a single day. */
+export const taskDeps = () => [data.tasks, data.projects, data.prefs];
+export const noteDeps = () => [data.notes, data.projects, ui.openNoteId];
+export const eventDeps = (key) => [device.calendarConnected, ui.calendarStatus, data.prefs, key ? ui.events[key] : ui.events];
+
 export function daysWithItems() {
   const days = new Set();
   for (const t of live(data.tasks)) if (t.date) days.add(t.date);

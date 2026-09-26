@@ -179,74 +179,78 @@ export function paintFocus(now) {
 // ---------- view ----------
 
 export function focusView() {
-  return reactive(h('section', { class: 'pomodoro', 'aria-label': 'Focus timer' }), () => {
-    const f = focusState();
-    const p = store.prefs();
-    const running = f.state === 'running';
-    const cycle = cycleToday(f);
-    const inCycle = cycle % LONG_EVERY;
-    const done = f.phase === 'long' && f.state === 'idle' && cycle > 0 && inCycle === 0 ? LONG_EVERY : inCycle;
+  return reactive(
+    h('section', { class: 'pomodoro', 'aria-label': 'Focus timer' }),
+    () => {
+      const f = focusState();
+      const p = store.prefs();
+      const running = f.state === 'running';
+      const cycle = cycleToday(f);
+      const inCycle = cycle % LONG_EVERY;
+      const done = f.phase === 'long' && f.state === 'idle' && cycle > 0 && inCycle === 0 ? LONG_EVERY : inCycle;
 
-    const tabs = h(
-      'div',
-      { class: 'pill-tabs', role: 'tablist', 'aria-label': 'Timer' },
-      Object.entries(PHASES).map(([id, { label, pref }]) =>
-        h(
-          'button',
-          {
-            type: 'button',
-            role: 'tab',
-            'aria-selected': String(f.phase === id),
-            class: ['pill-tabs__tab', f.phase === id && 'is-active'],
-            onClick: () => f.phase !== id && selectPhase(id),
-          },
-          `${label} ${p[pref]}m`,
-        ),
-      ),
-    );
-
-    const primaryLabel = running ? 'Pause' : f.state === 'paused' ? 'Resume' : 'Start';
-    const controls = h(
-      'div',
-      { class: 'pomodoro__controls' },
-      h('button', { type: 'button', class: 'pill-btn', onClick: resetFocus, title: 'Reset (R)' }, 'Reset'),
-      h('button', { type: 'button', class: 'pill-btn pill-btn--primary', onClick: togglePause, title: `${primaryLabel} (Space)` }, primaryLabel),
-      h('button', { type: 'button', class: 'pill-btn', onClick: skipFocus, title: 'Skip to next (S)' }, 'Skip'),
-    );
-
-    const sessions = h(
-      'div',
-      { class: 'pomodoro__sessions', title: `${cycle} focus session${cycle === 1 ? '' : 's'} today` },
-      Array.from({ length: LONG_EVERY }, (_, i) => h('i', { class: ['pomodoro__pip', i < done && 'is-done'] })),
-      h('span', null, cycle ? `${cycle} today` : 'Session 1'),
-    );
-
-    const intention = h('input', {
-      class: 'pomodoro__intention',
-      value: f.intention || '',
-      placeholder: 'What are you focusing on?',
-      'aria-label': 'Focus intention',
-      maxlength: '120',
-      id: 'focus-input',
-      onInput: (e) => setFocus({ intention: e.target.value }),
-      onKeydown: (e) => {
-        if (e.key === 'Enter' || e.key === 'Escape') e.target.blur();
-      },
-    });
-
-    return [
-      tabs,
-      h(
+      const tabs = h(
         'div',
-        { class: ['pomodoro__center', f.state === 'paused' && 'is-paused', f.phase !== 'focus' && 'is-break'] },
-        matrix(focusRemaining(Date.now())),
-        controls,
-        sessions,
-        intention,
-      ),
-      metaFooter(),
-    ];
-  });
+        { class: 'pill-tabs', role: 'tablist', 'aria-label': 'Timer' },
+        Object.entries(PHASES).map(([id, { label, pref }]) =>
+          h(
+            'button',
+            {
+              type: 'button',
+              role: 'tab',
+              'aria-selected': String(f.phase === id),
+              class: ['pill-tabs__tab', f.phase === id && 'is-active'],
+              onClick: () => f.phase !== id && selectPhase(id),
+            },
+            `${label} ${p[pref]}m`,
+          ),
+        ),
+      );
+
+      const primaryLabel = running ? 'Pause' : f.state === 'paused' ? 'Resume' : 'Start';
+      const controls = h(
+        'div',
+        { class: 'pomodoro__controls' },
+        h('button', { type: 'button', class: 'pill-btn', onClick: resetFocus, title: 'Reset (R)' }, 'Reset'),
+        h('button', { type: 'button', class: 'pill-btn pill-btn--primary', onClick: togglePause, title: `${primaryLabel} (Space)` }, primaryLabel),
+        h('button', { type: 'button', class: 'pill-btn', onClick: skipFocus, title: 'Skip to next (S)' }, 'Skip'),
+      );
+
+      const sessions = h(
+        'div',
+        { class: 'pomodoro__sessions', title: `${cycle} focus session${cycle === 1 ? '' : 's'} today` },
+        Array.from({ length: LONG_EVERY }, (_, i) => h('i', { class: ['pomodoro__pip', i < done && 'is-done'] })),
+        h('span', null, cycle ? `${cycle} today` : 'Session 1'),
+      );
+
+      const intention = h('input', {
+        class: 'pomodoro__intention',
+        value: f.intention || '',
+        placeholder: 'What are you focusing on?',
+        'aria-label': 'Focus intention',
+        maxlength: '120',
+        id: 'focus-input',
+        onInput: (e) => setFocus({ intention: e.target.value }),
+        onKeydown: (e) => {
+          if (e.key === 'Enter' || e.key === 'Escape') e.target.blur();
+        },
+      });
+
+      return [
+        tabs,
+        h(
+          'div',
+          { class: ['pomodoro__center', f.state === 'paused' && 'is-paused', f.phase !== 'focus' && 'is-break'] },
+          matrix(focusRemaining(Date.now())),
+          controls,
+          sessions,
+          intention,
+        ),
+        metaFooter(),
+      ];
+    },
+    () => [focusState(), store.prefs(), todayKey()],
+  );
 }
 
 // ---------- mini timer ----------
@@ -259,44 +263,48 @@ const RING = 2 * Math.PI * 7;
  * pauses / resumes in place. Hidden on the Focus page itself (CSS).
  */
 export function focusMini(openFocus) {
-  return reactive(h('div', { class: 'focus-mini-wrap' }), () => {
-    const f = focusState();
-    if (f.state !== 'running' && f.state !== 'paused') return null;
-    const running = f.state === 'running';
-    const phase = PHASES[f.phase]?.label || 'Focus';
-    const el = h(
-      'div',
-      { class: ['focus-mini', !running && 'is-paused', f.phase !== 'focus' && 'is-break'], role: 'group', 'aria-label': `${phase} timer` },
-      h(
-        'button',
-        {
-          type: 'button',
-          class: 'focus-mini__open',
-          title: f.intention ? `${f.intention} · open Focus (3)` : 'Open Focus (3)',
-          onClick: openFocus,
-        },
-        h('svg', { class: 'focus-mini__ring', viewBox: '0 0 18 18', 'aria-hidden': 'true' }, [
-          h('circle', { cx: '9', cy: '9', r: '7' }),
-          h('circle', { class: 'focus-mini__arc', cx: '9', cy: '9', r: '7', 'stroke-dasharray': RING.toFixed(2) }),
-        ]),
-        h('span', { class: 'focus-mini__label' }, running ? phase : 'Paused'),
-        h('span', { class: 'focus-mini__time', role: 'timer' }),
-      ),
-      h(
-        'button',
-        {
-          type: 'button',
-          class: 'focus-mini__toggle',
-          'aria-label': running ? 'Pause timer' : 'Resume timer',
-          title: running ? 'Pause' : 'Resume',
-          onClick: togglePause,
-        },
-        icon(running ? 'pause' : 'play', 14),
-      ),
-    );
-    paintMini(el, Date.now());
-    return el;
-  });
+  return reactive(
+    h('div', { class: 'focus-mini-wrap' }),
+    () => {
+      const f = focusState();
+      if (f.state !== 'running' && f.state !== 'paused') return null;
+      const running = f.state === 'running';
+      const phase = PHASES[f.phase]?.label || 'Focus';
+      const el = h(
+        'div',
+        { class: ['focus-mini', !running && 'is-paused', f.phase !== 'focus' && 'is-break'], role: 'group', 'aria-label': `${phase} timer` },
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'focus-mini__open',
+            title: f.intention ? `${f.intention} · open Focus (3)` : 'Open Focus (3)',
+            onClick: openFocus,
+          },
+          h('svg', { class: 'focus-mini__ring', viewBox: '0 0 18 18', 'aria-hidden': 'true' }, [
+            h('circle', { cx: '9', cy: '9', r: '7' }),
+            h('circle', { class: 'focus-mini__arc', cx: '9', cy: '9', r: '7', 'stroke-dasharray': RING.toFixed(2) }),
+          ]),
+          h('span', { class: 'focus-mini__label' }, running ? phase : 'Paused'),
+          h('span', { class: 'focus-mini__time', role: 'timer' }),
+        ),
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'focus-mini__toggle',
+            'aria-label': running ? 'Pause timer' : 'Resume timer',
+            title: running ? 'Pause' : 'Resume',
+            onClick: togglePause,
+          },
+          icon(running ? 'pause' : 'play', 14),
+        ),
+      );
+      paintMini(el, Date.now());
+      return el;
+    },
+    () => [focusState(), store.prefs()],
+  );
 }
 
 /** Ticker hook: keep the mini timer's countdown and ring current. */

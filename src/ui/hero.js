@@ -38,30 +38,39 @@ export function greetingLine() {
 // ---------- weather ----------
 
 export function weather(variant = 'full') {
-  return reactive(h('div', { class: `weather weather--${variant}` }), () => {
-    const { location, weather: w } = store.getDevice();
-    if (!location) {
-      return h('button', { type: 'button', class: 'weather__add', onClick: (e) => openLocation(e.currentTarget) }, icon('location', 14), 'Add weather');
-    }
-    if (!w) return h('span', { class: 'weather__place' }, location.name);
-    const { label } = describe(w.code);
-    const unit = '°';
-    const btn = h(
-      'button',
-      { type: 'button', class: 'weather__btn', title: 'Change location', onClick: (e) => openLocation(e.currentTarget) },
-      h('span', { class: 'weather__temp' }, `${convert(w.temp)}${unit}`),
-      h('span', { class: 'weather__place' }, location.name),
-    );
-    if (variant === 'inline') return [btn, h('span', { class: 'weather__label' }, label)];
-    if (variant === 'meta') return btn;
-    if (variant === 'display') {
-      return [btn, h('div', { class: 'weather__detail' }, `${label} H ${convert(w.high)}° / L ${convert(w.low)}°`)];
-    }
-    return [
-      btn,
-      h('div', { class: 'weather__detail' }, h('span', null, label), h('span', { class: 'weather__range' }, `H ${convert(w.high)}°  /  L ${convert(w.low)}°`)),
-    ];
-  });
+  return reactive(
+    h('div', { class: `weather weather--${variant}` }),
+    () => {
+      const { location, weather: w } = store.getDevice();
+      if (!location) {
+        return h('button', { type: 'button', class: 'weather__add', onClick: (e) => openLocation(e.currentTarget) }, icon('location', 14), 'Add weather');
+      }
+      if (!w) return h('span', { class: 'weather__place' }, location.name);
+      const { label } = describe(w.code);
+      const unit = '°';
+      const btn = h(
+        'button',
+        { type: 'button', class: 'weather__btn', title: 'Change location', onClick: (e) => openLocation(e.currentTarget) },
+        h('span', { class: 'weather__temp' }, `${convert(w.temp)}${unit}`),
+        h('span', { class: 'weather__place' }, location.name),
+      );
+      if (variant === 'inline') return [btn, h('span', { class: 'weather__label' }, label)];
+      if (variant === 'meta') return btn;
+      if (variant === 'display') {
+        return [btn, h('div', { class: 'weather__detail' }, `${label} H ${convert(w.high)}° / L ${convert(w.low)}°`)];
+      }
+      return [
+        btn,
+        h(
+          'div',
+          { class: 'weather__detail' },
+          h('span', null, label),
+          h('span', { class: 'weather__range' }, `H ${convert(w.high)}°  /  L ${convert(w.low)}°`),
+        ),
+      ];
+    },
+    () => [store.getDevice().location, store.getDevice().weather, store.prefs().units],
+  );
 }
 
 export function openLocation(anchor) {
@@ -152,50 +161,55 @@ export function nextQuote() {
 
 export function quote(variant = 'hero') {
   let lastText = null;
-  return reactive(h('figure', { class: `quote quote--${variant}` }), () => {
-    const q = currentQuote();
-    const fresh = q.text !== lastText;
-    lastText = q.text;
-    // Clock and Quote faces show the line plainly (Figma); others keep quotation marks.
-    const plain = variant === 'line' || variant === 'display';
-    const body = variant === 'display' ? q.text.replace(/\.$/, '') : q.text;
-    const long = body.length > 90;
-    // Laws of UX carry a name: prefix it on the Clock line, headline it on the Quote face.
-    const text = h(
-      'blockquote',
-      { class: ['quote__text', fresh && 'is-entering', long && 'is-long'] },
-      variant === 'line' && q.title && h('strong', { class: 'quote__law' }, `${q.title} · `),
-      plain ? body : `“${body}”`,
-    );
-    if (variant === 'display') {
+  return reactive(
+    h('figure', { class: `quote quote--${variant}` }),
+    () => {
+      const q = currentQuote();
+      // Fade only when the line changes in place ("Another one"), not on first render.
+      const fresh = lastText !== null && q.text !== lastText;
+      lastText = q.text;
+      // Clock and Quote faces show the line plainly (Figma); others keep quotation marks.
+      const plain = variant === 'line' || variant === 'display';
+      const body = variant === 'display' ? q.text.replace(/\.$/, '') : q.text;
+      const long = body.length > 90;
+      // Laws of UX carry a name: prefix it on the Clock line, headline it on the Quote face.
+      const text = h(
+        'blockquote',
+        { class: ['quote__text', fresh && 'is-entering', long && 'is-long'] },
+        variant === 'line' && q.title && h('strong', { class: 'quote__law' }, `${q.title} · `),
+        plain ? body : `“${body}”`,
+      );
+      if (variant === 'display') {
+        return [
+          q.title && h('div', { class: 'quote__title' }, q.title),
+          text,
+          h(
+            'div',
+            { class: 'quote__tools' },
+            h('button', { type: 'button', class: 'text-btn', onClick: (e) => openCategories(e.currentTarget) }, categoryLabel()),
+            h('span', { class: 'sep' }, '·'),
+            h('button', { type: 'button', class: 'text-btn', onClick: nextQuote, title: 'Another one (Q)' }, 'Another one'),
+            h('span', { class: 'sep' }, '·'),
+            h('button', { type: 'button', class: 'text-btn', onClick: () => copyQuote(q.title ? `${q.title} — ${q.text}` : q.text) }, 'Copy'),
+            q.url && [h('span', { class: 'sep' }, '·'), h('a', { class: 'text-btn', href: q.url, target: '_blank', rel: 'noopener' }, `Read on ${q.author} ↗`)],
+          ),
+        ];
+      }
+      if (variant !== 'feature') return text;
       return [
-        q.title && h('div', { class: 'quote__title' }, q.title),
         text,
+        h('figcaption', { class: 'quote__by' }, `— ${q.author}`),
         h(
           'div',
           { class: 'quote__tools' },
           h('button', { type: 'button', class: 'text-btn', onClick: (e) => openCategories(e.currentTarget) }, categoryLabel()),
           h('span', { class: 'sep' }, '·'),
           h('button', { type: 'button', class: 'text-btn', onClick: nextQuote, title: 'Another one (Q)' }, 'Another one'),
-          h('span', { class: 'sep' }, '·'),
-          h('button', { type: 'button', class: 'text-btn', onClick: () => copyQuote(q.title ? `${q.title} — ${q.text}` : q.text) }, 'Copy'),
-          q.url && [h('span', { class: 'sep' }, '·'), h('a', { class: 'text-btn', href: q.url, target: '_blank', rel: 'noopener' }, `Read on ${q.author} ↗`)],
         ),
       ];
-    }
-    if (variant !== 'feature') return text;
-    return [
-      text,
-      h('figcaption', { class: 'quote__by' }, `— ${q.author}`),
-      h(
-        'div',
-        { class: 'quote__tools' },
-        h('button', { type: 'button', class: 'text-btn', onClick: (e) => openCategories(e.currentTarget) }, categoryLabel()),
-        h('span', { class: 'sep' }, '·'),
-        h('button', { type: 'button', class: 'text-btn', onClick: nextQuote, title: 'Another one (Q)' }, 'Another one'),
-      ),
-    ];
-  });
+    },
+    () => [todayKey(), store.prefs().quoteCategory, store.getDevice().quoteShift],
+  );
 }
 
 function copyQuote(text) {

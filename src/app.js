@@ -16,6 +16,8 @@ import { dock } from './ui/dock.js';
 import { initShortcuts } from './ui/shortcuts.js';
 import { initTheme, applyDaypart } from './ui/theme.js';
 
+performance.mark('inspira:modules');
+
 function renderMode(mode) {
   const p = store.prefs();
   switch (mode) {
@@ -95,6 +97,7 @@ function startTicker() {
 // ---------- stage ----------
 
 let stage;
+let booted = false;
 let paint;
 let signature = '';
 const signatureOf = (mode) => {
@@ -108,6 +111,7 @@ function rerender() {
 
 async function boot() {
   await store.init();
+  performance.mark('inspira:store');
   initTheme();
 
   const app = document.getElementById('app');
@@ -122,14 +126,19 @@ async function boot() {
     signature = signatureOf(mode);
     app.dataset.mode = mode;
     const layout = renderMode(mode);
-    // Entrance motion only on a fresh paint, never on reactive re-renders.
-    layout.classList.add('is-entering');
-    setTimeout(() => layout.classList.remove('is-entering'), 1000);
+    // Entrance motion when switching views, never on reactive re-renders. The
+    // first paint of a new tab skips it so content is there the moment it opens.
+    if (booted) {
+      layout.classList.add('is-entering');
+      setTimeout(() => layout.classList.remove('is-entering'), 1000);
+    }
     stage.replaceChildren(layout);
     tick();
   };
   registerStage(paint);
   paint(store.getDevice().mode);
+  booted = true;
+  performance.mark('inspira:painted');
 
   // Layout-affecting prefs re-paint the stage.
   store.subscribe(() => {

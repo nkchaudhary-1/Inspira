@@ -84,16 +84,20 @@ function header(view) {
 function board() {
   const today = todayKey();
   const days = weekKeys(store.ui.date, store.prefs().weekStart);
-  const carry = reactive(h('div', { class: 'board__carry' }), () => {
-    const earlier = store.carriedOver(today);
-    if (!earlier.length) return null;
-    return h(
-      'div',
-      { class: 'carry' },
-      h('span', null, `${earlier.length} unfinished from earlier`),
-      h('button', { type: 'button', class: 'text-btn', onClick: () => moveTasksTo(earlier, today) }, 'Move to today'),
-    );
-  });
+  const carry = reactive(
+    h('div', { class: 'board__carry' }),
+    () => {
+      const earlier = store.carriedOver(today);
+      if (!earlier.length) return null;
+      return h(
+        'div',
+        { class: 'carry' },
+        h('span', null, `${earlier.length} unfinished from earlier`),
+        h('button', { type: 'button', class: 'text-btn', onClick: () => moveTasksTo(earlier, today) }, 'Move to today'),
+      );
+    },
+    () => [store.getData().tasks],
+  );
   return h(
     'div',
     { class: 'page__body board-wrap' },
@@ -108,10 +112,14 @@ function board() {
 
 function dayColumn(key, today) {
   const d = fromKey(key);
-  const list = reactive(h('div', { class: 'board__list' }), () => {
-    const tasks = store.tasksForDate(key);
-    return tasks.length ? taskList(tasks, { draggable: true, showProject: true }) : null;
-  });
+  const list = reactive(
+    h('div', { class: 'board__list' }),
+    () => {
+      const tasks = store.tasksForDate(key);
+      return tasks.length ? taskList(tasks, { draggable: true, showProject: true }) : null;
+    },
+    () => store.dayTaskDeps(key),
+  );
   const col = h(
     'section',
     { class: ['board__col', key === today && 'is-today', key < today && 'is-past'], 'aria-label': weekdayName(key), dataset: { date: key } },
@@ -134,15 +142,19 @@ function dayColumn(key, today) {
  */
 /** "3/10" beside the weekday once a day has tasks; highlighted when full. */
 export function dayCount(key) {
-  return reactive(h('span', { class: 'board__count' }), () => {
-    const n = store.dayTaskCount(key);
-    if (!n) return null;
-    return h(
-      'span',
-      { class: ['board__count-n', n >= store.MAX_TASKS_PER_DAY && 'is-full'], title: `${n} of ${store.MAX_TASKS_PER_DAY} tasks` },
-      `${n}/${store.MAX_TASKS_PER_DAY}`,
-    );
-  });
+  return reactive(
+    h('span', { class: 'board__count' }),
+    () => {
+      const n = store.dayTaskCount(key);
+      if (!n) return null;
+      return h(
+        'span',
+        { class: ['board__count-n', n >= store.MAX_TASKS_PER_DAY && 'is-full'], title: `${n} of ${store.MAX_TASKS_PER_DAY} tasks` },
+        `${n}/${store.MAX_TASKS_PER_DAY}`,
+      );
+    },
+    () => [store.dayTaskCount(key)],
+  );
 }
 
 export function addTask(key) {

@@ -161,49 +161,52 @@ function monthView(d) {
   // Drop a trailing week that belongs entirely to the next month.
   const weeks = monthMatrix(date.getFullYear(), month, ws).filter((week, i) => i < 5 || fromKey(week[0]).getMonth() === month);
 
-  const grid = reactive(h('div', { class: 'month__grid', role: 'grid', style: { gridTemplateRows: `repeat(${weeks.length}, minmax(0, 1fr))` } }), () =>
-    weeks.flat().map((key, i) => {
-      const day = fromKey(key);
-      const items = dayItems(key);
-      const shown = items.slice(0, MAX_ITEMS);
-      const more = items.length - shown.length;
-      const notes = store.notesForDate(key).length;
-      return h(
-        'button',
-        {
-          type: 'button',
-          role: 'gridcell',
-          class: [
-            'month__cell',
-            day.getMonth() !== month && 'is-outside',
-            key === today && 'is-today',
-            key === d && 'is-selected',
-            (items.length > 0 || notes > 0) && 'has-items',
-          ],
-          'aria-label': `${formatFull(key)}${items.length ? `, ${items.length} items` : ''}`,
-          dataset: { date: key },
-          tabindex: key === d ? '0' : '-1',
-          onClick: (e) => openDayPopover(e.currentTarget, key),
-        },
-        i < 7 && h('span', { class: 'month__weekday' }, weekdayName(key)),
-        h('span', { class: 'month__num' }, pad(day.getDate())),
-        h(
-          'span',
-          { class: 'month__items' },
-          shown.map((it) =>
-            h(
-              'span',
-              { class: ['month__item', `month__item--${it.kind}`, it.done && 'is-done'] },
-              it.kind === 'event' && h('i', { class: 'month__bar', style: it.color ? { background: it.color } : null }),
-              it.time && h('b', null, `${it.time} `),
-              it.text,
+  const grid = reactive(
+    h('div', { class: 'month__grid', role: 'grid', style: { gridTemplateRows: `repeat(${weeks.length}, minmax(0, 1fr))` } }),
+    () =>
+      weeks.flat().map((key, i) => {
+        const day = fromKey(key);
+        const items = dayItems(key);
+        const shown = items.slice(0, MAX_ITEMS);
+        const more = items.length - shown.length;
+        const notes = store.notesForDate(key).length;
+        return h(
+          'button',
+          {
+            type: 'button',
+            role: 'gridcell',
+            class: [
+              'month__cell',
+              day.getMonth() !== month && 'is-outside',
+              key === today && 'is-today',
+              key === d && 'is-selected',
+              (items.length > 0 || notes > 0) && 'has-items',
+            ],
+            'aria-label': `${formatFull(key)}${items.length ? `, ${items.length} items` : ''}`,
+            dataset: { date: key },
+            tabindex: key === d ? '0' : '-1',
+            onClick: (e) => openDayPopover(e.currentTarget, key),
+          },
+          i < 7 && h('span', { class: 'month__weekday' }, weekdayName(key)),
+          h('span', { class: 'month__num' }, pad(day.getDate())),
+          h(
+            'span',
+            { class: 'month__items' },
+            shown.map((it) =>
+              h(
+                'span',
+                { class: ['month__item', `month__item--${it.kind}`, it.done && 'is-done'] },
+                it.kind === 'event' && h('i', { class: 'month__bar', style: it.color ? { background: it.color } : null }),
+                it.time && h('b', null, `${it.time} `),
+                it.text,
+              ),
             ),
+            more > 0 && h('span', { class: 'month__more' }, `+${more} more`),
+            notes > 0 && h('span', { class: 'month__more' }, `${notes} note${notes > 1 ? 's' : ''}`),
           ),
-          more > 0 && h('span', { class: 'month__more' }, `+${more} more`),
-          notes > 0 && h('span', { class: 'month__more' }, `${notes} note${notes > 1 ? 's' : ''}`),
-        ),
-      );
-    }),
+        );
+      }),
+    () => [store.getData().tasks, store.getData().notes, store.ui.events, store.prefs()],
   );
 
   // Arrow keys move between days inside the grid; Enter opens the day.
@@ -249,32 +252,44 @@ function openDayPopover(cell, key) {
 
   // Separate reactive regions, so the always-on input keeps focus while the
   // list above it updates.
-  const events = reactive(h('div', { class: 'daypop__events' }), () => eventList(key, { compact: true }));
-  const tasks = reactive(h('div', { class: 'daypop__tasks' }), () => {
-    const list = store.tasksForDate(key);
-    return list.length ? taskList(list, { compact: true }) : h('p', { class: 'empty' }, key < todayKey() ? 'No tasks this day.' : 'Nothing planned yet.');
-  });
-  const notes = reactive(h('div', { class: 'daypop__notes' }), () => {
-    const list = store.notesForDate(key);
-    return [
-      list.map((n) =>
-        h('button', { type: 'button', class: 'daypop__note', onClick: () => toDay(n.id) }, icon('note', 14), h('span', null, n.title || 'Untitled')),
-      ),
-      h(
-        'button',
-        {
-          type: 'button',
-          class: 'daypop__note daypop__note--add',
-          onClick: () => {
-            toDay();
-            createNote({ date: key });
+  const events = reactive(
+    h('div', { class: 'daypop__events' }),
+    () => eventList(key, { compact: true }),
+    () => store.eventDeps(key),
+  );
+  const tasks = reactive(
+    h('div', { class: 'daypop__tasks' }),
+    () => {
+      const list = store.tasksForDate(key);
+      return list.length ? taskList(list, { compact: true }) : h('p', { class: 'empty' }, key < todayKey() ? 'No tasks this day.' : 'Nothing planned yet.');
+    },
+    () => store.dayTaskDeps(key),
+  );
+  const notes = reactive(
+    h('div', { class: 'daypop__notes' }),
+    () => {
+      const list = store.notesForDate(key);
+      return [
+        list.map((n) =>
+          h('button', { type: 'button', class: 'daypop__note', onClick: () => toDay(n.id) }, icon('note', 14), h('span', null, n.title || 'Untitled')),
+        ),
+        h(
+          'button',
+          {
+            type: 'button',
+            class: 'daypop__note daypop__note--add',
+            onClick: () => {
+              toDay();
+              createNote({ date: key });
+            },
           },
-        },
-        icon('plus', 14),
-        h('span', null, 'New note'),
-      ),
-    ];
-  });
+          icon('plus', 14),
+          h('span', null, 'New note'),
+        ),
+      ];
+    },
+    store.noteDeps,
+  );
 
   const content = h(
     'div',
@@ -306,28 +321,32 @@ function weekView(d) {
     { class: 'board board--calendar' },
     weekKeys(d, store.prefs().weekStart).map((key) => {
       const day = fromKey(key);
-      const content = reactive(h('div', { class: 'board__list' }), () => {
-        const events = store.ui.events[key] || [];
-        const tasks = store.tasksForDate(key);
-        return [
-          events.length > 0 &&
-            h(
-              'ul',
-              { class: 'week__events', role: 'list' },
-              events.map((ev) =>
-                h(
-                  'li',
-                  { class: 'week__event' },
-                  h('i', { class: 'month__bar', style: ev.color ? { background: ev.color } : null }),
-                  h('span', { class: 'week__time' }, ev.allDay ? 'All day' : formatTime(new Date(ev.start), h24)),
-                  h('span', { class: 'week__title' }, ev.title),
+      const content = reactive(
+        h('div', { class: 'board__list' }),
+        () => {
+          const events = store.ui.events[key] || [];
+          const tasks = store.tasksForDate(key);
+          return [
+            events.length > 0 &&
+              h(
+                'ul',
+                { class: 'week__events', role: 'list' },
+                events.map((ev) =>
+                  h(
+                    'li',
+                    { class: 'week__event' },
+                    h('i', { class: 'month__bar', style: ev.color ? { background: ev.color } : null }),
+                    h('span', { class: 'week__time' }, ev.allDay ? 'All day' : formatTime(new Date(ev.start), h24)),
+                    h('span', { class: 'week__title' }, ev.title),
+                  ),
                 ),
               ),
-            ),
-          tasks.length > 0 && taskList(tasks, { draggable: true, compact: true, showProject: false }),
-          !events.length && !tasks.length && h('p', { class: 'empty' }, '—'),
-        ];
-      });
+            tasks.length > 0 && taskList(tasks, { draggable: true, compact: true, showProject: false }),
+            !events.length && !tasks.length && h('p', { class: 'empty' }, '—'),
+          ];
+        },
+        () => [store.ui.events[key], ...store.dayTaskDeps(key)],
+      );
       return taskDropTarget(
         h(
           'section',
@@ -353,50 +372,54 @@ function yearView(d) {
   const year = fromKey(d).getFullYear();
   const ws = store.prefs().weekStart;
   const today = todayKey();
-  return reactive(h('div', { class: 'year' }), () => {
-    const busy = store.daysWithItems();
-    return Array.from({ length: 12 }, (_, m) => {
-      const first = toKey(new Date(year, m, 1));
-      return h(
-        'section',
-        { class: 'year__month' },
-        h(
-          'button',
-          {
-            type: 'button',
-            class: 'year__name',
-            onClick: () =>
-              transition(() => {
-                store.setUI({ date: first });
-                store.setDevice({ calView: 'month' });
+  return reactive(
+    h('div', { class: 'year' }),
+    () => {
+      const busy = store.daysWithItems();
+      return Array.from({ length: 12 }, (_, m) => {
+        const first = toKey(new Date(year, m, 1));
+        return h(
+          'section',
+          { class: 'year__month' },
+          h(
+            'button',
+            {
+              type: 'button',
+              class: 'year__name',
+              onClick: () =>
+                transition(() => {
+                  store.setUI({ date: first });
+                  store.setDevice({ calView: 'month' });
+                }),
+            },
+            monthName(m),
+          ),
+          h(
+            'div',
+            { class: 'year__grid' },
+            weekdayInitials(ws).map((w) => h('span', { class: 'year__dow' }, w[0])),
+            monthMatrix(year, m, ws)
+              .flat()
+              .map((key) => {
+                const inMonth = fromKey(key).getMonth() === m;
+                if (!inMonth) return h('span', { class: 'year__day is-outside' });
+                return h(
+                  'button',
+                  {
+                    type: 'button',
+                    class: ['year__day', key === today && 'is-today', busy.has(key) && 'has-items', (store.ui.events[key] || []).length && 'has-events'],
+                    'aria-label': formatFull(key),
+                    onClick: () => openDay(key),
+                  },
+                  fromKey(key).getDate(),
+                );
               }),
-          },
-          monthName(m),
-        ),
-        h(
-          'div',
-          { class: 'year__grid' },
-          weekdayInitials(ws).map((w) => h('span', { class: 'year__dow' }, w[0])),
-          monthMatrix(year, m, ws)
-            .flat()
-            .map((key) => {
-              const inMonth = fromKey(key).getMonth() === m;
-              if (!inMonth) return h('span', { class: 'year__day is-outside' });
-              return h(
-                'button',
-                {
-                  type: 'button',
-                  class: ['year__day', key === today && 'is-today', busy.has(key) && 'has-items', (store.ui.events[key] || []).length && 'has-events'],
-                  'aria-label': formatFull(key),
-                  onClick: () => openDay(key),
-                },
-                fromKey(key).getDate(),
-              );
-            }),
-        ),
-      );
-    });
-  });
+          ),
+        );
+      });
+    },
+    () => [store.getData().tasks, store.getData().notes, store.ui.events],
+  );
 }
 
 // ---------- day (the daily workspace) ----------
@@ -406,24 +429,36 @@ function column(title, reactiveBody, footer, extraClass) {
 }
 
 function dayView(date) {
-  const schedule = reactive(h('div', { class: 'col__body' }), () => eventList(date));
+  const schedule = reactive(
+    h('div', { class: 'col__body' }),
+    () => eventList(date),
+    () => store.eventDeps(date),
+  );
 
-  const tasks = reactive(h('div', { class: 'col__body' }), () => {
-    const list = store.tasksForDate(date);
-    const earlier = date === todayKey() ? store.carriedOver(date) : [];
-    return [
-      earlier.length > 0 &&
-        h(
-          'div',
-          { class: 'carry' },
-          h('span', null, `${earlier.length} unfinished from earlier`),
-          h('button', { type: 'button', class: 'text-btn', onClick: () => moveTasksTo(earlier, date) }, 'Move to today'),
-        ),
-      list.length ? taskList(list) : h('p', { class: 'empty' }, date < todayKey() ? 'No tasks this day.' : 'Nothing planned yet.'),
-    ];
-  });
+  const tasks = reactive(
+    h('div', { class: 'col__body' }),
+    () => {
+      const list = store.tasksForDate(date);
+      const earlier = date === todayKey() ? store.carriedOver(date) : [];
+      return [
+        earlier.length > 0 &&
+          h(
+            'div',
+            { class: 'carry' },
+            h('span', null, `${earlier.length} unfinished from earlier`),
+            h('button', { type: 'button', class: 'text-btn', onClick: () => moveTasksTo(earlier, date) }, 'Move to today'),
+          ),
+        list.length ? taskList(list) : h('p', { class: 'empty' }, date < todayKey() ? 'No tasks this day.' : 'Nothing planned yet.'),
+      ];
+    },
+    store.taskDeps,
+  );
 
-  const notes = reactive(h('div', { class: 'col__body' }), () => noteList(store.notesForDate(date), { empty: 'Capture a thought for this day.' }));
+  const notes = reactive(
+    h('div', { class: 'col__body' }),
+    () => noteList(store.notesForDate(date), { empty: 'Capture a thought for this day.' }),
+    store.noteDeps,
+  );
 
   return h(
     'div',

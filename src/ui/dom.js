@@ -39,20 +39,30 @@ if (typeof window !== 'undefined') {
 
 const isEditing = (el) => el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
 
+const sameDeps = (a, b) => a && a.length === b.length && a.every((v, i) => Object.is(v, b[i]));
+
 /**
  * Render `render()` into `container` now and on every store change. While the
  * user is typing inside the container, re-render is deferred until focus leaves.
+ *
+ * `deps` (optional) returns the values the region shows — store slices are
+ * replaced, never mutated, so references are enough. When they are unchanged
+ * the region is left alone instead of being rebuilt on every store change.
  */
-export function reactive(container, render) {
+export function reactive(container, render, deps) {
   let dirty = false;
+  let last = null;
   const run = () => {
     if (!container.isConnected && container.dataset.mounted) return unsubscribe();
+    const next = deps?.();
+    if (next && sameDeps(last, next)) return;
     const active = document.activeElement;
     if (active && container.contains(active) && isEditing(active)) {
       dirty = true;
       return;
     }
     dirty = false;
+    last = next;
     container.dataset.mounted = '1';
     container.replaceChildren(...[render()].flat(Infinity).filter(Boolean));
   };

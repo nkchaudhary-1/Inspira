@@ -90,12 +90,18 @@ function projectDetail(project) {
     ];
   });
 
-  const tasks = reactive(h('div', { class: 'col__body' }), () => {
-    const list = store.tasksForProject(project.id);
-    return list.length ? taskList(list, { showDate: true, showProject: false }) : h('p', { class: 'empty' }, 'No tasks yet.');
-  });
-  const notes = reactive(h('div', { class: 'col__body' }), () =>
-    noteList(store.notesForProject(project.id), { showDate: true, showProject: false, empty: 'No notes yet.' }),
+  const tasks = reactive(
+    h('div', { class: 'col__body' }),
+    () => {
+      const list = store.tasksForProject(project.id);
+      return list.length ? taskList(list, { showDate: true, showProject: false }) : h('p', { class: 'empty' }, 'No tasks yet.');
+    },
+    store.taskDeps,
+  );
+  const notes = reactive(
+    h('div', { class: 'col__body' }),
+    () => noteList(store.notesForProject(project.id), { showDate: true, showProject: false, empty: 'No notes yet.' }),
+    store.noteDeps,
   );
 
   return h(

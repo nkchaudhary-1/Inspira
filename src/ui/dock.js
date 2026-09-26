@@ -32,25 +32,39 @@ function item({ id, label, keyHint, iconName, active, badge, onClick, index = 0 
 export function dock() {
   let closeTimer = null;
 
-  const nav = reactive(h('nav', { class: 'dock', 'aria-label': 'Inspira' }), () => {
-    const mode = currentMode() || store.getDevice().mode;
-    const dark = document.documentElement.dataset.theme === 'dark';
-    const pref = store.prefs().theme;
-    return [
-      MODES.map((m, i) => item({ index: i, id: m.id, label: m.label, keyHint: m.key, iconName: m.icon, active: m.id === mode, onClick: () => setMode(m.id) })),
-      h('span', { class: 'dock__divider', 'aria-hidden': 'true' }),
-      item({ index: 5, id: 'shortcuts', label: 'Shortcuts', keyHint: '?', iconName: 'keyboard', onClick: openShortcuts }),
-      item({
-        index: 6,
-        id: 'theme',
-        label: `Theme · ${pref === 'system' ? 'Auto' : pref[0].toUpperCase() + pref.slice(1)}`,
-        keyHint: 'D',
-        iconName: dark ? 'moon' : 'sun',
-        onClick: cycleTheme,
-      }),
-      item({ index: 7, id: 'settings', label: 'Settings', keyHint: ',', iconName: 'settings', badge: store.ui.syncStatus === 'error', onClick: openSettings }),
-    ];
-  });
+  const nav = reactive(
+    h('nav', { class: 'dock', 'aria-label': 'Inspira' }),
+    () => {
+      const mode = currentMode() || store.getDevice().mode;
+      const dark = document.documentElement.dataset.theme === 'dark';
+      const pref = store.prefs().theme;
+      return [
+        MODES.map((m, i) =>
+          item({ index: i, id: m.id, label: m.label, keyHint: m.key, iconName: m.icon, active: m.id === mode, onClick: () => setMode(m.id) }),
+        ),
+        h('span', { class: 'dock__divider', 'aria-hidden': 'true' }),
+        item({ index: 5, id: 'shortcuts', label: 'Shortcuts', keyHint: '?', iconName: 'keyboard', onClick: openShortcuts }),
+        item({
+          index: 6,
+          id: 'theme',
+          label: `Theme · ${pref === 'system' ? 'Auto' : pref[0].toUpperCase() + pref.slice(1)}`,
+          keyHint: 'D',
+          iconName: dark ? 'moon' : 'sun',
+          onClick: cycleTheme,
+        }),
+        item({
+          index: 7,
+          id: 'settings',
+          label: 'Settings',
+          keyHint: ',',
+          iconName: 'settings',
+          badge: store.ui.syncStatus === 'error',
+          onClick: openSettings,
+        }),
+      ];
+    },
+    () => [currentMode() || store.getDevice().mode, document.documentElement.dataset.theme, store.prefs().theme, store.ui.syncStatus],
+  );
 
   const handle = h('button', { type: 'button', class: 'dock-handle', 'aria-label': 'Show menu', 'aria-expanded': 'false' }, icon('more', 22));
   const edge = h('div', { class: 'dock-edge', 'aria-hidden': 'true' });
