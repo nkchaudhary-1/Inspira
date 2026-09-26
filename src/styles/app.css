@@ -3518,18 +3518,8 @@ body:has(.dock-wrap.is-open) .hint,
 /* Sky picker: tall cards like the reference — name, icon, time range. */
 .sky-opts {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 92px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
-  overflow-x: auto;
-  padding: 4px 2px 8px;
-  margin: -4px -2px -8px;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-}
-
-.sky-opts::-webkit-scrollbar {
-  display: none;
 }
 
 .sky-opt {
@@ -3537,11 +3527,10 @@ body:has(.dock-wrap.is-open) .hint,
   display: grid;
   grid-template-rows: auto 1fr auto;
   justify-items: center;
-  gap: 6px;
-  height: 148px;
+  gap: 4px;
+  height: 118px;
   padding: 10px 6px 6px;
-  border-radius: 18px;
-  scroll-snap-align: start;
+  border-radius: 16px;
   color: #fff;
   background:
     radial-gradient(140% 60% at 50% 110%, var(--sk-glow) 0%, transparent 70%), linear-gradient(180deg, var(--sk-top) 0%, var(--sk-mid) 55%, var(--sk-low) 100%);
@@ -3572,6 +3561,18 @@ body:has(.dock-wrap.is-open) .hint,
   line-height: 1.2;
 }
 
+.sky-opt__now {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  font-size: 0;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 25%, transparent);
+}
+
 .sky-opt__icon {
   display: grid;
   place-items: center;
@@ -3586,7 +3587,7 @@ body:has(.dock-wrap.is-open) .hint,
   font-weight: 600;
   line-height: 1.3;
   text-align: center;
-  white-space: pre-line;
+  white-space: nowrap;
   background: color-mix(in srgb, #fff 16%, transparent);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);

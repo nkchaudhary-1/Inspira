@@ -245,36 +245,42 @@ function backgroundCard() {
   );
 }
 
-/** Sky gradients: Auto follows the time of day, or pin one. */
+/** Sky gradients: follow the time of day, or pin one phase. */
 function skyCard() {
   const b = backdrop();
   const on = b.light === 'sky';
+  const auto = on && b.sky === 'auto';
   const now = skyPhaseAt(new Date().getHours());
-  const opt = (id, label, range, iconName, phase) =>
-    h(
-      'button',
-      {
-        type: 'button',
-        role: 'radio',
-        'aria-checked': String(on && b.sky === id),
-        class: ['sky-opt', on && b.sky === id && 'is-active'],
-        dataset: { phase },
-        onClick: () => setBackdrop({ light: 'sky', sky: id }),
-      },
-      h('span', { class: 'sky-opt__name' }, label),
-      h('span', { class: 'sky-opt__icon' }, icon(iconName, 18)),
-      h('span', { class: 'sky-opt__range' }, range),
-    );
   return card(
     'Sky',
+    row(
+      'Follow the time of day',
+      toggle(auto, (v) => setBackdrop({ light: 'sky', sky: v ? 'auto' : now }), 'Follow the time of day'),
+      auto ? 'Shifts from dawn to deep night' : on ? 'Pinned — tap a sky or switch on' : 'Uses the sky as your background',
+    ),
     block(
       h(
         'div',
         { class: 'sky-opts', role: 'radiogroup', 'aria-label': 'Sky gradient' },
-        opt('auto', 'Auto', 'Follows the time', 'refresh', now),
-        SKY_PHASES.map((p) => opt(p.id, p.label, p.range.replace(' – ', '\n'), p.icon, p.id)),
+        SKY_PHASES.map((p) => {
+          const active = on && (b.sky === p.id || (auto && now === p.id));
+          return h(
+            'button',
+            {
+              type: 'button',
+              role: 'radio',
+              'aria-checked': String(active),
+              class: ['sky-opt', active && 'is-active'],
+              dataset: { phase: p.id },
+              onClick: () => setBackdrop({ light: 'sky', sky: p.id }),
+            },
+            h('span', { class: 'sky-opt__name' }, p.label),
+            h('span', { class: 'sky-opt__icon' }, icon(p.icon, 18)),
+            h('span', { class: 'sky-opt__range' }, p.range),
+            auto && now === p.id && h('span', { class: 'sky-opt__now' }, 'Now'),
+          );
+        }),
       ),
-      h('p', { class: 'settings__hint' }, on ? 'Auto shifts from dawn to deep night through the day.' : 'Pick one to use the sky as your background.'),
     ),
   );
 }
