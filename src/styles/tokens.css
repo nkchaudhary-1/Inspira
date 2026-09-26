@@ -104,6 +104,7 @@
   --face-meridiem: clamp(34px, 3.75vw, 72px); /* 72 */
   --face-date: clamp(15px, 1.25vw, 24px); /* 24 */
   --face-line: clamp(20px, 1.67vw, 32px); /* 32 */
+  --meta-time: clamp(24px, 2.4vw, 52px); /* time under the quote / timer; grows on large displays */
   --face-temp: clamp(40px, 3.33vw, 64px); /* 64 */
   --face-muted: color-mix(in srgb, var(--text) 60%, transparent); /* rgba(255,255,255,.6) */
 

@@ -1529,6 +1529,16 @@ body:has(.dock-wrap.is-open) .hint,
   margin: 0;
 }
 
+.meta-foot .clock--meta .clock__time {
+  font-size: var(--meta-time);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.meta-foot .clock--meta .clock__meridiem {
+  font-size: calc(var(--meta-time) * 0.5);
+}
+
 .weather--meta {
   flex-direction: row;
   color: inherit;
