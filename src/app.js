@@ -8,10 +8,10 @@ import { loadMonth } from './services/calendar.js';
 import { startSync } from './services/sync.js';
 import { h, icon } from './ui/dom.js';
 import { clock, fullDateLine, greetingLine, quote, weather, metaFooter } from './ui/hero.js';
-import { focusView, focusTick, focusRemaining, paintFocus, PHASES } from './ui/focus.js';
+import { focusView, focusTick, focusRemaining, paintFocus, focusMini, paintFocusMini, PHASES } from './ui/focus.js';
 import { tasksPage } from './ui/tasksPage.js';
 import { calendarPage } from './ui/calendarPage.js';
-import { registerStage, currentMode } from './ui/modes.js';
+import { registerStage, currentMode, setMode } from './ui/modes.js';
 import { dock } from './ui/dock.js';
 import { initShortcuts } from './ui/shortcuts.js';
 import { initTheme, applyDaypart } from './ui/theme.js';
@@ -68,6 +68,7 @@ function tick() {
   const f = store.getDevice().focus;
   const remaining = focusRemaining(now.getTime());
   paintFocus(now.getTime());
+  paintFocusMini(now.getTime());
   const title = f.state === 'running' ? `${formatDuration(remaining)} · ${PHASES[f.phase]?.label || 'Focus'}` : 'New Tab';
   if (document.title !== title) document.title = title;
 
@@ -111,7 +112,11 @@ async function boot() {
 
   const app = document.getElementById('app');
   stage = h('main', { class: 'stage', id: 'stage' });
-  app.replaceChildren(stage, ...dock());
+  app.replaceChildren(
+    stage,
+    focusMini(() => setMode('focus')),
+    ...dock(),
+  );
 
   paint = (mode) => {
     signature = signatureOf(mode);

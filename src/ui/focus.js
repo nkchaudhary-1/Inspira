@@ -5,7 +5,7 @@
 
 import * as store from '../core/store.js';
 import { todayKey, formatDuration } from '../core/dates.js';
-import { h, reactive } from './dom.js';
+import { h, icon, reactive } from './dom.js';
 import { metaFooter } from './hero.js';
 import { toast } from './overlay.js';
 
@@ -247,4 +247,69 @@ export function focusView() {
       metaFooter(),
     ];
   });
+}
+
+// ---------- mini timer ----------
+
+const RING = 2 * Math.PI * 7;
+
+/**
+ * A small pill that follows the running (or paused) pomodoro onto every other
+ * page: phase, progress ring and countdown. Click opens Focus; the button
+ * pauses / resumes in place. Hidden on the Focus page itself (CSS).
+ */
+export function focusMini(openFocus) {
+  return reactive(h('div', { class: 'focus-mini-wrap' }), () => {
+    const f = focusState();
+    if (f.state !== 'running' && f.state !== 'paused') return null;
+    const running = f.state === 'running';
+    const phase = PHASES[f.phase]?.label || 'Focus';
+    const el = h(
+      'div',
+      { class: ['focus-mini', !running && 'is-paused', f.phase !== 'focus' && 'is-break'], role: 'group', 'aria-label': `${phase} timer` },
+      h(
+        'button',
+        {
+          type: 'button',
+          class: 'focus-mini__open',
+          title: f.intention ? `${f.intention} · open Focus (3)` : 'Open Focus (3)',
+          onClick: openFocus,
+        },
+        h('svg', { class: 'focus-mini__ring', viewBox: '0 0 18 18', 'aria-hidden': 'true' }, [
+          h('circle', { cx: '9', cy: '9', r: '7' }),
+          h('circle', { class: 'focus-mini__arc', cx: '9', cy: '9', r: '7', 'stroke-dasharray': RING.toFixed(2) }),
+        ]),
+        h('span', { class: 'focus-mini__label' }, running ? phase : 'Paused'),
+        h('span', { class: 'focus-mini__time', role: 'timer' }),
+      ),
+      h(
+        'button',
+        {
+          type: 'button',
+          class: 'focus-mini__toggle',
+          'aria-label': running ? 'Pause timer' : 'Resume timer',
+          title: running ? 'Pause' : 'Resume',
+          onClick: togglePause,
+        },
+        icon(running ? 'pause' : 'play', 14),
+      ),
+    );
+    paintMini(el, Date.now());
+    return el;
+  });
+}
+
+/** Ticker hook: keep the mini timer's countdown and ring current. */
+export function paintFocusMini(now) {
+  const el = document.querySelector('.focus-mini');
+  if (el) paintMini(el, now);
+}
+
+function paintMini(el, now) {
+  const ms = focusRemaining(now);
+  const time = el.querySelector('.focus-mini__time');
+  const text = formatDuration(ms);
+  if (time.textContent !== text) time.textContent = text;
+  const left = Math.min(1, ms / phaseMs(focusState().phase));
+  el.querySelector('.focus-mini__arc').setAttribute('stroke-dashoffset', (RING * (1 - left)).toFixed(2));
 }
