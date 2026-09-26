@@ -10,10 +10,10 @@
 import * as store from '../core/store.js';
 
 export const DEFAULT_BACKDROP = {
-  light: 'halo', // none | halo | horizon | mesh | spotlight | sky
+  light: 'sky', // none | halo | horizon | mesh | spotlight | sky
   lightIntensity: 0.6,
   sky: 'auto', // auto (follows the time of day) | dawn | day | evening | night | late | deep
-  texture: 'none', // none | grain  (noise)
+  texture: 'grain', // none | grain  (noise)
   textureAmount: 0.3,
   grid: 'none', // none | lines | dots
   gridSize: 32,

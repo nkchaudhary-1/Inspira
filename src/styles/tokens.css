@@ -217,6 +217,9 @@
   --primary: var(--mint-l-700);
   --primary-hover: var(--mint-l-800);
   --on-primary: var(--paper-0);
+  /* filled controls: a solid by default; Sky swaps in a phase gradient */
+  --primary-fill: var(--primary);
+  --accent-fill: var(--accent);
   /* shader + preset swatches: ground, mid, highlight */
   --shader-a: var(--paper-50);
   --shader-b: #dfe8fb;
@@ -281,6 +284,8 @@
   --primary: var(--mint-500);
   --primary-hover: var(--mint-400);
   --on-primary: var(--ink-950);
+  --primary-fill: var(--primary);
+  --accent-fill: var(--accent);
   --shader-a: var(--ink-950);
   --shader-b: #152441;
   --shader-c: #1d5a47;

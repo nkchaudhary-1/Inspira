@@ -138,6 +138,95 @@
   --sk-glow: rgb(44 52 144 / 50%);
 }
 
+/* Sky accents: with the Sky background on, the accent follows the phase —
+   a solid for dots, rings and text, a gradient for filled controls. */
+:root[data-light='sky'] {
+  --accent: var(--sk-accent);
+  --accent-text: var(--sk-accent-text);
+  --accent-soft: color-mix(in srgb, var(--sk-accent) 18%, transparent);
+  --focus-ring: var(--sk-accent);
+  --primary: var(--sk-accent);
+  --on-primary: var(--sk-on);
+  --primary-fill: linear-gradient(135deg, var(--sk-accent), var(--sk-accent-2));
+  --accent-fill: var(--primary-fill);
+}
+
+/* Accent pairs per phase — dark mode: bright ends, ink text on fills. */
+:root[data-theme='dark'][data-skyphase='dawn'] {
+  --sk-accent: #f4a594;
+  --sk-accent-2: #d9708a;
+  --sk-accent-text: #f4a594;
+  --sk-on: #1a0d10;
+}
+:root[data-theme='dark'][data-skyphase='day'] {
+  --sk-accent: #86baf0;
+  --sk-accent-2: #4f85d6;
+  --sk-accent-text: #86baf0;
+  --sk-on: #06101f;
+}
+:root[data-theme='dark'][data-skyphase='evening'] {
+  --sk-accent: #f6ad62;
+  --sk-accent-2: #e37a2c;
+  --sk-accent-text: #f6ad62;
+  --sk-on: #1a0d05;
+}
+:root[data-theme='dark'][data-skyphase='night'] {
+  --sk-accent: #c6baf8;
+  --sk-accent-2: #8c86ea;
+  --sk-accent-text: #c6baf8;
+  --sk-on: #0e0c24;
+}
+:root[data-theme='dark'][data-skyphase='late'] {
+  --sk-accent: #8d9bf4;
+  --sk-accent-2: #6272e6;
+  --sk-accent-text: #97a4f5;
+  --sk-on: #070a20;
+}
+:root[data-theme='dark'][data-skyphase='deep'] {
+  --sk-accent: #a3a8f0;
+  --sk-accent-2: #6a70d4;
+  --sk-accent-text: #a3a8f0;
+  --sk-on: #06061a;
+}
+
+/* … light mode: deeper ends so white text on fills and small accent text stay AA. */
+:root[data-theme='light'][data-skyphase='dawn'] {
+  --sk-accent: #bd4c67;
+  --sk-accent-2: #a8405e;
+  --sk-accent-text: #a8405e;
+  --sk-on: #ffffff;
+}
+:root[data-theme='light'][data-skyphase='day'] {
+  --sk-accent: #2f72c4;
+  --sk-accent-2: #2356a6;
+  --sk-accent-text: #2356a6;
+  --sk-on: #ffffff;
+}
+:root[data-theme='light'][data-skyphase='evening'] {
+  --sk-accent: #b5560b;
+  --sk-accent-2: #a54a08;
+  --sk-accent-text: #a54a08;
+  --sk-on: #ffffff;
+}
+:root[data-theme='light'][data-skyphase='night'] {
+  --sk-accent: #6a5fd6;
+  --sk-accent-2: #4f45b8;
+  --sk-accent-text: #4f45b8;
+  --sk-on: #ffffff;
+}
+:root[data-theme='light'][data-skyphase='late'] {
+  --sk-accent: #3f55d6;
+  --sk-accent-2: #2c3cae;
+  --sk-accent-text: #2c3cae;
+  --sk-on: #ffffff;
+}
+:root[data-theme='light'][data-skyphase='deep'] {
+  --sk-accent: #4b52b8;
+  --sk-accent-2: #333995;
+  --sk-accent-text: #333995;
+  --sk-on: #ffffff;
+}
+
 /* … and light: the same hues as a pale wash, so text stays dark-on-light. */
 :root[data-theme='light'][data-skyphase='dawn'],
 :root[data-theme='light'] [data-phase='dawn'] {
@@ -1113,7 +1202,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .switch.is-on {
-  background: var(--accent);
+  background: var(--accent-fill);
 }
 
 .switch.is-on span {
@@ -1202,7 +1291,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .task.is-done .task__check {
-  background: var(--primary);
+  background: var(--primary-fill);
   border-color: var(--primary);
   color: var(--on-primary);
 }
@@ -1851,7 +1940,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .pill-tabs__tab.is-active {
-  background: var(--primary);
+  background: var(--primary-fill);
   color: var(--on-primary);
   font-weight: 600;
 }
@@ -1951,13 +2040,14 @@ body:has(.dock-wrap.is-open) .hint,
 
 .pill-btn--primary,
 .pill-btn--primary:hover {
-  background: var(--primary);
+  background: var(--primary-fill);
   color: var(--on-primary);
   font-weight: 600;
 }
 
 .pill-btn--primary:hover {
-  background: var(--primary-hover);
+  background: var(--primary-fill);
+  filter: brightness(1.08);
 }
 
 .pomodoro__sessions {
