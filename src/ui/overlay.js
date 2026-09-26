@@ -21,11 +21,16 @@ export const overlayOpen = () => Boolean(current);
  * Anchored popover. `anchor` is the element it points at; content is a node.
  * Closes on outside click and Escape (Escape is handled by shortcuts.js).
  */
-export function openPopover(anchor, content, { onClose, align = 'start', className } = {}) {
+export function openPopover(anchor, content, { onClose, align = 'start', side = 'below', className } = {}) {
   closeOverlay();
   const el = h('div', { class: ['popover', className], role: 'dialog' }, content);
   document.body.append(el);
-  position(el, anchor, align);
+  if (side === 'beside') {
+    // Anchor may be re-rendered away; keep its box and re-fit as content grows.
+    const rect = anchor.getBoundingClientRect();
+    besideAnchor(el, rect);
+    new ResizeObserver(() => el.isConnected && besideAnchor(el, rect)).observe(el);
+  } else position(el, anchor, align);
   current = { el, onClose, restoreFocus: document.activeElement };
   setTimeout(() => {
     const onDown = (e) => {
@@ -51,6 +56,19 @@ function position(el, anchor, align) {
   left = Math.max(pad, Math.min(left, window.innerWidth - w - pad));
   let top = r.bottom + 8;
   if (top + hgt > window.innerHeight - pad) top = Math.max(pad, r.top - hgt - 8);
+  el.style.left = `${left}px`;
+  el.style.top = `${top}px`;
+}
+
+/** Beside the anchor (right, else left); on narrow screens, centred over it. */
+function besideAnchor(el, r) {
+  const pad = 12;
+  const w = el.offsetWidth;
+  const hgt = el.offsetHeight;
+  let left = r.right + 8;
+  if (left + w > window.innerWidth - pad) left = r.left - w - 8;
+  if (left < pad) left = Math.max(pad, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - pad));
+  const top = Math.max(pad, Math.min(r.top, window.innerHeight - hgt - pad));
   el.style.left = `${left}px`;
   el.style.top = `${top}px`;
 }

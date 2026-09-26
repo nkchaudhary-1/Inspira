@@ -2465,6 +2465,142 @@ body:has(.dock-wrap.is-open) .hint,
   padding: var(--space-4);
 }
 
+/* Month cell → day popover */
+.popover--day {
+  width: 340px;
+  max-height: calc(100vh - 24px);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.daypop {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  outline: none;
+}
+
+.daypop__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-2);
+}
+
+.daypop__num {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-clock);
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.daypop__num small {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.daypop__close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: -4px -6px 0 0;
+  border-radius: 50%;
+  color: var(--text-2);
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.daypop__close:hover {
+  background: var(--pill-border);
+  color: var(--text);
+}
+
+.daypop__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+  padding: 0 var(--space-4) var(--space-3);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.daypop__body .board__add {
+  padding: 0;
+}
+
+.daypop__body .board__input {
+  margin-top: 0;
+}
+
+.daypop__body .empty {
+  margin: 4px 0 0;
+}
+
+/* The task menu is a popover too and would replace this one; the full Day view has it. */
+.popover--day .task__more {
+  display: none;
+}
+
+.daypop__notes {
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+}
+
+.daypop__note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--text);
+  text-align: left;
+  transition: color var(--dur-fast);
+}
+
+.daypop__note span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.daypop__note .icon {
+  flex: none;
+  color: var(--text-2);
+}
+
+.daypop__note--add {
+  color: var(--text-2);
+}
+
+.daypop__note:hover {
+  color: var(--text);
+}
+
+.daypop__foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  border-top: 1px solid var(--line);
+}
+
+.daypop__foot .text-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .menu {
   display: flex;
   flex-direction: column;

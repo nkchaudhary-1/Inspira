@@ -24,10 +24,11 @@ import {
   formatTime,
 } from '../core/dates.js';
 import { loadMonth } from '../services/calendar.js';
-import { h, reactive, transition, tab } from './dom.js';
+import { h, icon, reactive, transition, tab } from './dom.js';
 import { taskList, taskComposer, taskDropTarget, moveTasksTo } from './tasks.js';
 import { addTask, dayCount } from './tasksPage.js';
-import { noteList, noteButton, closeNote } from './notes.js';
+import { noteList, noteButton, closeNote, createNote } from './notes.js';
+import { openPopover, closeOverlay } from './overlay.js';
 import { eventList } from './schedule.js';
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -182,7 +183,7 @@ function monthView(d) {
           'aria-label': `${formatFull(key)}${items.length ? `, ${items.length} items` : ''}`,
           dataset: { date: key },
           tabindex: key === d ? '0' : '-1',
-          onClick: () => openDay(key),
+          onClick: (e) => openDayPopover(e.currentTarget, key),
         },
         i < 7 && h('span', { class: 'month__weekday' }, weekdayName(key)),
         h('span', { class: 'month__num' }, pad(day.getDate())),
@@ -230,6 +231,69 @@ function monthView(d) {
     ),
     grid,
   ];
+}
+
+// ---------- day popover (month cell) ----------
+
+/**
+ * A quick look at one day without leaving the month: events, tasks (check,
+ * rename, add), notes, and a way into the full Day view.
+ */
+function openDayPopover(cell, key) {
+  const d = fromKey(key);
+  const toDay = (noteId) => {
+    closeOverlay();
+    openDay(key);
+    if (noteId) store.setUI({ openNoteId: noteId });
+  };
+
+  // Separate reactive regions, so the always-on input keeps focus while the
+  // list above it updates.
+  const events = reactive(h('div', { class: 'daypop__events' }), () => eventList(key, { compact: true }));
+  const tasks = reactive(h('div', { class: 'daypop__tasks' }), () => {
+    const list = store.tasksForDate(key);
+    return list.length ? taskList(list, { compact: true }) : h('p', { class: 'empty' }, key < todayKey() ? 'No tasks this day.' : 'Nothing planned yet.');
+  });
+  const notes = reactive(h('div', { class: 'daypop__notes' }), () => {
+    const list = store.notesForDate(key);
+    return [
+      list.map((n) =>
+        h('button', { type: 'button', class: 'daypop__note', onClick: () => toDay(n.id) }, icon('note', 14), h('span', null, n.title || 'Untitled')),
+      ),
+      h(
+        'button',
+        {
+          type: 'button',
+          class: 'daypop__note daypop__note--add',
+          onClick: () => {
+            toDay();
+            createNote({ date: key });
+          },
+        },
+        icon('plus', 14),
+        h('span', null, 'New note'),
+      ),
+    ];
+  });
+
+  const content = h(
+    'div',
+    { class: 'daypop', tabindex: '-1', autofocus: '', 'aria-label': formatFull(key) },
+    h(
+      'header',
+      { class: 'daypop__head' },
+      h(
+        'div',
+        null,
+        h('span', { class: 'board__weekday' }, key === todayKey() ? 'Today' : weekdayName(key), dayCount(key)),
+        h('span', { class: 'daypop__num' }, pad(d.getDate()), h('small', null, ` ${monthName(d.getMonth())}`)),
+      ),
+      h('button', { type: 'button', class: 'daypop__close', 'aria-label': 'Close', onClick: () => closeOverlay() }, icon('close', 16)),
+    ),
+    h('div', { class: 'daypop__body' }, events, tasks, addTask(key), notes),
+    h('footer', { class: 'daypop__foot' }, h('button', { type: 'button', class: 'text-btn', onClick: () => toDay() }, 'Open day', icon('arrowUpRight', 14))),
+  );
+  openPopover(cell, content, { side: 'beside', className: 'popover--day' });
 }
 
 // ---------- week ----------
