@@ -6,15 +6,15 @@ import { clockParts, formatLong, todayKey, greeting, formatDuration } from './co
 import { refreshWeather } from './services/weather.js';
 import { loadMonth } from './services/calendar.js';
 import { startSync } from './services/sync.js';
-import { h, icon, iconButton, reactive } from './ui/dom.js';
+import { h, icon } from './ui/dom.js';
 import { clock, dateLine, greetingLine, quote, weather } from './ui/hero.js';
 import { rail } from './ui/rail.js';
 import { workspace } from './ui/workspace.js';
 import { focusView, focusTick, focusRemaining } from './ui/focus.js';
-import { modeSwitcher, registerStage, currentMode } from './ui/modes.js';
-import { openSettings } from './ui/settings.js';
-import { initShortcuts, openShortcuts } from './ui/shortcuts.js';
-import { initTheme, applyDaypart, cycleTheme } from './ui/theme.js';
+import { registerStage, currentMode } from './ui/modes.js';
+import { dock } from './ui/dock.js';
+import { initShortcuts } from './ui/shortcuts.js';
+import { initTheme, applyDaypart } from './ui/theme.js';
 
 function renderMode(mode) {
   const p = store.prefs();
@@ -113,26 +113,13 @@ function rerender() {
   paint(currentMode() || store.getDevice().mode);
 }
 
-function corner() {
-  const themeBtn = reactive(h('span'), () => {
-    const dark = document.documentElement.dataset.theme === 'dark';
-    const pref = store.prefs().theme;
-    return iconButton(dark ? 'moon' : 'sun', `Theme: ${pref === 'system' ? 'Auto' : pref} (D)`, cycleTheme);
-  });
-  const settingsBtn = reactive(h('span', { class: 'settings-btn' }), () => [
-    iconButton('settings', 'Settings (,)', openSettings),
-    store.ui.syncStatus === 'error' && h('i', { class: 'badge', title: 'Sync paused' }),
-  ]);
-  return h('div', { class: 'corner' }, iconButton('keyboard', 'Keyboard shortcuts (?)', openShortcuts), themeBtn, settingsBtn);
-}
-
 async function boot() {
   await store.init();
   initTheme();
 
   const app = document.getElementById('app');
   stage = h('main', { class: 'stage', id: 'stage' });
-  app.replaceChildren(stage, modeSwitcher(), corner());
+  app.replaceChildren(stage, ...dock());
 
   paint = (mode) => {
     signature = signatureOf(mode);
@@ -172,17 +159,7 @@ async function boot() {
 
 function firstRunHint() {
   if (store.getDevice().hintsSeen) return;
-  const hint = h(
-    'div',
-    { class: 'hint' },
-    'Tip: press ',
-    h('kbd', null, '?'),
-    ' for shortcuts · ',
-    h('kbd', null, '1'),
-    '–',
-    h('kbd', null, '4'),
-    ' to switch views',
-  );
+  const hint = h('div', { class: 'hint' }, 'Tip: hover the dots below for the menu · ', h('kbd', null, '1'), '–', h('kbd', null, '4'), ' to switch views');
   document.body.append(hint);
   const dismiss = () => {
     hint.classList.add('is-leaving');

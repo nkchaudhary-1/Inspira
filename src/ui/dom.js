@@ -54,7 +54,7 @@ export function reactive(container, render) {
     }
     dirty = false;
     container.dataset.mounted = '1';
-    container.replaceChildren(...[render()].flat().filter(Boolean));
+    container.replaceChildren(...[render()].flat(Infinity).filter(Boolean));
   };
   const unsubscribe = subscribe(run);
   container.addEventListener('focusout', () => {
@@ -69,6 +69,10 @@ export function reactive(container, render) {
 // ---------- icons (1.5px stroke, 20px grid) ----------
 
 const PATHS = {
+  clock: 'M10 16.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM10 6.5V10l2.5 1.5',
+  sparkle: 'M10 3.5l1.5 5 5 1.5-5 1.5-1.5 5-1.5-5-5-1.5 5-1.5z',
+  target: 'M10 16.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  checklist: 'M9 6h6.5M9 10h6.5M9 14h6.5M4.5 6l1 1 1.8-2M4.5 10l1 1 1.8-2M4.5 14l1 1 1.8-2',
   chevronLeft: 'M12.5 5l-5 5 5 5',
   chevronRight: 'M7.5 5l5 5-5 5',
   plus: 'M10 4.5v11M4.5 10h11',

@@ -1,14 +1,13 @@
-// Experience modes. The switcher is four quiet words at the bottom edge —
-// deliberately not a nav bar.
+// Experience modes. Switched from the hidden dock (see dock.js) or keys 1–4.
 
 import * as store from '../core/store.js';
-import { h, reactive, transition } from './dom.js';
+import { transition } from './dom.js';
 
 export const MODES = [
-  { id: 'clock', label: 'Clock', key: '1' },
-  { id: 'motivation', label: 'Motivation', key: '2' },
-  { id: 'focus', label: 'Focus', key: '3' },
-  { id: 'plan', label: 'Plan', key: '4' },
+  { id: 'clock', label: 'Clock', key: '1', icon: 'clock' },
+  { id: 'motivation', label: 'Motivation', key: '2', icon: 'sparkle' },
+  { id: 'focus', label: 'Focus', key: '3', icon: 'target' },
+  { id: 'plan', label: 'Plan', key: '4', icon: 'checklist' },
 ];
 
 let renderStage = () => {};
@@ -36,22 +35,3 @@ export function setMode(mode) {
 }
 
 export const currentMode = () => renderedMode;
-
-export function modeSwitcher() {
-  return reactive(h('nav', { class: 'modes', 'aria-label': 'View' }), () => {
-    const mode = renderedMode || store.getDevice().mode;
-    return MODES.map((m) =>
-      h(
-        'button',
-        {
-          type: 'button',
-          class: ['modes__item', m.id === mode && 'is-active'],
-          'aria-current': m.id === mode ? 'page' : null,
-          title: `${m.label} (${m.key})`,
-          onClick: () => setMode(m.id),
-        },
-        m.label,
-      ),
-    );
-  });
-}

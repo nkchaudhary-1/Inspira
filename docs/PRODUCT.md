@@ -27,7 +27,7 @@ Components only reference semantic and component tokens, so none of them need ed
 | **Focus** | Do one thing | Intention, duration and a timer. Everything else disappears. The session is shared across tabs, and a notification fires when it ends. |
 | **Plan** | Organize the day | Date navigation, then *Schedule · Tasks · Notes* as three columns. Projects are one click away. |
 
-The switcher is four low-contrast words at the bottom edge, not a nav bar. Number keys are the fast path.
+Navigation lives in a hidden dock. A faint ••• handle at the bottom (or the very bottom edge of the screen, like macOS auto-hide) reveals a glass dock with the four modes plus shortcuts, theme and settings; icons magnify toward the pointer. Number keys are the fast path.
 
 ## Key decisions and tradeoffs
 

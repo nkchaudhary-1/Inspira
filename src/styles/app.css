@@ -411,98 +411,169 @@
   margin-top: var(--space-2);
 }
 
-/* ---------- mode switcher ---------- */
+/* ---------- dock ---------- */
 
-.modes {
+/* 6px strip on the bottom edge — like macOS auto-hide, pointing there reveals the dock. */
+.dock-edge {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  z-index: 29;
+}
+
+.dock-wrap {
   position: fixed;
   left: 50%;
-  bottom: var(--space-5);
+  bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%);
-  display: flex;
-  gap: var(--space-1);
-  padding: 4px;
+  z-index: 30;
+  display: grid;
+  justify-items: center;
+  align-items: end;
+}
+
+.dock-wrap > * {
+  grid-area: 1 / 1;
+}
+
+.dock-handle {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 24px;
+  margin-bottom: 2px;
   border-radius: var(--radius-pill);
-  opacity: 0.6;
+  color: var(--text-2);
+  opacity: 0.55;
   transition:
-    opacity var(--dur-base),
-    background var(--dur-base);
-  z-index: 10;
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out),
+    background var(--dur-fast);
 }
 
-.modes:hover,
-.modes:focus-within {
+.dock-handle:hover,
+.dock-handle:focus-visible {
   opacity: 1;
-  background: var(--surface);
-  backdrop-filter: blur(12px);
+  background: var(--surface-hover);
 }
 
-.modes__item {
-  position: relative;
-  padding: 4px 12px;
-  font-size: var(--text-xs);
-  letter-spacing: 0.02em;
-  color: var(--text-3);
-  border-radius: var(--radius-pill);
-  transition: color var(--dur-fast);
-}
-
-.modes__item:hover {
-  color: var(--text);
-}
-
-.modes__item.is-active {
-  color: var(--text);
-}
-
-.modes__item.is-active::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -1px;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--accent);
-  transform: translateX(-50%);
-}
-
-.app[data-mode='focus'] .modes {
+.app[data-mode='focus'] .dock-handle {
   opacity: 0.3;
 }
 
-/* Plan content scrolls beneath the switcher — give it a soft backdrop. */
-.app[data-mode='plan'] .modes,
-.app[data-mode='plan'] .corner {
-  opacity: 0.9;
-  background: var(--surface);
-  backdrop-filter: blur(12px);
-  border-radius: var(--radius-pill);
-}
-
-/* ---------- corner controls ---------- */
-
-.corner {
-  position: fixed;
-  right: var(--space-4);
-  bottom: var(--space-4);
+.dock {
+  --tile: 42px;
   display: flex;
-  gap: 2px;
-  z-index: 10;
-  opacity: 0.6;
-  transition: opacity var(--dur-base);
+  align-items: flex-end;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--surface-solid) 72%, transparent);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-pop);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  /* hidden state */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px) scale(0.96);
+  transform-origin: bottom center;
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 260ms var(--ease-out),
+    visibility 0s linear 260ms;
 }
 
-.corner:hover,
-.corner:focus-within {
+.dock-wrap.is-open .dock {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 320ms var(--ease-out),
+    visibility 0s;
+}
+
+.dock-wrap.is-open .dock-handle {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+.dock__item {
+  --s: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: calc(var(--tile) * var(--s));
+  height: calc(var(--tile) * var(--s));
+  transition:
+    width 110ms var(--ease-out),
+    height 110ms var(--ease-out);
+}
+
+.dock__tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: calc(12px * var(--s));
+  color: var(--text-2);
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.dock__tile .icon {
+  width: calc(20px * var(--s));
+  height: calc(20px * var(--s));
+  transition:
+    width 110ms var(--ease-out),
+    height 110ms var(--ease-out);
+}
+
+.dock__item:hover .dock__tile,
+.dock__item:focus-visible .dock__tile {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.dock__item:focus-visible {
+  outline: none;
+}
+
+.dock__item:focus-visible .dock__tile {
+  box-shadow: inset 0 0 0 2px var(--focus-ring);
+}
+
+.dock__item.is-active .dock__tile {
+  color: var(--text);
+}
+
+.dock__item:active .dock__tile {
+  transform: scale(0.94);
+}
+
+.dock__dot {
+  position: absolute;
+  bottom: -5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+}
+
+.dock__item.is-active .dock__dot {
   opacity: 1;
 }
 
-.settings-btn {
-  position: relative;
-  display: inline-flex;
-}
-
-.badge {
+.dock__badge {
   position: absolute;
   top: 7px;
   right: 7px;
@@ -510,6 +581,48 @@
   height: 6px;
   border-radius: 50%;
   background: var(--danger);
+}
+
+/* Tooltip above the hovered icon, like the macOS dock. */
+.dock__label {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translate(-50%, 4px);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-pop);
+  font-size: var(--text-xs);
+  color: var(--text);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-fast),
+    transform var(--dur-fast);
+}
+
+.dock__label kbd {
+  padding: 0 5px;
+  font-size: 10px;
+}
+
+.dock__item:hover .dock__label,
+.dock__item:focus-visible .dock__label {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.dock__divider {
+  align-self: stretch;
+  width: 1px;
+  margin: 6px 4px;
+  background: var(--line-strong);
 }
 
 .hint {
@@ -524,6 +637,7 @@
   white-space: nowrap;
 }
 
+body:has(.dock-wrap.is-open) .hint,
 .hint.is-leaving {
   opacity: 0;
 }
