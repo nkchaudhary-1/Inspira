@@ -2,7 +2,7 @@
 
 ## Positioning
 
-**Calm + beautiful + minimal + personal**, and useful: *plan, capture, focus, remember.*
+**Calm + beautiful + minimal + personal**, and useful: _plan, capture, focus, remember._
 The central guardrail: the default tab must not look like a productivity app. The workspace is always secondary to the time, the day and the line of inspiration.
 
 ## Identity: what carried over, and what's assumed
@@ -20,15 +20,15 @@ Components only reference semantic and component tokens, so none of them need ed
 
 ## Modes
 
-Figma: *Inspira 2.0 — Home — Clock / Daily Quote / Pomodoro / Tasks / Calendar*.
+Figma: _Inspira 2.0 — Home — Clock / Daily Quote / Pomodoro / Tasks / Calendar_.
 
-| Mode | Job | What's on screen |
-| --- | --- | --- |
-| **Clock** (default) | Glance | Date, one quote line, a large Boldonse clock, weather — nothing else. |
-| **Quote** | Pause | Greeting, the day's line set large in Boldonse, date + time + weather. Category, "another one" and copy appear on hover. |
-| **Focus** | Do one thing | Pomodoro on a dot-matrix display: Focus / Short break / Long break (every 4th). Reset · Start · Skip, session pips, optional intention. Shared across tabs; a notification fires at the end. |
-| **Tasks** | Plan the week | Seven day columns. "+ Add task" inline (stays open for rapid entry), drag a task onto another day, carry-over from earlier days. Projects is a tab. |
-| **Calendar** | See time | Day (Schedule · Tasks · Notes — the old Plan mode), Week, Month (the Figma grid) and Year. Click any day to open it. |
+| Mode                | Job           | What's on screen                                                                                                                                                                             |
+| ------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Clock** (default) | Glance        | Date, one quote line, a large Boldonse clock, weather — nothing else.                                                                                                                        |
+| **Quote**           | Pause         | Greeting, the day's line set large in Boldonse, date + time + weather. Category, "another one" and copy appear on hover.                                                                     |
+| **Focus**           | Do one thing  | Pomodoro on a dot-matrix display: Focus / Short break / Long break (every 4th). Reset · Start · Skip, session pips, optional intention. Shared across tabs; a notification fires at the end. |
+| **Tasks**           | Plan the week | Seven day columns. "+ Add task" inline (stays open for rapid entry), drag a task onto another day, carry-over from earlier days. Projects is a tab.                                          |
+| **Calendar**        | See time      | Day (Schedule · Tasks · Notes — the old Plan mode), Week, Month (the Figma grid) and Year. Click any day to open it.                                                                         |
 
 Navigation lives in a hidden dock. A faint ••• handle at the bottom (or the very bottom edge of the screen, like macOS auto-hide) reveals a glass dock with the five modes plus shortcuts, theme and settings; icons magnify toward the pointer. Number keys are the fast path.
 
@@ -53,6 +53,7 @@ Navigation lives in a hidden dock. A faint ••• handle at the bottom (or th
 ## MVP (this build) vs. later
 
 **In the MVP**
+
 - All four modes; light/dark/auto; atmosphere by daypart and weather
 - Tasks: quick add, tokens, inline edit, details popover, reminders, carry-over, undo delete
 - Notes: inline cards → inline editor, auto bullets, per-day or per-project
@@ -62,6 +63,7 @@ Navigation lives in a hidden dock. A faint ••• handle at the bottom (or th
 - Export / import JSON
 
 **Later**
+
 - Create or edit Calendar events from Inspira (needs the `calendar.events` scope and more UI)
 - Recurring tasks
 - Drag to reorder tasks and to move them between days

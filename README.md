@@ -6,7 +6,7 @@ Inspira replaces Chrome's New Tab page with a calm clock, daily inspiration and 
 
 - **Five modes, one key each.** `1` Clock · `2` Quote · `3` Focus (pomodoro) · `4` Tasks (week board) · `5` Calendar (day / week / month / year)
 - **The date is the backbone.** Every task, note and event belongs to a day. Drag tasks between days, step through weeks or months with `←` / `→`, and jump back with `T`.
-- **Three things stay separate.** *Schedule* is what's booked (Google Calendar, read-only). *Tasks* are what you need to do. *Notes* are what you want to remember.
+- **Three things stay separate.** _Schedule_ is what's booked (Google Calendar, read-only). _Tasks_ are what you need to do. _Notes_ are what you want to remember.
 - **Works without an account.** Signing in with Google syncs everything through a private file in your Drive.
 
 ---
@@ -83,26 +83,26 @@ src/
 
 **Sync.** Local storage is the source of truth. When you're signed in, one JSON file in Drive's hidden `appDataFolder` is the shared copy. Each sync pulls it, merges record by record (newest `updatedAt` wins; deletions are kept as tombstones for 30 days), then pushes. Syncs run 2.5 s after an edit, when the tab becomes visible, and every 5 minutes. There's no server to run or pay for.
 
-**Permissions.** `storage`, `identity` and `alarms` produce no install warning. `notifications` is *optional*: Inspira requests it only when you first set a reminder or start a focus session. Weather uses city search or a one-off browser geolocation prompt, so the manifest doesn't need `geolocation`. This is deliberate: when an update adds permissions that show a warning, Chrome disables the extension for existing users until they approve.
+**Permissions.** `storage`, `identity` and `alarms` produce no install warning. `notifications` is _optional_: Inspira requests it only when you first set a reminder or start a focus session. Weather uses city search or a one-off browser geolocation prompt, so the manifest doesn't need `geolocation`. This is deliberate: when an update adds permissions that show a warning, Chrome disables the extension for existing users until they approve.
 
 ## Keyboard
 
-| Key | Action |
-| --- | --- |
-| `1`–`5` | Clock · Quote · Focus · Tasks · Calendar |
+| Key     | Action                                                               |
+| ------- | -------------------------------------------------------------------- |
+| `1`–`5` | Clock · Quote · Focus · Tasks · Calendar                             |
 | `←` `→` | Previous / next week (Tasks) or day / week / month / year (Calendar) |
-| `T` | Today |
-| `C` | Calendar |
-| `P` | Projects |
-| `N` | New task for today |
-| `M` | New note for the selected day |
-| `Q` | Another quote |
-| `Space` | Start / pause the timer |
-| `R` `S` | Reset / skip the timer |
-| `D` | Cycle theme |
-| `,` | Settings |
-| `?` | Shortcuts |
-| `Esc` | Close |
+| `T`     | Today                                                                |
+| `C`     | Calendar                                                             |
+| `P`     | Projects                                                             |
+| `N`     | New task for today                                                   |
+| `M`     | New note for the selected day                                        |
+| `Q`     | Another quote                                                        |
+| `Space` | Start / pause the timer                                              |
+| `R` `S` | Reset / skip the timer                                               |
+| `D`     | Cycle theme                                                          |
+| `,`     | Settings                                                             |
+| `?`     | Shortcuts                                                            |
+| `Esc`   | Close                                                                |
 
 Quick-add tokens: `#project`, `!`/`!!`/`!!!` (priority), `@6pm` or `@18:30` (time).
 

@@ -310,6 +310,7 @@
   background-size: var(--grid-size) var(--grid-size);
   -webkit-mask-image: var(--grid-mask);
   mask-image: var(--grid-mask);
+  transition: opacity var(--dur-slow) var(--ease-out);
 }
 
 :root[data-grid='dots'] .sky__grid {
@@ -324,10 +325,6 @@
 
 /* Tasks and Calendar have their own structure (columns, cells); a second
    grid behind them just competes, so it fades out there. */
-.sky__grid {
-  transition: opacity var(--dur-slow) var(--ease-out);
-}
-
 :root:has(.app[data-mode='tasks']) .sky__grid,
 :root:has(.app[data-mode='calendar']) .sky__grid {
   opacity: 0;
@@ -425,23 +422,19 @@
 /* ---------- entrance ---------- */
 
 .is-entering .clockface > *,
-.is-entering .hero > *,
 .is-entering .layout--quote > *,
 .is-entering .pomodoro > * {
   animation: rise var(--dur-slow) var(--ease-out) both;
 }
 .is-entering .clockface > :nth-child(2),
-.is-entering .hero > :nth-child(2),
 .is-entering .layout--quote > :nth-child(2),
 .is-entering .pomodoro > :nth-child(2) {
   animation-delay: 60ms;
 }
 .is-entering .clockface > :nth-child(3),
-.is-entering .hero > :nth-child(3),
 .is-entering .pomodoro > :nth-child(3) {
   animation-delay: 120ms;
 }
-.is-entering .hero > :nth-child(4),
 .is-entering .pomodoro > :nth-child(4) {
   animation-delay: 180ms;
 }
@@ -500,59 +493,6 @@
   display: none;
 }
 
-.clock--hero .clock__time {
-  font-size: var(--clock-size);
-}
-.clock--hero .clock__meridiem {
-  font-size: clamp(0.875rem, 1.4vw, 1.25rem);
-  margin: 0.9em 0 0 0.6em;
-}
-
-.clock--focus .clock__time {
-  font-size: clamp(56px, 8vw, 104px);
-}
-.clock--focus .clock__meridiem {
-  font-size: var(--text-sm);
-  margin: 0.6em 0 0 0.5em;
-}
-
-.clock--inline,
-.clock--small {
-  align-items: baseline;
-  gap: 0.35em;
-}
-.clock--inline .clock__time,
-.clock--small .clock__time {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  letter-spacing: 0;
-}
-.clock--inline .clock__meridiem,
-.clock--small .clock__meridiem {
-  font-size: var(--text-2xs);
-}
-
-/* ---------- hero (Clock mode) ---------- */
-
-.layout--clock {
-  position: relative;
-}
-
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--space-4);
-  max-width: 720px;
-}
-
-.hero-date {
-  font-size: var(--text-lg);
-  color: var(--text-2);
-  letter-spacing: 0.01em;
-}
-
 .quote {
   color: var(--text-2);
 }
@@ -566,16 +506,6 @@
   animation: fade var(--dur-slow) var(--ease-out);
 }
 
-.quote--hero {
-  margin-top: var(--space-2);
-  max-width: 36ch;
-}
-
-.quote--hero .quote__text {
-  font-size: var(--quote-hero-size);
-  line-height: 1.5;
-}
-
 /* ---------- weather ---------- */
 
 .weather {
@@ -584,10 +514,6 @@
   align-items: center;
   gap: 2px;
   color: var(--text-2);
-}
-
-.weather--full {
-  margin-top: var(--space-4);
 }
 
 .weather__btn,
@@ -630,35 +556,10 @@
   color: var(--text-3);
 }
 
-.weather__range {
-  font-variant-numeric: tabular-nums;
-}
-
-.weather--inline {
-  flex-direction: row;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-}
-
-.weather--inline .weather__btn {
-  padding: 0 4px;
-}
-
-.weather--inline .weather__temp {
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
-
-.weather--inline .weather__place,
-.weather--inline .weather__label {
-  font-size: var(--text-sm);
-  color: var(--text-3);
-}
-
 /* ---------- clock face (Clock mode · Figma "Inspira 2.0 / Clock") ---------- */
 
 .layout--clock {
+  position: relative;
   padding: 0;
   align-items: stretch;
   justify-content: stretch;
@@ -1111,7 +1012,7 @@ body:has(.dock-wrap.is-open) .hint,
 
 /* ---- Buttons: one family ----
    Secondary (ghost / outline / pill / glass): a glass pill in three heights.
-   Primary (…--primary, primary-btn): the accent fill. Text (text-btn, add-btn):
+   Primary (…--primary): the accent fill. Text (text-btn, add-btn):
    bare, accent on hover. Icon (icon-btn, sheet__close): a circle. */
 .ghost-btn,
 .outline-btn,
@@ -2091,8 +1992,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .pill-btn--primary,
-.glass-btn--primary,
-.primary-btn {
+.glass-btn--primary {
   color: var(--on-primary);
   background: var(--primary-fill);
   border-color: transparent;
@@ -2101,8 +2001,7 @@ body:has(.dock-wrap.is-open) .hint,
 }
 
 .pill-btn--primary:hover,
-.glass-btn--primary:hover,
-.primary-btn:hover {
+.glass-btn--primary:hover {
   background: var(--primary-fill);
   filter: brightness(1.08);
 }
@@ -2774,11 +2673,6 @@ body:has(.dock-wrap.is-open) .hint,
   width: 320px;
 }
 
-.popover--cal {
-  width: 320px;
-  padding: var(--space-4);
-}
-
 /* Month cell → day popover */
 .popover--day {
   width: 340px;
@@ -2895,10 +2789,6 @@ body:has(.dock-wrap.is-open) .hint,
 
 .daypop__note .icon {
   flex: none;
-  color: var(--text-2);
-}
-
-.daypop__note--add {
   color: var(--text-2);
 }
 
@@ -3824,7 +3714,7 @@ body:has(.dock-wrap.is-open) .hint,
 
 .focus-mini__ring circle {
   fill: none;
-  stroke: var(--pill-border);
+  stroke: var(--glass-border);
   stroke-width: 2;
 }
 
@@ -4103,11 +3993,5 @@ body:has(.dock-wrap.is-open) .hint,
 
   .year__dow {
     padding-bottom: 0;
-  }
-}
-
-@media (max-height: 640px) {
-  :root {
-    --clock-size: clamp(72px, 11vw, 132px);
   }
 }

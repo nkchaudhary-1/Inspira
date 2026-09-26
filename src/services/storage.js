@@ -3,8 +3,6 @@
 
 const chromeStore = typeof chrome !== 'undefined' && chrome.storage?.local ? chrome.storage.local : null;
 
-export const isExtension = Boolean(chromeStore);
-
 export async function load(key) {
   if (chromeStore) {
     const res = await chromeStore.get(key);

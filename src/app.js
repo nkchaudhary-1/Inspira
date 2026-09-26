@@ -2,7 +2,7 @@
 // start the ticker and background services (weather, calendar, sync).
 
 import * as store from './core/store.js';
-import { clockParts, formatLong, formatFull, todayKey, greeting, formatDuration } from './core/dates.js';
+import { clockParts, formatFull, todayKey, greeting, formatDuration } from './core/dates.js';
 import { refreshWeather } from './services/weather.js';
 import { loadMonth } from './services/calendar.js';
 import { startSync } from './services/sync.js';
@@ -55,8 +55,17 @@ function setAll(bind, value) {
   for (const el of document.querySelectorAll(`[data-bind="${bind}"]`)) if (el.textContent !== value) el.textContent = value;
 }
 
+// A hidden tab only keeps the timer and its tab title current; the page itself
+// catches up on visibilitychange.
 function tick() {
   const now = new Date();
+  focusTick(now.getTime());
+  const f = store.getDevice().focus;
+  const remaining = focusRemaining(now.getTime());
+  const title = f.state === 'running' ? `${formatDuration(remaining)} · ${PHASES[f.phase]?.label || 'Focus'}` : 'New Tab';
+  if (document.title !== title) document.title = title;
+  if (document.hidden) return;
+
   const p = store.prefs();
   const { time, meridiem } = clockParts(now, p.clock24, p.showSeconds);
   setAll('time', time);
@@ -66,17 +75,11 @@ function tick() {
     setAll('seconds', String(now.getSeconds()).padStart(2, '0'));
   }
   const today = todayKey(now);
-  setAll('date', formatLong(today));
   setAll('date-full', formatFull(today));
   setAll('greeting', `${greeting(now.getHours())}${p.name ? `, ${p.name}` : ''}`);
 
-  focusTick(now.getTime());
-  const f = store.getDevice().focus;
-  const remaining = focusRemaining(now.getTime());
   paintFocus(now.getTime());
   paintFocusMini(now.getTime());
-  const title = f.state === 'running' ? `${formatDuration(remaining)} · ${PHASES[f.phase]?.label || 'Focus'}` : 'New Tab';
-  if (document.title !== title) document.title = title;
 
   applyDaypart(now);
 
@@ -154,7 +157,7 @@ async function boot() {
   initShortcuts();
 
   refreshWeather();
-  setInterval(() => refreshWeather(), 15 * 60 * 1000);
+  setInterval(() => document.hidden || refreshWeather(), 15 * 60 * 1000);
   if (store.getDevice().calendarConnected) loadMonth(store.ui.date);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') return;

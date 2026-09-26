@@ -2,7 +2,7 @@
   "name": "inspira",
   "version": "2.0.0",
   "private": true,
-  "description": "Inspira \u2014 your day, every time you open a new tab.",
+  "description": "Inspira — your day, every time you open a new tab.",
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",

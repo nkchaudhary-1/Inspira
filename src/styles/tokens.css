@@ -117,7 +117,6 @@
   --text-xl: 1.375rem; /* 22 */
   --text-2xl: 1.75rem; /* 28 */
   --text-3xl: 1.875rem; /* 30 */
-  --tracking-eyebrow: 0.16em;
 
   /* ---- spacing (4px base) ---- */
   --space-1: 4px;
@@ -155,12 +154,9 @@
   --dur-ambient: 60s;
 
   /* ---- Layer 3 · component tokens ---- */
-  --clock-size: clamp(88px, 14vw, 184px);
   --clock-weight: 200;
   --display-opsz: 'opsz' 32; /* Inter Display cut */
   --clock-tracking: -0.045em;
-  --quote-hero-size: clamp(1rem, 1.5vw, 1.25rem);
-  --quote-feature-size: clamp(1.75rem, 3.6vw, 3rem);
   /* Clock face — values from the 1920 × 1024 Figma frame, scaled with the viewport. */
   --face-pad: clamp(32px, 6.25vw, 120px); /* 120 */
   --face-clock: clamp(88px, 9.5vw, 182px); /* 182 */
@@ -177,7 +173,6 @@
   --board-num: clamp(18px, 1.25vw, 24px); /* 24 */
   --quote-display: clamp(30px, 3.8vw, 72px);
   --dot: clamp(8px, min(0.83vw, 1.6vh), 16px); /* 16 */
-  --content-max: 1180px;
 }
 
 /* ---- Layer 2 · semantic (light) ---- */
@@ -207,12 +202,11 @@
   --accent-soft: var(--mint-l-50);
   --danger: var(--state-l-error);
   --focus-ring: var(--mint-l-500); /* Focus Ring */
-  --shadow-pop: 0 1px 2px rgb(17 19 24 / 6%), 0 12px 32px -8px rgb(17 19 24 / 16%);
   --scrim: rgb(17 19 24 / 22%);
   /* Figma "Home" screens */
   --cell-active: color-mix(in srgb, var(--accent) 10%, rgb(255 255 255 / 62%));
   --text-soft: var(--paper-800);
-  --label: var(--paper-700); /* 10px labels stay AA on paper */
+  --label: var(--paper-700); /* small captions stay AA on paper */
   --check-bg: rgb(255 255 255 / 70%);
   --check-border: rgb(17 19 24 / 28%);
   --matrix-bezel: var(--paper-0);
@@ -223,15 +217,9 @@
   --dot-off: color-mix(in srgb, var(--paper-900) 7%, transparent);
   --dot-on: var(--paper-900);
   --dot-glow: none;
-  --pill-bg: rgb(255 255 255 / 70%);
-  --pill-border: rgb(17 19 24 / 8%);
-  --tabs-bg: rgb(17 19 24 / 5%);
-  --tab-active: var(--paper-0);
-  --outline: var(--paper-400);
   --grain-opacity: 0.04;
   /* primary action fill (Start, active pill tab, done checkbox) */
   --primary: var(--mint-l-700);
-  --primary-hover: var(--mint-l-800);
   --on-primary: var(--paper-0);
   /* filled controls: a solid by default; Sky swaps in a phase gradient */
   --primary-fill: var(--primary);
@@ -288,12 +276,11 @@
   --accent-soft: var(--mint-900);
   --danger: var(--state-error);
   --focus-ring: var(--mint-500); /* Focus Ring */
-  --shadow-pop: 0 1px 1px rgb(0 0 0 / 35%), 0 16px 40px -8px rgb(0 0 0 / 70%);
   --scrim: rgb(0 0 0 / 55%);
   /* Figma "Home" screens */
   --cell-active: color-mix(in srgb, var(--accent) 14%, rgb(255 255 255 / 4%));
   --text-soft: var(--ink-150);
-  --label: var(--ink-200); /* 10px labels stay AA on ink */
+  --label: var(--ink-200); /* small captions stay AA on ink */
   --check-bg: rgb(255 255 255 / 4%);
   --check-border: rgb(255 255 255 / 24%);
   --matrix-bezel: var(--ink-950);
@@ -303,14 +290,8 @@
   --dot-off: color-mix(in srgb, var(--white-100) 6%, transparent);
   --dot-on: var(--white-100);
   --dot-glow: 0 0 6px rgb(255 255 255 / 55%);
-  --pill-bg: rgb(255 255 255 / 6%);
-  --pill-border: rgb(255 255 255 / 9%);
-  --tabs-bg: rgb(255 255 255 / 5%);
-  --tab-active: rgb(255 255 255 / 12%); /* ≈ Card / Active */
-  --outline: var(--ink-500);
   --grain-opacity: 0.06;
   --primary: var(--mint-500);
-  --primary-hover: var(--mint-400);
   --on-primary: var(--ink-950);
   --primary-fill: var(--primary);
   --accent-fill: var(--accent);
@@ -339,33 +320,21 @@
   --nav-active-ink: var(--ink-950);
 }
 
-/* ---- Atmosphere: palette ground + a faint daypart glow ---- */
+/* ---- Atmosphere: palette ground ---- */
 :root[data-theme='light'] {
   --sky-a: var(--paper-50);
   --sky-b: var(--paper-100);
-  --sky-glow: rgb(255 255 255 / 70%);
-}
-:root[data-theme='light'][data-daypart='dawn'],
-:root[data-theme='light'][data-daypart='evening'] {
-  --sky-glow: rgb(230 247 241 / 60%); /* a breath of mint at the day's edges */
 }
 :root[data-theme='light'][data-daypart='night'] {
   --sky-b: var(--paper-150);
-  --sky-glow: rgb(255 255 255 / 55%);
 }
 
 :root[data-theme='dark'] {
   --sky-a: var(--ink-950);
   --sky-b: var(--ink-900);
-  --sky-glow: rgb(92 100 120 / 7%);
-}
-:root[data-theme='dark'][data-daypart='dawn'],
-:root[data-theme='dark'][data-daypart='evening'] {
-  --sky-glow: rgb(45 212 160 / 4%); /* a breath of mint at the day's edges */
 }
 :root[data-theme='dark'][data-daypart='night'] {
   --sky-b: var(--ink-950);
-  --sky-glow: rgb(92 100 120 / 5%);
 }
 
 /* Weather tints are a thin wash on top — atmosphere, not illustration. */

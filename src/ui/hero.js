@@ -2,14 +2,15 @@
 // attributes that the app ticker updates every second — no re-render needed.
 
 import * as store from '../core/store.js';
-import { todayKey, clockParts, formatLong, formatFull, greeting } from '../core/dates.js';
+import { todayKey, clockParts, formatFull, greeting } from '../core/dates.js';
 import { quoteFor, CATEGORIES } from '../data/quotes.js';
 import { describe, convert, searchCity, locateMe, setLocation } from '../services/weather.js';
 import { h, icon, reactive } from './dom.js';
 import { openPopover, closeOverlay, toast } from './overlay.js';
 
 // Bound text is filled at creation so re-rendered regions never flash empty.
-export function clock(variant = 'hero') {
+/** variant: 'display' (Clock face) or 'meta' (footer line). */
+export function clock(variant) {
   const p = store.prefs();
   const now = new Date();
   // The display face (Boldonse) has proportional digits — "0" is more than twice
@@ -38,8 +39,6 @@ export function clock(variant = 'hero') {
   );
 }
 
-export const dateLine = (className = 'hero-date') => h('div', { class: className, dataset: { bind: 'date' } }, formatLong(todayKey()));
-
 /** "Saturday, 02 September 2026" — the Clock face's date. */
 export const fullDateLine = (className = 'clockface__date') => h('div', { class: className, dataset: { bind: 'date-full' } }, formatFull(todayKey()));
 
@@ -55,7 +54,8 @@ export function greetingLine() {
 
 // ---------- weather ----------
 
-export function weather(variant = 'full') {
+/** variant: 'display' (Clock face, with the day's range) or 'meta' (footer line). */
+export function weather(variant) {
   return reactive(
     h('div', { class: `weather weather--${variant}` }),
     () => {
@@ -64,28 +64,14 @@ export function weather(variant = 'full') {
         return h('button', { type: 'button', class: 'weather__add', onClick: (e) => openLocation(e.currentTarget) }, icon('location', 14), 'Add weather');
       }
       if (!w) return h('span', { class: 'weather__place' }, location.name);
-      const { label } = describe(w.code);
-      const unit = '°';
       const btn = h(
         'button',
         { type: 'button', class: 'weather__btn', title: 'Change location', onClick: (e) => openLocation(e.currentTarget) },
-        h('span', { class: 'weather__temp' }, `${convert(w.temp)}${unit}`),
+        h('span', { class: 'weather__temp' }, `${convert(w.temp)}°`),
         h('span', { class: 'weather__place' }, location.name),
       );
-      if (variant === 'inline') return [btn, h('span', { class: 'weather__label' }, label)];
       if (variant === 'meta') return btn;
-      if (variant === 'display') {
-        return [btn, h('div', { class: 'weather__detail' }, `${label} H ${convert(w.high)}° / L ${convert(w.low)}°`)];
-      }
-      return [
-        btn,
-        h(
-          'div',
-          { class: 'weather__detail' },
-          h('span', null, label),
-          h('span', { class: 'weather__range' }, `H ${convert(w.high)}°  /  L ${convert(w.low)}°`),
-        ),
-      ];
+      return [btn, h('div', { class: 'weather__detail' }, `${describe(w.code).label} H ${convert(w.high)}° / L ${convert(w.low)}°`)];
     },
     () => [store.getDevice().location, store.getDevice().weather, store.prefs().units],
   );
@@ -186,7 +172,8 @@ export function nextQuote() {
   store.setDevice({ quoteShift: { date: today, n } });
 }
 
-export function quote(variant = 'hero') {
+/** variant: 'display' (Quote face, with tools) or 'line' (under the Clock face date). */
+export function quote(variant) {
   let lastText = null;
   return reactive(
     h('figure', { class: `quote quote--${variant}` }),
@@ -195,8 +182,6 @@ export function quote(variant = 'hero') {
       // Fade only when the line changes in place ("Another one"), not on first render.
       const fresh = lastText !== null && q.text !== lastText;
       lastText = q.text;
-      // Clock and Quote faces show the line plainly (Figma); others keep quotation marks.
-      const plain = variant === 'line' || variant === 'display';
       const body = variant === 'display' ? q.text.replace(/\.$/, '') : q.text;
       const long = body.length > 90;
       // Laws of UX carry a name: prefix it on the Clock line, headline it on the Quote face.
@@ -204,7 +189,7 @@ export function quote(variant = 'hero') {
         'blockquote',
         { class: ['quote__text', fresh && 'is-entering', long && 'is-long'] },
         variant === 'line' && q.title && h('strong', { class: 'quote__law' }, `${q.title} · `),
-        plain ? body : `“${body}”`,
+        body,
       );
       if (variant === 'display') {
         return [
@@ -222,18 +207,7 @@ export function quote(variant = 'hero') {
           ),
         ];
       }
-      if (variant !== 'feature') return text;
-      return [
-        text,
-        h('figcaption', { class: 'quote__by' }, `— ${q.author}`),
-        h(
-          'div',
-          { class: 'quote__tools' },
-          h('button', { type: 'button', class: 'text-btn', onClick: (e) => openCategories(e.currentTarget) }, categoryLabel()),
-          h('span', { class: 'sep' }, '·'),
-          h('button', { type: 'button', class: 'text-btn', onClick: nextQuote, title: 'Another one (Q)' }, 'Another one'),
-        ),
-      ];
+      return text;
     },
     () => [todayKey(), store.prefs().quoteCategory, store.getDevice().quoteShift],
   );
@@ -248,7 +222,7 @@ function copyQuote(text) {
 
 const categoryLabel = () => CATEGORIES.find((c) => c.id === store.prefs().quoteCategory)?.label || 'Motivation';
 
-export function openCategories(anchor) {
+function openCategories(anchor) {
   const current = store.prefs().quoteCategory;
   openPopover(
     anchor,
