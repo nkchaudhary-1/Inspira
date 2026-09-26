@@ -269,24 +269,9 @@ function openDayPopover(cell, key) {
     h('div', { class: 'daypop__notes' }),
     () => {
       const list = store.notesForDate(key);
-      return [
-        list.map((n) =>
-          h('button', { type: 'button', class: 'daypop__note', onClick: () => toDay(n.id) }, icon('note', 14), h('span', null, n.title || 'Untitled')),
-        ),
-        h(
-          'button',
-          {
-            type: 'button',
-            class: 'daypop__note daypop__note--add',
-            onClick: () => {
-              toDay();
-              createNote({ date: key });
-            },
-          },
-          icon('plus', 14),
-          h('span', null, 'New note'),
-        ),
-      ];
+      return list.map((n) =>
+        h('button', { type: 'button', class: 'daypop__note', onClick: () => toDay(n.id) }, icon('note', 14), h('span', null, n.title || 'Untitled')),
+      );
     },
     store.noteDeps,
   );
@@ -300,13 +285,34 @@ function openDayPopover(cell, key) {
       h(
         'div',
         null,
-        h('span', { class: 'board__weekday' }, key === todayKey() ? 'Today' : weekdayName(key), dayCount(key)),
+        h('span', { class: 'board__weekday daypop__weekday' }, key === todayKey() ? 'Today' : weekdayName(key), dayCount(key)),
         h('span', { class: 'daypop__num' }, pad(d.getDate()), h('small', null, ` ${monthName(d.getMonth())}`)),
       ),
-      h('button', { type: 'button', class: 'daypop__close', 'aria-label': 'Close', onClick: () => closeOverlay() }, icon('close', 16)),
+      h(
+        'button',
+        { type: 'button', class: 'sheet__close daypop__close', 'aria-label': 'Close', title: 'Close (Esc)', onClick: () => closeOverlay() },
+        icon('close', 16),
+      ),
     ),
     h('div', { class: 'daypop__body' }, events, tasks, addTask(key), notes),
-    h('footer', { class: 'daypop__foot' }, h('button', { type: 'button', class: 'text-btn', onClick: () => toDay() }, 'Open day', icon('arrowUpRight', 14))),
+    h(
+      'footer',
+      { class: 'daypop__foot' },
+      h(
+        'button',
+        {
+          type: 'button',
+          class: 'glass-btn',
+          onClick: () => {
+            toDay();
+            createNote({ date: key });
+          },
+        },
+        icon('plus', 14),
+        'New note',
+      ),
+      h('button', { type: 'button', class: 'glass-btn glass-btn--primary', onClick: () => toDay() }, 'Open day', icon('arrowUpRight', 14)),
+    ),
   );
   openPopover(cell, content, { side: 'beside', className: 'popover--day' });
 }
