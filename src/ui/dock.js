@@ -59,7 +59,7 @@ export function dock() {
           keyHint: ',',
           iconName: 'settings',
           badge: store.ui.syncStatus === 'error',
-          onClick: openSettings,
+          onClick: () => openSettings(),
         }),
       ];
     },

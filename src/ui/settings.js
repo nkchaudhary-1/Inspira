@@ -22,8 +22,9 @@ const TABS = [
   ['account', 'Account'],
 ];
 
+/** Open Settings, optionally on a tab. Safe to pass straight as a click handler. */
 export function openSettings(tab) {
-  if (tab) store.setUI({ settingsTab: tab });
+  if (typeof tab === 'string' && TABS.some(([id]) => id === tab)) store.setUI({ settingsTab: tab });
   const body = reactive(h('div', { class: 'settings' }), render);
   openSheet('Settings', body);
 }
@@ -31,7 +32,7 @@ export function openSettings(tab) {
 function render() {
   const p = store.prefs();
   const d = store.getDevice();
-  const tab = store.ui.settingsTab || 'appearance';
+  const tab = TABS.some(([id]) => id === store.ui.settingsTab) ? store.ui.settingsTab : 'appearance';
   const panels = {
     appearance: () => [modeCard(p), backgroundCard(), fineTuneCard()],
     general: () => [youCard(p), clockCard(p), inspirationCard(p), weatherCard(d, p)],
