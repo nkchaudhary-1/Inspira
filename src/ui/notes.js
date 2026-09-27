@@ -196,5 +196,5 @@ function continueBullet(e, id) {
 }
 
 export function noteButton(label, fields) {
-  return h('button', { type: 'button', class: 'add-btn', onClick: () => createNote(fields()) }, icon('plus', 16), h('span', null, label));
+  return h('button', { type: 'button', class: 'add-btn add-btn--box', onClick: () => createNote(fields()) }, icon('plus', 16), h('span', null, label));
 }

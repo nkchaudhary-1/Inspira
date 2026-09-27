@@ -55,12 +55,14 @@ function connectPrompt() {
   return h(
     'div',
     { class: 'connect' },
-    h('p', { class: 'empty' }, 'See your calendar alongside your day — Google, Outlook or iCloud.'),
+    h('span', { class: 'connect__icon' }, icon('calendar', 20)),
+    h('p', { class: 'connect__title' }, 'Bring in your calendar'),
+    h('p', { class: 'connect__text' }, 'See meetings next to your tasks — Google, Outlook or iCloud. Read-only, no sign-in.'),
     h(
       'button',
-      { type: 'button', class: 'add-btn', onClick: () => import('./settings.js').then((m) => m.openSettings('account')) },
-      icon('calendar', 16),
-      h('span', null, 'Add your calendar'),
+      { type: 'button', class: 'ghost-btn ghost-btn--sm', onClick: () => import('./settings.js').then((m) => m.openSettings('account')) },
+      icon('plus', 14),
+      'Add your calendar',
     ),
   );
 }

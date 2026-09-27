@@ -1135,6 +1135,27 @@ body:has(.dock-wrap.is-open) .hint,
   color: var(--accent-text);
 }
 
+/* "New note" as a dashed box, the same size as the Add task field. */
+.add-btn--box {
+  justify-content: flex-start;
+  width: 100%;
+  height: var(--control-md);
+  margin-top: var(--space-2);
+  padding: 0 var(--space-3);
+  border: 1px dashed var(--field-border-hover);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  transition:
+    color var(--dur-fast),
+    border-color var(--dur-fast),
+    background var(--dur-fast);
+}
+
+.add-btn--box:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--accent-soft);
+}
+
 /* ---- Buttons: one family ----
    Secondary (ghost / outline / pill / glass): a glass pill in three heights.
    Primary (…--primary): the accent fill. Text (text-btn, add-btn):
@@ -1758,8 +1779,37 @@ input[type='datetime-local'].field__input::-webkit-calendar-picker-indicator {
 
 .connect {
   display: grid;
+  justify-items: center;
   gap: var(--space-2);
-  justify-items: start;
+  padding: var(--space-8) var(--space-4);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.connect__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--space-1);
+  border-radius: 50%;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.connect__title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.connect__text {
+  max-width: 260px;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--text-3);
 }
 
 /* ---------- notes ---------- */
@@ -1909,14 +1959,79 @@ input[type='datetime-local'].field__input::-webkit-calendar-picker-indicator {
 
 .carry {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  margin-bottom: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
   border-radius: var(--radius-lg);
   background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
   font-size: var(--text-sm);
-  color: var(--text-2);
+  color: var(--text);
+}
+
+.carry__icon {
+  display: grid;
+  color: var(--accent-text);
+}
+
+.carry__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.carry__btn {
+  flex: none;
+}
+
+/* ---- Day view: three soft cards (Schedule · Tasks · Notes), each with a
+   header and a live count, like a project's detail. ---- */
+.cal-view--day .cols {
+  gap: var(--space-6);
+}
+
+.col--card {
+  padding: var(--space-5) var(--space-6) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--surface-solid) 55%, transparent);
+  box-shadow:
+    inset 0 0 0 1px var(--glass-border),
+    inset 0 1px 0 var(--glass-hi),
+    0 12px 32px -24px rgb(0 0 0 / 35%);
+}
+
+.col__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.col__head .col__title {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.col__count {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.col__count:empty {
+  display: none;
+}
+
+.col--card .note {
+  background: color-mix(in srgb, var(--text) 4%, transparent);
 }
 
 /* ---------- projects ---------- */

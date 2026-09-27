@@ -444,8 +444,16 @@ function yearView(d) {
 
 // ---------- day (the daily workspace) ----------
 
-function column(title, reactiveBody, footer, extraClass) {
-  return h('section', { class: ['col', extraClass] }, h('h2', { class: 'col__title' }, title), reactiveBody, footer);
+/** A Day-view card: title with a live count, its list, then its composer. */
+function column(title, reactiveBody, footer, extraClass, count) {
+  const badge = count && reactive(h('span', { class: 'col__count' }), count.text, count.deps);
+  return h(
+    'section',
+    { class: ['col', 'col--card', extraClass] },
+    h('header', { class: 'col__head' }, h('h2', { class: 'col__title' }, title), badge),
+    reactiveBody,
+    footer,
+  );
 }
 
 function dayView(date) {
@@ -465,8 +473,9 @@ function dayView(date) {
           h(
             'div',
             { class: 'carry' },
-            h('span', null, `${earlier.length} unfinished from earlier`),
-            h('button', { type: 'button', class: 'text-btn', onClick: () => moveTasksTo(earlier, date) }, 'Move to today'),
+            h('span', { class: 'carry__icon' }, icon('refresh', 14)),
+            h('span', { class: 'carry__text' }, `${earlier.length} unfinished from earlier`),
+            h('button', { type: 'button', class: 'ghost-btn ghost-btn--sm carry__btn', onClick: () => moveTasksTo(earlier, date) }, 'Move to today'),
           ),
         list.length ? taskList(list) : h('p', { class: 'empty' }, date < todayKey() ? 'No tasks this day.' : 'Nothing planned yet.'),
       ];
@@ -483,13 +492,32 @@ function dayView(date) {
   return h(
     'div',
     { class: 'cols' },
-    column('Schedule', schedule, null, 'col--schedule'),
-    column('Tasks', tasks, taskComposer({ placeholder: 'Add task', id: 'day-composer', defaults: () => ({ date: store.ui.date }) }), 'col--tasks'),
+    column('Schedule', schedule, null, 'col--schedule', {
+      text: () => {
+        const n = (store.ui.events[date] || []).length;
+        return n ? String(n) : null;
+      },
+      deps: () => [store.ui.events[date]],
+    }),
+    column('Tasks', tasks, taskComposer({ placeholder: 'Add task', id: 'day-composer', defaults: () => ({ date: store.ui.date }) }), 'col--tasks', {
+      text: () => {
+        const list = store.tasksForDate(date);
+        return list.length ? `${list.filter((t) => t.done).length}/${list.length}` : null;
+      },
+      deps: () => store.dayTaskDeps(date),
+    }),
     column(
       'Notes',
       notes,
       noteButton('New note', () => ({ date: store.ui.date })),
       'col--notes',
+      {
+        text: () => {
+          const n = store.notesForDate(date).length;
+          return n ? String(n) : null;
+        },
+        deps: store.noteDeps,
+      },
     ),
   );
 }
