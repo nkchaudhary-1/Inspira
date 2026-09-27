@@ -55,6 +55,7 @@ let device = structuredClone(DEFAULT_DEVICE);
 export const ui = {
   date: todayKey(),
   projectId: null,
+  projectQuery: '',
   openNoteId: null,
   events: {}, // dayKey -> [event]
   calendarStatus: 'idle', // idle | loading | ready | error

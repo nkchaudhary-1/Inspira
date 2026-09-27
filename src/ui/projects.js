@@ -3,73 +3,188 @@
 
 import * as store from '../core/store.js';
 import { PROJECT_COLORS } from '../core/store.js';
-import { h, icon, iconButton, reactive } from './dom.js';
+import { todayKey, formatShort } from '../core/dates.js';
+import { h, icon, iconButton, reactive, transition } from './dom.js';
 import { taskList, taskComposer } from './tasks.js';
 import { noteList, noteButton } from './notes.js';
 import { openPopover, closeOverlay, toast } from './overlay.js';
 
+const excerpt = (text, n = 140) => {
+  const t = (text || '').replace(/\s+/g, ' ').trim();
+  return t.length > n ? `${t.slice(0, n).trimEnd()}…` : t;
+};
+
+/** Open a project; `focusTask` puts the cursor in its "Add task" field. */
+function openProject(id, { focusTask = false } = {}) {
+  transition(() => store.setUI({ projectId: id }), id ? 'next' : 'prev');
+  if (!focusTask) return;
+  // The page swaps inside a view transition; wait for the field to exist.
+  const tryFocus = (n = 0) => {
+    const input = document.querySelector('.project .composer__input');
+    if (input) input.focus();
+    else if (n < 60) requestAnimationFrame(() => tryFocus(n + 1));
+  };
+  tryFocus();
+}
+
 export function projectsView() {
-  const list = reactive(h('div', { class: 'projects__list' }), () => {
-    const projects = store.projectList();
-    const active = store.ui.projectId;
-    return [
-      h('h2', { class: 'col__title' }, 'Projects'),
-      h(
-        'ul',
-        { class: 'plist', role: 'list' },
-        projects.map((p) => {
-          const open = store.tasksForProject(p.id).filter((t) => !t.done).length;
-          return h(
-            'li',
-            null,
-            h(
-              'button',
-              { type: 'button', class: ['plist__item', p.id === active && 'is-active'], onClick: () => store.setUI({ projectId: p.id }) },
-              h('i', { class: 'dot', style: { background: p.color } }),
-              h('span', { class: 'plist__name' }, p.name),
-              open ? h('span', { class: 'plist__count' }, open) : null,
-            ),
-          );
-        }),
-      ),
-    ];
-  });
-
-  const newInput = h('input', { class: 'composer__input', placeholder: 'New project', 'aria-label': 'New project name', maxlength: '60' });
-  const newForm = h('form', { class: 'composer' }, h('span', { class: 'composer__plus' }, icon('plus', 16)), newInput);
-  newForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = newInput.value.trim();
-    if (!name) return;
-    const p = store.findOrCreateProject(name);
-    newInput.value = '';
-    store.setUI({ projectId: p.id });
-  });
-
-  let shownId;
-  const detail = h('div', { class: 'projects__detail' });
-  const renderDetail = () => {
-    if (shownId !== undefined && !detail.isConnected) return unsub();
+  const root = h('div', { class: 'projects' });
+  let shown;
+  const render = () => {
+    if (shown !== undefined && !root.isConnected) return unsub();
     const project = store.getProject(store.ui.projectId);
     const id = project?.id ?? null;
-    if (id === shownId) return;
-    shownId = id;
-    detail.replaceChildren(project ? projectDetail(project) : emptyProjects());
+    if (id === shown) return;
+    shown = id;
+    root.replaceChildren(project ? projectDetail(project) : projectGrid());
   };
-  const unsub = store.subscribe(renderDetail);
-  renderDetail();
-
-  return h('div', { class: 'projects' }, h('aside', { class: 'projects__side' }, list, newForm), detail);
+  const unsub = store.subscribe(render);
+  render();
+  return root;
 }
 
-function emptyProjects() {
-  return h(
+// ---------- overview: one tinted card per project ----------
+
+function projectGrid() {
+  const search = h('input', {
+    class: 'projects__search-input',
+    type: 'search',
+    placeholder: 'Search projects, tasks and notes',
+    'aria-label': 'Search projects',
+    value: store.ui.projectQuery || '',
+    onInput: (e) => store.setUI({ projectQuery: e.target.value }),
+  });
+  const toolbar = h(
     'div',
-    { class: 'projects__empty' },
-    h('p', { class: 'empty' }, store.projectList().length ? 'Pick a project.' : 'Projects gather related tasks and notes — Portfolio, Work, Travel.'),
-    h('p', { class: 'fineprint' }, 'Tip: type “#portfolio” while adding a task to file it instantly.'),
+    { class: 'projects__bar' },
+    h('label', { class: 'projects__search' }, icon('search', 16), search),
+    h(
+      'button',
+      { type: 'button', class: 'glass-btn projects__new', onClick: () => document.querySelector('.pcard--new input')?.focus() },
+      icon('plus', 16),
+      'New project',
+    ),
+  );
+
+  const grid = reactive(
+    h('div', { class: 'pgrid' }),
+    () => {
+      const q = (store.ui.projectQuery || '').trim().toLowerCase();
+      const matches = (p) =>
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        store.tasksForProject(p.id).some((t) => t.title.toLowerCase().includes(q)) ||
+        store.notesForProject(p.id).some((n) => `${n.title} ${n.body}`.toLowerCase().includes(q));
+      const projects = store.projectList().filter(matches);
+      return [
+        ...projects.map(projectCard),
+        !q && newProjectCard(),
+        q && !projects.length && h('p', { class: 'empty pgrid__none' }, `Nothing matches “${store.ui.projectQuery.trim()}”.`),
+      ];
+    },
+    () => [store.getData().tasks, store.getData().notes, store.getData().projects, store.prefs(), store.ui.projectQuery],
+  );
+
+  return h('div', { class: 'projects__overview' }, toolbar, grid);
+}
+
+function projectCard(p) {
+  const all = store.tasksForProject(p.id);
+  const open = all.filter((t) => !t.done);
+  const done = all.length - open.length;
+  const notes = store.notesForProject(p.id);
+  const today = todayKey();
+  const dueToday = open.filter((t) => t.date === today).length;
+  const note = notes[0];
+  const chip = (text, extra) => h('span', { class: ['pchip', extra] }, text);
+
+  return h(
+    'article',
+    {
+      class: 'pcard',
+      style: { '--pc': p.color },
+      // The whole card opens the project; its own buttons keep their jobs.
+      onClick: (e) => !e.target.closest('button, a, input') && openProject(p.id),
+    },
+    h(
+      'header',
+      { class: 'pcard__head' },
+      h('button', { type: 'button', class: 'pcard__title', onClick: () => openProject(p.id) }, p.name),
+      h(
+        'div',
+        { class: 'pcard__tools' },
+        iconButton('plus', `Add a task to ${p.name}`, () => openProject(p.id, { focusTask: true }), { size: 18 }),
+        iconButton('more', 'Project options', (e) => projectMenu(e.currentTarget, p), { size: 18 }),
+      ),
+    ),
+    h(
+      'div',
+      { class: 'pcard__body' },
+      h(
+        'div',
+        { class: 'pcard__chips' },
+        chip(open.length ? `${open.length} open` : 'All clear'),
+        dueToday > 0 && chip(`${dueToday} today`, 'pchip--today'),
+        done > 0 && chip(`${done} done`),
+        notes.length > 0 && chip(`${notes.length} ${notes.length === 1 ? 'note' : 'notes'}`),
+      ),
+      open.length
+        ? h(
+            'ul',
+            { class: 'pcard__tasks', role: 'list' },
+            open.slice(0, 4).map((t) =>
+              h(
+                'li',
+                { class: 'pcard__task' },
+                h(
+                  'button',
+                  {
+                    type: 'button',
+                    class: 'pcard__check',
+                    role: 'checkbox',
+                    'aria-checked': 'false',
+                    'aria-label': `Mark “${t.title}” as done`,
+                    onClick: () => store.toggleTask(t.id),
+                  },
+                  icon('check', 12),
+                ),
+                h('span', { class: 'pcard__task-title' }, t.title),
+                t.date && h('span', { class: ['pcard__due', t.date < today && 'is-late'] }, t.date === today ? 'Today' : formatShort(t.date)),
+              ),
+            ),
+            open.length > 4 && h('li', { class: 'pcard__more' }, `+${open.length - 4} more`),
+          )
+        : h('p', { class: 'pcard__empty' }, all.length ? 'Everything here is done.' : 'No tasks yet — press + to add one.'),
+      note && h('div', { class: 'pcard__note' }, h('mark', null, note.title || 'Untitled note'), note.body && h('p', null, excerpt(note.body))),
+    ),
   );
 }
+
+/** Last card in the grid: type a name to make a project. */
+function newProjectCard() {
+  const input = h('input', { class: 'pcard__new-input', placeholder: 'New project', 'aria-label': 'New project name', maxlength: '60' });
+  return h(
+    'form',
+    {
+      class: 'pcard pcard--new',
+      onClick: () => input.focus(),
+      onSubmit: (e) => {
+        e.preventDefault();
+        const name = input.value.trim();
+        if (!name) return;
+        store.findOrCreateProject(name);
+        input.value = '';
+        input.blur(); // the grid holds re-renders while you type in it
+        toast(`“${name}” created`);
+      },
+    },
+    h('span', { class: 'pcard__plus' }, icon('plus', 20)),
+    input,
+    h('p', { class: 'pcard__hint' }, 'Group related tasks and notes — Work, Travel, Home. Tip: type #name while adding a task.'),
+  );
+}
+
+// ---------- one project ----------
 
 function projectDetail(project) {
   const header = reactive(h('header', { class: 'project__head' }), () => {
@@ -84,9 +199,20 @@ function projectDetail(project) {
       onKeydown: (e) => e.key === 'Enter' && e.target.blur(),
     });
     return [
-      h('i', { class: 'dot dot--lg', style: { background: p.color } }),
-      name,
-      iconButton('more', 'Project options', (e) => projectMenu(e.currentTarget, p)),
+      h(
+        'nav',
+        { class: 'crumbs', 'aria-label': 'Breadcrumb' },
+        h('button', { type: 'button', class: 'crumbs__back', onClick: () => openProject(null) }, icon('chevronLeft', 16), 'Projects'),
+        h('span', { class: 'crumbs__sep', 'aria-hidden': 'true' }, '/'),
+        h('span', { class: 'crumbs__here' }, p.name),
+      ),
+      h(
+        'div',
+        { class: 'project__title' },
+        h('i', { class: 'dot dot--lg', style: { background: p.color } }),
+        name,
+        iconButton('more', 'Project options', (e) => projectMenu(e.currentTarget, p)),
+      ),
     ];
   });
 
@@ -106,7 +232,7 @@ function projectDetail(project) {
 
   return h(
     'div',
-    { class: 'project' },
+    { class: 'project', style: { '--pc': project.color } },
     header,
     h(
       'div',
@@ -157,7 +283,7 @@ function projectMenu(anchor, project) {
           onClick: () => {
             closeOverlay();
             store.deleteProject(project.id);
-            store.setUI({ projectId: store.projectList()[0]?.id ?? null });
+            store.setUI({ projectId: null });
             toast(`“${project.name}” deleted. Its tasks and notes were kept.`);
           },
         },

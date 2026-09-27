@@ -11,7 +11,7 @@ import { projectsView } from './projects.js';
 const pad = (n) => String(n).padStart(2, '0');
 
 export function shiftWeek(n) {
-  transition(() => store.setUI({ date: addDays(store.ui.date, n * 7) }));
+  transition(() => store.setUI({ date: addDays(store.ui.date, n * 7) }), n > 0 ? 'next' : 'prev');
 }
 
 export function tasksToday() {
@@ -19,7 +19,8 @@ export function tasksToday() {
 }
 
 export function setTasksView(view) {
-  if (view === 'projects' && !store.getProject(store.ui.projectId)) store.setUI({ projectId: store.projectList()[0]?.id ?? null });
+  // The Projects tab always lands on the overview of all projects.
+  if (view === 'projects') store.setUI({ projectId: null });
   transition(() => store.setDevice({ tasksView: view }));
 }
 
@@ -39,6 +40,13 @@ export function tasksPage() {
   const unsub = store.subscribe(render);
   render();
   return page;
+}
+
+function projectSummary() {
+  const projects = store.projectList();
+  const open = projects.reduce((n, p) => n + store.tasksForProject(p.id).filter((t) => !t.done).length, 0);
+  if (!projects.length) return 'No projects yet';
+  return `${projects.length} ${projects.length === 1 ? 'project' : 'projects'} · ${open} open ${open === 1 ? 'task' : 'tasks'}`;
 }
 
 function header(view) {
@@ -65,12 +73,7 @@ function header(view) {
             !weekKeys(store.ui.date, ws).includes(todayKey()) &&
               h('button', { type: 'button', class: 'outline-btn', onClick: tasksToday, title: 'This week (T)' }, 'Today'),
           )
-        : h(
-            'div',
-            { class: 'pagenav__left' },
-            h('button', { type: 'button', class: 'pagenav__arrow', 'aria-label': 'Back to tasks', onClick: () => setTasksView('week') }, '‹'),
-            h('span', { class: 'pagenav__label' }, 'Back to this week'),
-          ),
+        : h('div', { class: 'pagenav__left' }, h('span', { class: 'pagenav__summary' }, projectSummary())),
       h(
         'div',
         { class: 'tabs', role: 'tablist', 'aria-label': 'Tasks view' },

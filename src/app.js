@@ -136,7 +136,8 @@ async function boot() {
     const layout = renderMode(mode);
     // Entrance motion when switching views, never on reactive re-renders. The
     // first paint of a new tab skips it so content is there the moment it opens.
-    if (booted) {
+    // View Transitions animate the swap; the staggered rise is only the fallback.
+    if (booted && !document.startViewTransition) {
       layout.classList.add('is-entering');
       setTimeout(() => layout.classList.remove('is-entering'), 1000);
     }

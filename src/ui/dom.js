@@ -9,8 +9,10 @@ export function h(tag, props, ...children) {
     for (const [key, value] of Object.entries(props)) {
       if (value == null || value === false) continue;
       if (key === 'class') el.setAttribute('class', Array.isArray(value) ? value.filter(Boolean).join(' ') : value);
-      else if (key === 'style' && typeof value === 'object') Object.assign(el.style, value);
-      else if (key === 'dataset') Object.assign(el.dataset, value);
+      else if (key === 'style' && typeof value === 'object') {
+        // Custom properties (--x) need setProperty; Object.assign drops them.
+        for (const [prop, v] of Object.entries(value)) prop.startsWith('--') ? el.style.setProperty(prop, v) : (el.style[prop] = v);
+      } else if (key === 'dataset') Object.assign(el.dataset, value);
       else if (key.startsWith('on') && typeof value === 'function') el.addEventListener(key.slice(2).toLowerCase(), value);
       else if (key === 'value' || key === 'checked' || key === 'textContent') el[key] = value;
       else if (value === true) el.setAttribute(key, '');
@@ -107,6 +109,7 @@ const PATHS = {
   keyboard:
     'M3 6.5A1.5 1.5 0 0 1 4.5 5h11A1.5 1.5 0 0 1 17 6.5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 13.5zM6 8.5h.01M9 8.5h.01M12 8.5h.01M14 8.5h.01M7 12h6',
   arrowUpRight: 'M7 13l6-6M8 7h5v5',
+  search: 'M9 15.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM13.8 13.8 17 17',
   sync: 'M4 10a6 6 0 0 1 10.2-4.3L16 7.5M16 10a6 6 0 0 1-10.2 4.3L4 12.5M16 4v3.5h-3.5M4 16v-3.5h3.5',
 };
 
@@ -152,8 +155,15 @@ export function autosize(textarea) {
 }
 
 /** Wrap a DOM update in a View Transition when supported (calm cross-fades). */
-export function transition(update) {
+/**
+ * Swap the page with a View Transition. Only the stage animates (the sky, dock
+ * and timer stay put); `dir` ('next' | 'prev') slides it the way you moved.
+ */
+export function transition(update, dir = 'fade') {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!document.startViewTransition || reduce) return update();
-  document.startViewTransition(update);
+  const root = document.documentElement;
+  root.dataset.vt = dir;
+  const t = document.startViewTransition(update);
+  t.finished.finally(() => root.dataset.vt === dir && delete root.dataset.vt);
 }

@@ -63,7 +63,7 @@ export function shiftCalendar(dir) {
   const d = store.ui.date;
   const next = v === 'day' ? addDays(d, dir) : v === 'week' ? addDays(d, dir * 7) : v === 'month' ? addMonths(d, dir) : addYears(d, dir);
   closeNote();
-  transition(() => store.setUI({ date: next }));
+  transition(() => store.setUI({ date: next }), dir > 0 ? 'next' : 'prev');
   loadMonth(next);
 }
 
