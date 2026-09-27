@@ -27,7 +27,20 @@ const TABS = [
 /** Open Settings, optionally on a tab. Safe to pass straight as a click handler. */
 export function openSettings(tab) {
   if (typeof tab === 'string' && TABS.some(([id]) => id === tab)) store.setUI({ settingsTab: tab });
-  const body = reactive(h('div', { class: 'settings' }), render);
+  const body = h('div', { class: 'settings' });
+  // Every change re-renders the panel; keep its scroll position so picking a
+  // style or a colour never jumps you back to the top. Switching tabs resets it.
+  let lastTab = null;
+  reactive(body, () => {
+    const old = body.querySelector('.settings__panel');
+    const top = old && lastTab === store.ui.settingsTab ? old.scrollTop : 0;
+    lastTab = store.ui.settingsTab;
+    queueMicrotask(() => {
+      const panel = body.querySelector('.settings__panel');
+      if (panel) panel.scrollTop = top;
+    });
+    return render();
+  });
   // No scrim: appearance changes are seen live on the page behind the panel.
   openSheet('Settings', body, { clear: true });
 }
