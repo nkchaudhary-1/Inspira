@@ -196,7 +196,7 @@ export function taskComposer({ placeholder = 'Add task', defaults = () => ({}), 
     id,
   });
   const hint = h('div', { class: 'composer__hint' }, '#project  ·  ! priority  ·  @6pm time  ·  Enter to add');
-  const form = h('form', { class: 'composer' }, h('span', { class: 'composer__plus' }, icon('plus', 16)), input, hint);
+  const form = h('form', { class: 'composer' }, h('label', { class: 'composer__box' }, h('span', { class: 'composer__plus' }, icon('plus', 16)), input), hint);
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (addTaskFromText(input.value, defaults())) input.value = '';

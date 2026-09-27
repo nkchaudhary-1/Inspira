@@ -243,6 +243,11 @@
   --glass-inset: rgb(17 19 24 / 8%);
   --glass-raised: #ffffff;
   --glass-group: rgb(255 255 255 / 60%); /* inset settings groups */
+  /* Input fields: one box style everywhere. */
+  --field-bg: rgb(255 255 255 / 72%);
+  --field-bg-focus: #ffffff;
+  --field-border: rgb(17 19 24 / 11%);
+  --field-border-hover: rgb(17 19 24 / 20%);
   --float-shadow: inset 0 1px 0 var(--glass-hi), 0 24px 64px -20px rgb(17 19 24 / 22%);
   /* Navigation (Figma 56:7576) */
   /* The dock is floating chrome: same glass and shadow as panels and popovers. */
@@ -312,6 +317,10 @@
   --glass-inset: rgb(0 0 0 / 45%);
   --glass-raised: rgb(255 255 255 / 9%);
   --glass-group: rgb(255 255 255 / 4%);
+  --field-bg: rgb(255 255 255 / 5%);
+  --field-bg-focus: rgb(255 255 255 / 8%);
+  --field-border: rgb(255 255 255 / 10%);
+  --field-border-hover: rgb(255 255 255 / 18%);
   --float-shadow: inset 0 1px 0 var(--glass-hi), 0 30px 80px -20px rgb(0 0 0 / 55%);
   --nav-bg: var(--glass-bg);
   --nav-border: var(--glass-border);
