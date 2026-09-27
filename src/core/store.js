@@ -138,9 +138,20 @@ function newRev() {
   return rev;
 }
 
+const SAVE_DELAY = 120;
+let lastSave = 0;
+
+function writeData() {
+  lastSave = Date.now();
+  storage.save(DATA_KEY, { ...data, _rev: newRev() });
+}
+
+// A lone edit is written at once, so it survives even a hard browser quit
+// (which never fires pagehide). Rapid follow-ups, like typing, are batched.
 function persistData() {
+  if (!saveTimer && Date.now() - lastSave >= SAVE_DELAY) return writeData();
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(flushData, 120);
+  saveTimer = setTimeout(flushData, SAVE_DELAY);
 }
 
 /** Write any pending edit now — used when the tab is hidden or closing. */
@@ -148,7 +159,7 @@ function flushData() {
   if (!saveTimer) return;
   clearTimeout(saveTimer);
   saveTimer = null;
-  storage.save(DATA_KEY, { ...data, _rev: newRev() });
+  writeData();
 }
 
 if (typeof window !== 'undefined' && typeof document?.addEventListener === 'function') {
