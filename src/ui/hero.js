@@ -6,6 +6,7 @@ import { todayKey, clockParts, formatFull, greeting } from '../core/dates.js';
 import { quoteFor, CATEGORIES } from '../data/quotes.js';
 import { describe, convert, searchCity, locateMe, setLocation } from '../services/weather.js';
 import { h, icon, reactive } from './dom.js';
+import { weatherIcon } from './weatherIcons.js';
 import { openPopover, closeOverlay, toast } from './overlay.js';
 
 // Bound text is filled at creation so re-rendered regions never flash empty.
@@ -67,6 +68,7 @@ export function weather(variant) {
       const btn = h(
         'button',
         { type: 'button', class: 'weather__btn', title: 'Change location', onClick: (e) => openLocation(e.currentTarget) },
+        h('span', { class: 'weather__icon', title: describe(w.code).label }, weatherIcon(w.code, w.isDay !== false, variant === 'meta' ? 22 : 36)),
         h('span', { class: 'weather__temp' }, `${convert(w.temp)}°`),
         h('span', { class: 'weather__place' }, location.name),
       );

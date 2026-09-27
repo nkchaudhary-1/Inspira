@@ -13,6 +13,7 @@ import { refreshCalendar, clearCalendar } from '../services/calendar.js';
 import { h, icon, reactive } from './dom.js';
 import { openSheet, closeOverlay, toast } from './overlay.js';
 import { openLocation } from './hero.js';
+import { kitIcon } from './weatherIcons.js';
 import { PRESETS, SKY_PHASES, DEFAULT_BACKDROP, backdrop, setBackdrop, activePreset, skyPhaseAt } from './backdrop.js';
 
 const TABS = [
@@ -79,9 +80,21 @@ function render() {
   ];
 }
 
-/** A titled group of rows. */
+/** A titled section. Consecutive rows sit together in one inset group. */
 function card(title, ...children) {
-  return h('section', { class: 'settings__card' }, title && h('h3', { class: 'settings__title' }, title), h('div', { class: 'settings__rows' }, ...children));
+  const items = [];
+  let run = null;
+  for (const child of children.flat()) {
+    if (!child) continue;
+    if (child.classList?.contains('settings__row')) {
+      if (!run) items.push((run = h('div', { class: 'settings__group' })));
+      run.append(child);
+    } else {
+      run = null;
+      items.push(child);
+    }
+  }
+  return h('section', { class: 'settings__card' }, title && h('h3', { class: 'settings__title' }, title), h('div', { class: 'settings__rows' }, items));
 }
 
 function row(label, control, hint, { stack = false } = {}) {
@@ -155,7 +168,7 @@ function accountCard(d) {
           'button',
           {
             type: 'button',
-            class: 'google-btn',
+            class: 'glass-btn google-btn',
             disabled: !avail.ok,
             onClick: () => guarded(async () => (await signIn(), syncNow()), 'Sign-in didn’t complete'),
           },
@@ -307,7 +320,11 @@ function skyCard() {
     row(
       'Follow the time of day',
       toggle(auto, (v) => setBackdrop({ light: 'sky', sky: v ? 'auto' : now }), 'Follow the time of day'),
-      auto ? 'Shifts from dawn to deep night' : on ? 'Pinned — tap a sky or switch on' : 'Uses the sky as your background',
+      auto
+        ? 'The sky changes with the hour'
+        : on
+          ? `Pinned to ${SKY_PHASES.find((x) => x.id === b.sky)?.label.toLowerCase() || 'one sky'}`
+          : 'Uses the sky as your background',
     ),
     block(
       h(
@@ -325,10 +342,9 @@ function skyCard() {
               dataset: { phase: p.id },
               onClick: () => setBackdrop({ light: 'sky', sky: p.id }),
             },
-            h('span', { class: 'sky-opt__name' }, p.label),
-            h('span', { class: 'sky-opt__icon' }, icon(p.icon, 18)),
-            h('span', { class: 'sky-opt__range' }, p.range),
-            auto && now === p.id && h('span', { class: 'sky-opt__now' }, 'Now'),
+            h('span', { class: 'sky-opt__icon' }, kitIcon(p.icon, 24)),
+            now === p.id && h('span', { class: 'sky-opt__now' }, 'Now'),
+            h('span', { class: 'sky-opt__text' }, h('span', { class: 'sky-opt__name' }, p.label), h('span', { class: 'sky-opt__range' }, p.range)),
           );
         }),
       ),
@@ -371,7 +387,7 @@ function fineTuneCard() {
     h('summary', null, h('span', null, 'Fine-tune'), h('span', { class: 'settings__hint' }, 'Light, grid, noise and motion')),
     h(
       'div',
-      { class: 'settings__rows' },
+      { class: 'settings__rows settings__rows--fold' },
       row(
         'Light',
         segmented(

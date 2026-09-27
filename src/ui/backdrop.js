@@ -50,10 +50,10 @@ export const PRESETS = [
  */
 export const SKY_PHASES = [
   { id: 'dawn', label: 'Dawn', from: 4, to: 8, range: '4AM – 8AM', icon: 'sunrise' },
-  { id: 'day', label: 'Day', from: 8, to: 16, range: '8AM – 4PM', icon: 'sun' },
+  { id: 'day', label: 'Day', from: 8, to: 16, range: '8AM – 4PM', icon: 'sunny' },
   { id: 'evening', label: 'Evening', from: 16, to: 19, range: '4PM – 7PM', icon: 'sunset' },
   { id: 'night', label: 'Night', from: 19, to: 22, range: '7PM – 10PM', icon: 'moon' },
-  { id: 'late', label: 'Late night', from: 22, to: 25, range: '10PM – 1AM', icon: 'moonStar' },
+  { id: 'late', label: 'Late night', from: 22, to: 25, range: '10PM – 1AM', icon: 'clearNight' },
   { id: 'deep', label: 'Deep night', from: 1, to: 4, range: '1AM – 4AM', icon: 'stars' },
 ];
 
