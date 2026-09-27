@@ -5,9 +5,9 @@ import { transition } from './dom.js';
 
 export const MODES = [
   { id: 'clock', label: 'Clock', key: '1', icon: 'clock' },
-  { id: 'motivation', label: 'Quote', key: '2', icon: 'sparkle' },
-  { id: 'focus', label: 'Focus', key: '3', icon: 'target' },
-  { id: 'tasks', label: 'Tasks', key: '4', icon: 'checklist' },
+  { id: 'motivation', label: 'Quote', key: '2', icon: 'quotes' },
+  { id: 'focus', label: 'Focus', key: '3', icon: 'focus' },
+  { id: 'tasks', label: 'Tasks', key: '4', icon: 'tasks' },
   { id: 'calendar', label: 'Calendar', key: '5', icon: 'calendar' },
 ];
 

@@ -4,6 +4,7 @@
 
 import * as store from '../core/store.js';
 import { h, icon, reactive } from './dom.js';
+import { navIcon } from './navIcons.js';
 import { MODES, setMode, currentMode } from './modes.js';
 import { openSettings } from './settings.js';
 import { openShortcuts } from './shortcuts.js';
@@ -23,7 +24,7 @@ function item({ id, label, keyHint, iconName, active, badge, onClick, index = 0 
       style: `--i: ${index}`,
       onClick,
     },
-    h('span', { class: 'dock__tile' }, icon(iconName, 20), badge && h('i', { class: 'dock__badge' })),
+    h('span', { class: 'dock__tile' }, navIcon(iconName, 22), badge && h('i', { class: 'dock__badge' })),
     h('span', { class: 'dock__label', 'aria-hidden': 'true' }, label, keyHint && h('kbd', null, keyHint)),
     h('i', { class: 'dock__dot', 'aria-hidden': 'true' }),
   );
@@ -49,7 +50,7 @@ export function dock() {
           id: 'theme',
           label: `Theme · ${pref === 'system' ? 'Auto' : pref[0].toUpperCase() + pref.slice(1)}`,
           keyHint: 'D',
-          iconName: dark ? 'moon' : 'sun',
+          iconName: dark ? 'themeDark' : 'themeLight',
           onClick: cycleTheme,
         }),
         item({
