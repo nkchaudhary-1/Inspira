@@ -1,6 +1,8 @@
 // Record-level last-write-wins merge used by sync. Every record carries
 // `updatedAt`; deletions are tombstones (`deleted: true`) so they propagate.
 
+import { cleanData } from './sanitize.js';
+
 export const TOMBSTONE_TTL = 30 * 24 * 60 * 60 * 1000;
 const COLLECTIONS = ['tasks', 'notes', 'projects'];
 
@@ -22,7 +24,9 @@ export function purgeTombstones(collection, now = Date.now(), ttl = TOMBSTONE_TT
   return out;
 }
 
+/** `remote` is untrusted (import, sync): it is cleaned before it can win. */
 export function mergeData(local, remote, now = Date.now()) {
+  remote = cleanData(remote);
   const out = {};
   for (const key of COLLECTIONS) {
     out[key] = purgeTombstones(mergeCollection(local[key], remote?.[key]), now);

@@ -42,14 +42,14 @@ npm run zip      # package for the Chrome Web Store
 
 ## Optional: Google sign-in (Drive sync, Calendar API)
 
-Google auth goes through `chrome.identity`, which needs an OAuth client tied to the extension's ID.
+The shipped build doesn't include Google sign-in (no `identity` permission, no OAuth client), so the Web Store listing asks for nothing it doesn't use. The code is kept in `src/services/auth.js` / `sync.js`; to turn it on, add `"identity"` to `permissions` and an `oauth2` block to `manifest.json`, then:
 
 1. In [Google Cloud Console](https://console.cloud.google.com/), create a project and enable the **Google Drive API** and **Google Calendar API**.
 2. Set up the **OAuth consent screen**. Add the scopes `userinfo.email`, `userinfo.profile`, `drive.appdata` and `calendar.readonly`.
 3. Go to **Credentials → Create OAuth client ID → Chrome Extension**. For the item ID, use the Web Store ID (`pemhabmgjkpbjdcedbfilpglbbklnmck`). For local testing, use the ID shown on `chrome://extensions`.
-4. Put the client ID in `manifest.json` → `oauth2.client_id`.
+4. Put the client ID in `manifest.json` → `oauth2.client_id` and add the sign-in section back to `privacy.html`.
 
-Until then, the app shows "Google sign-in isn't configured" and everything else works locally.
+Until then the Google account card stays hidden and everything else works without an account.
 
 > `calendar.readonly` is a **sensitive** scope. Public users won't see a clean consent screen until Google verifies the app, which typically takes a few weeks. Start that process early.
 
@@ -88,7 +88,7 @@ src/
 
 **Sync.** Local storage is the source of truth. When you're signed in, one JSON file in Drive's hidden `appDataFolder` is the shared copy. Each sync pulls it, merges record by record (newest `updatedAt` wins; deletions are kept as tombstones for 30 days), then pushes. Syncs run 2.5 s after an edit, when the tab becomes visible, and every 5 minutes. There's no server to run or pay for.
 
-**Permissions.** `storage`, `identity` and `alarms` produce no install warning. `notifications` is _optional_: Inspira requests it only when you first set a reminder or start a focus session. Weather uses city search or a one-off browser geolocation prompt, so the manifest doesn't need `geolocation`. This is deliberate: when an update adds permissions that show a warning, Chrome disables the extension for existing users until they approve.
+**Permissions.** `storage` and `alarms` produce no install warning. `notifications` is _optional_: Inspira requests it only when you first set a reminder or start a focus session. Weather uses city search or a one-off browser geolocation prompt, so the manifest doesn't need `geolocation`. This is deliberate: when an update adds permissions that show a warning, Chrome disables the extension for existing users until they approve.
 
 ## Keyboard
 
@@ -119,13 +119,12 @@ Inter typeface by Rasmus Andersson and Boldonse (both SIL OFL 1.1, see `src/font
 
 The package follows Manifest V3 and the Web Store program policies; `npm test` checks the parts that can be automated (MV3, name/description length, icons, minimal permissions, no remote code or inline scripts, network calls only to disclosed services, privacy policy coverage). Before submitting:
 
-1. **OAuth client** — create a Chrome-extension OAuth client in Google Cloud and put its ID in `manifest.json` → `oauth2.client_id`. Until then sign-in shows as unavailable and everything else works locally.
-2. **OAuth consent screen** — `calendar.readonly` is a sensitive scope, so the consent screen needs Google verification before public release. Link the privacy policy there.
+1. **Content security policy** — `manifest.json` pins scripts to the package (`script-src 'self'`, no eval), blocks plugins, framing and form posts, and limits network calls to Open-Meteo and the calendar hosts. `npm test` checks it.
+2. **Untrusted data** — imported files, Chrome sync and calendar feeds pass through `src/core/sanitize.js` (known fields and types only, http(s) links only, hex colours only, size caps).
 3. **Privacy policy URL** — `privacy.html` ships inside the extension; also publish it at a public URL and paste that into the listing.
 4. **Permission justifications** (Privacy tab of the listing):
    - `storage` — saves tasks, notes, projects and settings on the device.
    - `alarms` — schedules focus-session ends and task reminders.
-   - `identity` — optional Google sign-in for Drive sync and read-only Calendar.
    - `notifications` (optional, asked on first use) — focus and reminder alerts.
    - `optional_host_permissions` (asked only when you paste a calendar link, for that one service) — read the private iCal feed.
    - No required host permissions; no remote code.

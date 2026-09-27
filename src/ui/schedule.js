@@ -5,6 +5,7 @@ import * as store from '../core/store.js';
 import { formatTime } from '../core/dates.js';
 import { refreshCalendar, calendarSource } from '../services/calendar.js';
 import { h, icon } from './dom.js';
+import { safeUrl } from '../core/sanitize.js';
 
 export function eventList(dayKey, { limit, upcomingOnly = false, compact = false } = {}) {
   if (!calendarSource()) return compact ? null : connectPrompt();
@@ -39,8 +40,8 @@ export function eventList(dayKey, { limit, upcomingOnly = false, compact = false
         h('span', { class: 'event__time' }, ev.allDay ? 'All day' : formatTime(new Date(ev.start), h24)),
         h('span', { class: 'event__bar', style: ev.color ? { background: ev.color } : null }),
         h(
-          ev.link ? 'a' : 'span',
-          { class: 'event__title', href: ev.link || null, target: ev.link ? '_blank' : null, rel: ev.link ? 'noopener' : null },
+          safeUrl(ev.link) ? 'a' : 'span',
+          safeUrl(ev.link) ? { class: 'event__title', href: safeUrl(ev.link), target: '_blank', rel: 'noopener noreferrer' } : { class: 'event__title' },
           ev.title,
           ev.meet && !compact ? h('span', { class: 'event__meta' }, 'Meet') : null,
         ),

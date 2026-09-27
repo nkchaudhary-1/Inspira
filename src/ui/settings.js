@@ -17,6 +17,13 @@ import { openLocation } from './hero.js';
 import { kitIcon } from './weatherIcons.js';
 import { PRESETS, SKY_PHASES, DEFAULT_BACKDROP, CUSTOM_SWATCHES, backdrop, setBackdrop, activePreset, skyPhaseAt, validHex } from './backdrop.js';
 
+// About Inspira: the maker's credit and links. Leave a link empty to hide it.
+const ABOUT = {
+  maker: 'Neelesh',
+  portfolio: 'https://neelesh.one',
+  linkedin: 'https://www.linkedin.com/in/nkchaudhary01/',
+};
+
 const TABS = [
   ['appearance', 'Appearance'],
   ['general', 'General'],
@@ -53,13 +60,7 @@ function render() {
     appearance: () => [modeCard(p), backgroundCard(), colourCard(), skyCard(), fineTuneCard()],
     general: () => [youCard(p), clockCard(p), inspirationCard(p), weatherCard(d, p)],
     focus: () => [focusCard(p)],
-    account: () => [
-      syncCard(),
-      calendarCard(d),
-      (authAvailability().ok || d.account) && accountCard(d),
-      dataCard(),
-      h('p', { class: 'settings__hint settings__foot' }, 'Press ? anywhere for keyboard shortcuts.'),
-    ],
+    account: () => [syncCard(), calendarCard(d), (authAvailability().ok || d.account) && accountCard(d), dataCard(), aboutCard()],
   };
   return [
     h(
@@ -790,11 +791,40 @@ function focusCard(p) {
   );
 }
 
+function aboutCard() {
+  const version = typeof chrome !== 'undefined' && chrome.runtime?.getManifest ? chrome.runtime.getManifest().version : '';
+  const link = (label, href, hint) =>
+    href &&
+    row(label, h('a', { class: 'ghost-btn ghost-btn--sm', href, target: '_blank', rel: 'noopener noreferrer' }, 'Open', icon('arrowUpRight', 14)), hint);
+  return card(
+    'About Inspira',
+    h(
+      'div',
+      { class: 'about' },
+      h('img', { class: 'about__icon', src: 'icons/icon-128.png', alt: '', width: 48, height: 48 }),
+      h(
+        'div',
+        null,
+        h('div', { class: 'about__name' }, 'Inspira', version && h('span', { class: 'about__version' }, `v${version}`)),
+        h('p', { class: 'settings__hint' }, 'Your day, every time you open a new tab.'),
+      ),
+    ),
+    h('p', { class: 'about__credit' }, 'Designed & developed by ', h('strong', null, ABOUT.maker)),
+    link('Portfolio', ABOUT.portfolio, ABOUT.portfolio.replace(/^https?:\/\//, '')),
+    link('LinkedIn', ABOUT.linkedin, 'Say hello'),
+    row('Keyboard shortcuts', h('kbd', { class: 'about__kbd' }, '?'), 'Press anywhere to see them all'),
+  );
+}
+
 function dataCard() {
   const file = h('input', { type: 'file', accept: 'application/json', hidden: true });
   file.addEventListener('change', async () => {
     const f = file.files?.[0];
     if (!f) return;
+    if (f.size > 10 * 1024 * 1024) {
+      file.value = '';
+      return toast('That file is too large to be an Inspira export');
+    }
     try {
       const json = JSON.parse(await f.text());
       if (!json || typeof json !== 'object' || !('tasks' in json || 'notes' in json)) throw new Error('bad file');

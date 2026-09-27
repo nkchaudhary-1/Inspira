@@ -11,21 +11,26 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["storage", "identity", "alarms"],
-  "optional_permissions": ["notifications"],
-  "oauth2": {
-    "client_id": "YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com",
-    "scopes": [
-      "https://www.googleapis.com/auth/userinfo.email",
-      "https://www.googleapis.com/auth/userinfo.profile",
-      "https://www.googleapis.com/auth/drive.appdata"
-    ]
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "optional_permissions": [
+    "notifications"
+  ],
+  "optional_host_permissions": [
+    "https://calendar.google.com/*",
+    "https://outlook.office365.com/*",
+    "https://outlook.live.com/*",
+    "https://*.icloud.com/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self' data: https://*.googleusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://calendar.google.com https://outlook.office365.com https://outlook.live.com https://*.icloud.com https://www.googleapis.com https://oauth2.googleapis.com"
   },
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
-  },
-  "optional_host_permissions": ["https://calendar.google.com/*", "https://outlook.office365.com/*", "https://outlook.live.com/*", "https://*.icloud.com/*"]
+  }
 }

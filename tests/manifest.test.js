@@ -18,10 +18,22 @@ test('manifest is MV3 with store-sized name, description and icons', () => {
 });
 
 test('permissions stay minimal', () => {
-  assert.deepEqual([...manifest.permissions].sort(), ['alarms', 'identity', 'storage']);
+  assert.deepEqual([...manifest.permissions].sort(), ['alarms', 'storage']);
+  assert.equal(manifest.oauth2, undefined, 'no OAuth client until Google sign-in ships');
   assert.deepEqual(manifest.optional_permissions, ['notifications']);
   assert.equal(manifest.host_permissions, undefined, 'no host permissions — every API used allows CORS');
   assert.equal(manifest.content_scripts, undefined);
+});
+
+test('extension pages run under a strict CSP', () => {
+  const csp = manifest.content_security_policy?.extension_pages || '';
+  const directive = (name) => (csp.match(new RegExp(`(?:^|;)\\s*${name}\\s+([^;]+)`)) || [])[1]?.trim().split(/\s+/) || [];
+  assert.deepEqual(directive('script-src'), ["'self'"], 'scripts only from the package');
+  assert.deepEqual(directive('object-src'), ["'none'"]);
+  assert.ok(!csp.includes('unsafe-eval'));
+  const connect = directive('connect-src');
+  for (const host of manifest.optional_host_permissions) assert.ok(connect.includes(host.replace(/\/\*$/, '')), `connect-src allows ${host}`);
+  for (const host of ['https://api.open-meteo.com', 'https://geocoding-api.open-meteo.com']) assert.ok(connect.includes(host));
 });
 
 test('calendar-link hosts are optional, asked for one at a time, and match the code', async () => {
@@ -66,7 +78,7 @@ test('network calls only go to disclosed services', () => {
     }
   }
   const privacy = readFileSync('privacy.html', 'utf8');
-  for (const name of ['Open-Meteo', 'Chrome sync', 'iCal', 'Google Drive', 'calendar.readonly', 'Limited Use'])
+  for (const name of ['Open-Meteo', 'Chrome sync', 'iCal'])
     assert.ok(privacy.includes(name), `privacy policy mentions ${name}`);
 });
 

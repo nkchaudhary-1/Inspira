@@ -140,17 +140,27 @@ function body(v, d) {
 
 const MAX_ITEMS = 4;
 
-/** Events first (they're fixed in time), then open tasks, then done tasks. */
-function dayItems(key) {
+/** A cell lists the day's events (they're fixed in time); tasks show as a count. */
+function dayEvents(key) {
   const h24 = store.prefs().clock24;
-  const events = (store.ui.events[key] || []).map((e) => ({
-    kind: 'event',
+  return (store.ui.events[key] || []).map((e) => ({
     text: e.title,
     time: e.allDay ? null : formatTime(new Date(e.start), h24),
     color: e.color,
   }));
-  const tasks = store.tasksForDate(key).map((t) => ({ kind: 'task', text: t.title, done: t.done }));
-  return [...events, ...tasks];
+}
+
+/** "3 tasks" (or "2/3" when some are done) in the corner of a month cell. */
+function taskBadge(key) {
+  const tasks = store.tasksForDate(key);
+  if (!tasks.length) return null;
+  const done = tasks.filter((t) => t.done).length;
+  const all = done === tasks.length;
+  return h(
+    'span',
+    { class: ['month__badge', all && 'is-done'], title: `${done} of ${tasks.length} tasks done` },
+    all ? `✓ ${tasks.length}` : done ? `${done}/${tasks.length}` : `${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'}`,
+  );
 }
 
 function monthView(d) {
@@ -166,10 +176,11 @@ function monthView(d) {
     () =>
       weeks.flat().map((key, i) => {
         const day = fromKey(key);
-        const items = dayItems(key);
+        const items = dayEvents(key);
         const shown = items.slice(0, MAX_ITEMS);
         const more = items.length - shown.length;
         const notes = store.notesForDate(key).length;
+        const taskCount = store.tasksForDate(key).length;
         return h(
           'button',
           {
@@ -180,9 +191,11 @@ function monthView(d) {
               day.getMonth() !== month && 'is-outside',
               key === today && 'is-today',
               key === d && 'is-selected',
-              (items.length > 0 || notes > 0) && 'has-items',
+              (items.length > 0 || notes > 0 || taskCount > 0) && 'has-items',
             ],
-            'aria-label': `${formatFull(key)}${items.length ? `, ${items.length} items` : ''}`,
+            'aria-label': [formatFull(key), items.length && `${items.length} events`, taskCount && `${taskCount} tasks`, notes && `${notes} notes`]
+              .filter(Boolean)
+              .join(', '),
             dataset: { date: key },
             tabindex: key === d ? '0' : '-1',
             onClick: (e) => openDayPopover(e.currentTarget, key),
@@ -195,15 +208,16 @@ function monthView(d) {
             shown.map((it) =>
               h(
                 'span',
-                { class: ['month__item', `month__item--${it.kind}`, it.done && 'is-done'] },
-                it.kind === 'event' && h('i', { class: 'month__bar', style: it.color ? { background: it.color } : null }),
+                { class: 'month__item' },
+                h('i', { class: 'month__bar', style: it.color ? { background: it.color } : null }),
                 it.time && h('b', null, `${it.time} `),
                 it.text,
               ),
             ),
             more > 0 && h('span', { class: 'month__more' }, `+${more} more`),
-            notes > 0 && h('span', { class: 'month__more' }, `${notes} note${notes > 1 ? 's' : ''}`),
           ),
+          (taskCount > 0 || notes > 0) &&
+            h('span', { class: 'month__foot' }, notes > 0 && h('span', { class: 'month__note' }, icon('note', 12), notes), taskBadge(key)),
         );
       }),
     () => [store.getData().tasks, store.getData().notes, store.ui.events, store.prefs()],

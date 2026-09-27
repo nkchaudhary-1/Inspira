@@ -6,6 +6,7 @@
 import { getDevice, setDevice, setUI, ui } from '../core/store.js';
 import { toKey, fromKey } from '../core/dates.js';
 import { parseICS, expandEvents } from '../core/ics.js';
+import { safeUrl, safeColor } from '../core/sanitize.js';
 import { googleFetch } from './auth.js';
 
 export const calendarSource = () => (getDevice().icsUrl ? 'ics' : getDevice().calendarConnected ? 'google' : null);
@@ -15,6 +16,7 @@ export const calendarSource = () => (getDevice().icsUrl ? 'ics' : getDevice().ca
 /** Hosts whose secret iCal links we can read (declared as optional host permissions). */
 export const ICS_HOSTS = ['calendar.google.com', 'outlook.office365.com', 'outlook.live.com', '*.icloud.com'];
 const ICS_TTL = 15 * 60 * 1000;
+const ICS_MAX = 5 * 1024 * 1024; // a personal calendar is far smaller; refuse anything huge
 let feed = null; // { url, at, parsed }
 
 /** webcal:// → https://, and only hosts we support. Returns a URL or null. */
@@ -35,7 +37,9 @@ async function fetchFeed(url, { force = false } = {}) {
   if (!force && feed?.url === url && Date.now() - feed.at < ICS_TTL) return feed.parsed;
   const res = await fetch(url, { cache: 'no-store', credentials: 'omit' });
   if (!res.ok) throw new Error(`calendar feed ${res.status}`);
+  if (Number(res.headers.get('content-length')) > ICS_MAX) throw new Error('calendar feed too large');
   const text = await res.text();
+  if (text.length > ICS_MAX) throw new Error('calendar feed too large');
   if (!text.includes('BEGIN:VCALENDAR')) throw new Error('not a calendar feed');
   const parsed = parseICS(text);
   feed = { url, at: Date.now(), parsed };
@@ -63,7 +67,11 @@ export function removeIcsUrl() {
 
 async function icsEvents(timeMin, timeMax, force) {
   const parsed = await fetchFeed(getDevice().icsUrl, { force });
-  return expandEvents(parsed, new Date(timeMin).getTime(), new Date(timeMax).getTime());
+  return expandEvents(parsed, new Date(timeMin).getTime(), new Date(timeMax).getTime()).map((e) => ({
+    ...e,
+    title: e.title.slice(0, 300),
+    link: safeUrl(e.link),
+  }));
 }
 
 // ---------- Google Calendar API ----------
@@ -85,9 +93,9 @@ function normalize(ev, calendar) {
     start: start.getTime(),
     end: end.getTime(),
     location: ev.location || '',
-    link: ev.htmlLink,
-    meet: ev.hangoutLink || '',
-    color: calendar.backgroundColor || null,
+    link: safeUrl(ev.htmlLink),
+    meet: safeUrl(ev.hangoutLink),
+    color: safeColor(calendar.backgroundColor),
   };
 }
 

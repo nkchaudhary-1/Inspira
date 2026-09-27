@@ -205,7 +205,10 @@ export function quote(variant) {
             h('button', { type: 'button', class: 'text-btn', onClick: nextQuote, title: 'Another one (Q)' }, 'Another one'),
             h('span', { class: 'sep' }, '·'),
             h('button', { type: 'button', class: 'text-btn', onClick: () => copyQuote(q.title ? `${q.title} — ${q.text}` : q.text) }, 'Copy'),
-            q.url && [h('span', { class: 'sep' }, '·'), h('a', { class: 'text-btn', href: q.url, target: '_blank', rel: 'noopener' }, `Read on ${q.author} ↗`)],
+            q.url && [
+              h('span', { class: 'sep' }, '·'),
+              h('a', { class: 'text-btn', href: q.url, target: '_blank', rel: 'noopener noreferrer' }, `Read on ${q.author} ↗`),
+            ],
           ),
         ];
       }
