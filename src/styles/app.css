@@ -1493,7 +1493,7 @@ body:has(.dock-wrap.is-open) .hint,
   display: grid;
   gap: 6px;
   padding: var(--space-3) 14px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--surface);
   border: 1px solid var(--line);
   cursor: pointer;
@@ -1624,7 +1624,7 @@ body:has(.dock-wrap.is-open) .hint,
   gap: var(--space-3);
   padding: 8px 12px;
   margin-bottom: var(--space-2);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--accent-soft);
   font-size: var(--text-sm);
   color: var(--text-2);
@@ -2172,7 +2172,7 @@ body:has(.dock-wrap.is-open) .hint,
   flex-direction: column;
   gap: 12px;
   min-width: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--card);
   border: 1px solid var(--card-border);
   transition:
