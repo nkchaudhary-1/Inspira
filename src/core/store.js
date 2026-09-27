@@ -35,6 +35,12 @@ export const DEFAULT_DEVICE = {
   weather: null, // cached forecast
   account: null, // { email, name, givenName, picture }
   calendarConnected: false,
+  // Calendar from a private iCal link (Google / Outlook / iCloud) — no sign-in.
+  icsUrl: null,
+  icsName: '',
+  // Sync through the Chrome profile (chrome.storage.sync).
+  chromeSync: true,
+  chromeSyncInfo: null,
   // Pomodoro: phase focus → short break (long break every 4th), started manually.
   focus: { phase: 'focus', state: 'idle', intention: '', endsAt: null, remainingMs: null, cycle: 0, cycleDate: null },
   quoteShift: { date: null, n: 0 },
@@ -360,7 +366,7 @@ export const dayTaskDeps = (key) => [data.projects, data.prefs, ...tasksForDate(
 /** Any task list that isn't scoped to a single day. */
 export const taskDeps = () => [data.tasks, data.projects, data.prefs];
 export const noteDeps = () => [data.notes, data.projects, ui.openNoteId];
-export const eventDeps = (key) => [device.calendarConnected, ui.calendarStatus, data.prefs, key ? ui.events[key] : ui.events];
+export const eventDeps = (key) => [device.calendarConnected, device.icsUrl, ui.calendarStatus, data.prefs, key ? ui.events[key] : ui.events];
 
 export function daysWithItems() {
   const days = new Set();

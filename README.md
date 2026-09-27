@@ -7,7 +7,7 @@ Inspira replaces Chrome's New Tab page with a calm clock, daily inspiration and 
 - **Five modes, one key each.** `1` Clock · `2` Quote · `3` Focus (pomodoro) · `4` Tasks (week board) · `5` Calendar (day / week / month / year)
 - **The date is the backbone.** Every task, note and event belongs to a day. Drag tasks between days, step through weeks or months with `←` / `→`, and jump back with `T`.
 - **Three things stay separate.** _Schedule_ is what's booked (Google Calendar, read-only). _Tasks_ are what you need to do. _Notes_ are what you want to remember.
-- **Works without an account.** Signing in with Google syncs everything through a private file in your Drive.
+- **Works without an account.** Data syncs through your Chrome profile (`chrome.storage.sync`) to every computer signed in to Chrome with sync on, and your calendar comes from a private iCal link (Google, Outlook or iCloud). Google sign-in is optional, for later.
 
 ---
 
@@ -35,7 +35,12 @@ npm run serve    # optional: serve at http://localhost:5173/newtab.html (Google 
 npm run zip      # package for the Chrome Web Store
 ```
 
-## Enable Google sign-in, sync and Calendar
+## Sync and calendar without an account
+
+- **Chrome sync** (Settings → Account → Sync with Chrome, on by default). Uses `chrome.storage.sync`: about 100 KB, 8 KB per item. `src/core/syncPack.js` packs prefs, projects, open tasks and the last 60 days of items (newest first, whole records only) into chunks; whatever doesn't fit stays local, and the record-level merge never treats "missing" as "deleted". Writes are batched every 3 s.
+- **Calendar link** (Settings → Account → Calendar). Paste a secret iCal link; `src/core/ics.js` parses it (time zones, all-day, recurring events, exceptions). Hosts are optional permissions requested one at a time: `calendar.google.com`, `outlook.office365.com`, `outlook.live.com`, `*.icloud.com`. The link is stored on this device only.
+
+## Optional: Google sign-in (Drive sync, Calendar API)
 
 Google auth goes through `chrome.identity`, which needs an OAuth client tied to the extension's ID.
 
@@ -122,8 +127,9 @@ The package follows Manifest V3 and the Web Store program policies; `npm test` c
    - `alarms` — schedules focus-session ends and task reminders.
    - `identity` — optional Google sign-in for Drive sync and read-only Calendar.
    - `notifications` (optional, asked on first use) — focus and reminder alerts.
-   - No host permissions; no remote code.
+   - `optional_host_permissions` (asked only when you paste a calendar link, for that one service) — read the private iCal feed.
+   - No required host permissions; no remote code.
 5. **Single purpose** — "Replaces the new tab page with a calm daily workspace: clock, inspiration, weather, focus timer, tasks and calendar."
-6. **Data disclosure** — collects personal communications/content only for sync (Google Drive app folder) and approximate location only for weather (Open-Meteo); not sold, not used for unrelated purposes, not used for creditworthiness.
+6. **Data disclosure** — personal content syncs only through the user's own Chrome sync (or, if signed in, their Google Drive app folder); calendar events are read from the user's own iCal link; approximate location only for weather (Open-Meteo); not sold, not used for unrelated purposes, not used for creditworthiness.
 7. **Package** — `npm run zip` builds `inspira.zip` with only what ships (no tests, docs or sources of icons).
 8. **Listing assets** — 128×128 icon (included), at least one 1280×800 screenshot, 440×280 small promo tile.

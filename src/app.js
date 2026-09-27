@@ -4,8 +4,9 @@
 import * as store from './core/store.js';
 import { clockParts, formatFull, todayKey, greeting, formatDuration } from './core/dates.js';
 import { refreshWeather } from './services/weather.js';
-import { loadMonth } from './services/calendar.js';
+import { loadMonth, calendarSource } from './services/calendar.js';
 import { startSync } from './services/sync.js';
+import { startChromeSync } from './services/chromeSync.js';
 import { h, icon } from './ui/dom.js';
 import { clock, fullDateLine, greetingLine, quote, weather, metaFooter } from './ui/hero.js';
 import { focusView, focusTick, focusRemaining, paintFocus, focusMini, paintFocusMini, PHASES } from './ui/focus.js';
@@ -158,7 +159,7 @@ async function boot() {
 
   refreshWeather();
   setInterval(() => document.hidden || refreshWeather(), 15 * 60 * 1000);
-  if (store.getDevice().calendarConnected) loadMonth(store.ui.date);
+  if (calendarSource()) loadMonth(store.ui.date);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') return;
     refreshWeather();
@@ -166,6 +167,7 @@ async function boot() {
     tick();
   });
   startSync();
+  startChromeSync();
 
   firstRunHint();
 }

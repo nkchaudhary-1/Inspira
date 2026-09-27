@@ -9,7 +9,8 @@ import * as store from '../core/store.js';
 import { CATEGORIES } from '../data/quotes.js';
 import { authAvailability, signIn, signOut, connectCalendar, disconnectCalendar } from '../services/auth.js';
 import { syncNow, syncLabel } from '../services/sync.js';
-import { refreshCalendar, clearCalendar } from '../services/calendar.js';
+import { refreshCalendar, clearCalendar, normalizeIcsUrl, icsOrigin, testIcsUrl, setIcsUrl, removeIcsUrl } from '../services/calendar.js';
+import { chromeSyncAvailable, chromeSyncOn, setChromeSync, chromeSyncLabel } from '../services/chromeSync.js';
 import { h, icon, reactive } from './dom.js';
 import { openSheet, closeOverlay, toast } from './overlay.js';
 import { openLocation } from './hero.js';
@@ -38,7 +39,13 @@ function render() {
     appearance: () => [modeCard(p), backgroundCard(), skyCard(), fineTuneCard()],
     general: () => [youCard(p), clockCard(p), inspirationCard(p), weatherCard(d, p)],
     focus: () => [focusCard(p)],
-    account: () => [accountCard(d), dataCard(), h('p', { class: 'settings__hint settings__foot' }, 'Press ? anywhere for keyboard shortcuts.')],
+    account: () => [
+      syncCard(),
+      calendarCard(d),
+      (authAvailability().ok || d.account) && accountCard(d),
+      dataCard(),
+      h('p', { class: 'settings__hint settings__foot' }, 'Press ? anywhere for keyboard shortcuts.'),
+    ],
   };
   return [
     h(
@@ -151,6 +158,89 @@ async function guarded(fn, failMsg) {
     console.warn('[inspira]', err);
     toast(failMsg);
   }
+}
+
+/** Sync through the Chrome profile — no account needed. */
+function syncCard() {
+  return card(
+    'Sync',
+    row('Sync with Chrome', chromeSyncAvailable() ? toggle(chromeSyncOn(), setChromeSync, 'Sync with Chrome') : null, chromeSyncLabel()),
+    h(
+      'p',
+      { class: 'settings__hint settings__aside' },
+      'Your tasks, notes, projects and settings follow you to any computer where you’re signed in to Chrome with sync on. Open tasks and the last 60 days travel; older items stay on this computer.',
+    ),
+  );
+}
+
+/** Read-only calendar from a private iCal link: Google, Outlook or iCloud. */
+function calendarCard(d) {
+  if (d.icsUrl) {
+    const failed = store.ui.calendarStatus === 'error';
+    return card(
+      'Calendar',
+      row(
+        d.icsName || 'Calendar',
+        h(
+          'div',
+          { class: 'settings__actions' },
+          h('button', { type: 'button', class: 'ghost-btn ghost-btn--sm', onClick: () => refreshCalendar() }, icon('refresh', 14), 'Refresh'),
+          h(
+            'button',
+            { type: 'button', class: 'ghost-btn ghost-btn--sm ghost-btn--danger', onClick: () => (removeIcsUrl(), toast('Calendar removed')) },
+            'Remove',
+          ),
+        ),
+        failed ? 'Couldn’t reach the link — check it’s still valid' : 'Read-only · refreshes every 15 minutes',
+      ),
+    );
+  }
+  const input = h('input', {
+    class: 'field__input settings__link',
+    type: 'url',
+    placeholder: 'Paste your secret iCal link',
+    'aria-label': 'Calendar link',
+    autocomplete: 'off',
+    spellcheck: 'false',
+  });
+  const add = h('button', { type: 'submit', class: 'glass-btn glass-btn--primary settings__add' }, 'Add');
+  const connect = async (e) => {
+    e.preventDefault();
+    const url = normalizeIcsUrl(input.value);
+    if (!url) return toast('Paste a Google Calendar, Outlook or iCloud calendar link');
+    // Ask for access to just this calendar's host (must happen in the click).
+    const granted = typeof chrome !== 'undefined' && chrome.permissions ? await chrome.permissions.request({ origins: [icsOrigin(url)] }) : true;
+    if (!granted) return toast('Inspira needs permission to read that calendar');
+    add.disabled = true;
+    add.textContent = 'Checking…';
+    try {
+      const name = await testIcsUrl(url);
+      setIcsUrl(url, name);
+      toast(`Added ${name}`);
+    } catch (err) {
+      console.warn('[inspira] calendar link', err);
+      toast('Couldn’t read that link — use the secret iCal address');
+      add.disabled = false;
+      add.textContent = 'Add';
+    }
+  };
+  return card(
+    'Calendar',
+    h('form', { class: 'settings__linkform', onSubmit: connect }, input, add),
+    h(
+      'details',
+      { class: 'settings__howto' },
+      h('summary', null, 'Where do I find it?'),
+      h(
+        'ul',
+        null,
+        h('li', null, h('strong', null, 'Google Calendar'), ' — Settings → your calendar → “Secret address in iCal format”'),
+        h('li', null, h('strong', null, 'Outlook'), ' — Settings → Calendar → Shared calendars → Publish → ICS link'),
+        h('li', null, h('strong', null, 'iCloud'), ' — Calendar → Share → Public calendar → copy link'),
+      ),
+      h('p', null, 'Read-only. The link stays on this computer — anyone with it can see that calendar, so keep it private.'),
+    ),
+  );
 }
 
 function accountCard(d) {

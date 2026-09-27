@@ -3,7 +3,7 @@
   "name": "Inspira — Your Day, Every New Tab",
   "short_name": "Inspira",
   "version": "2.0.0",
-  "description": "A calm clock, daily inspiration and weather — with your tasks, notes, projects and Google Calendar, one new tab away.",
+  "description": "A calm clock, daily inspiration and weather — with your tasks, notes, projects and calendar, one new tab away.",
   "minimum_chrome_version": "116",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
@@ -26,5 +26,6 @@
     "32": "icons/icon-32.png",
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
-  }
+  },
+  "optional_host_permissions": ["https://calendar.google.com/*", "https://outlook.office365.com/*", "https://outlook.live.com/*", "https://*.icloud.com/*"]
 }

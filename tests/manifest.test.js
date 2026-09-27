@@ -24,6 +24,20 @@ test('permissions stay minimal', () => {
   assert.equal(manifest.content_scripts, undefined);
 });
 
+test('calendar-link hosts are optional, asked for one at a time, and match the code', async () => {
+  globalThis.document ??= { documentElement: { dataset: {}, style: { setProperty() {} } }, querySelector: () => null };
+  const { ICS_HOSTS, normalizeIcsUrl } = await import('../src/services/calendar.js');
+  assert.deepEqual(
+    manifest.optional_host_permissions,
+    ICS_HOSTS.map((h) => `https://${h}/*`),
+  );
+  assert.equal(normalizeIcsUrl('webcal://p42-caldav.icloud.com/published/2/abc'), 'https://p42-caldav.icloud.com/published/2/abc');
+  assert.ok(normalizeIcsUrl('https://calendar.google.com/calendar/ical/me%40gmail.com/private-x/basic.ics'));
+  assert.equal(normalizeIcsUrl('https://evil.example.com/cal.ics'), null);
+  assert.equal(normalizeIcsUrl('https://calendar.google.com.evil.com/x.ics'), null);
+  assert.equal(normalizeIcsUrl('http://calendar.google.com/x.ics'), null);
+});
+
 test('every file the manifest or pages reference exists and is packaged', () => {
   const zip = pkg.scripts.zip;
   for (const f of ['newtab.html', 'privacy.html', 'background.js', 'src', 'icons']) assert.ok(zip.includes(f), `zip includes ${f}`);
@@ -52,7 +66,8 @@ test('network calls only go to disclosed services', () => {
     }
   }
   const privacy = readFileSync('privacy.html', 'utf8');
-  for (const name of ['Open-Meteo', 'Google Drive', 'calendar.readonly', 'Limited Use']) assert.ok(privacy.includes(name), `privacy policy mentions ${name}`);
+  for (const name of ['Open-Meteo', 'Chrome sync', 'iCal', 'Google Drive', 'calendar.readonly', 'Limited Use'])
+    assert.ok(privacy.includes(name), `privacy policy mentions ${name}`);
 });
 
 test('current-location name comes from the time zone, offline', async () => {

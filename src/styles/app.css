@@ -3217,6 +3217,81 @@ body:has(.dock-wrap.is-open) .hint,
   border-top: 1px solid var(--glass-border);
 }
 
+.settings__aside {
+  margin: 0;
+  padding: 0 4px;
+}
+
+.settings__actions {
+  display: flex;
+  flex: none;
+  gap: var(--space-2);
+}
+
+/* Calendar link: a pill field with its button, then a quiet how-to fold. */
+.settings__linkform {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.settings__link {
+  flex: 1;
+  border-radius: var(--radius-pill);
+  background: var(--glass-group);
+}
+
+.settings__add {
+  height: var(--control-md);
+  min-width: 80px;
+  padding: 0 var(--space-5);
+  font-size: var(--text-sm);
+}
+
+.settings__howto {
+  padding: 0 4px;
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+
+.settings__howto summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--text-2);
+  list-style: none;
+}
+
+.settings__howto summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings__howto summary::after {
+  content: '›';
+  display: inline-block;
+  margin-left: 6px;
+  transition: transform var(--dur-fast);
+}
+
+.settings__howto[open] summary::after {
+  transform: rotate(90deg);
+}
+
+.settings__howto ul {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0;
+  padding-left: 18px;
+  line-height: 1.5;
+}
+
+.settings__howto strong {
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.settings__howto p {
+  line-height: 1.5;
+}
+
 .settings__input {
   width: 180px;
   height: var(--control-sm);

@@ -3,23 +3,15 @@
 
 import * as store from '../core/store.js';
 import { formatTime } from '../core/dates.js';
-import { connectCalendar, authAvailability } from '../services/auth.js';
-import { loadMonth, refreshCalendar } from '../services/calendar.js';
+import { refreshCalendar, calendarSource } from '../services/calendar.js';
 import { h, icon } from './dom.js';
-import { toast } from './overlay.js';
 
 export function eventList(dayKey, { limit, upcomingOnly = false, compact = false } = {}) {
-  const device = store.getDevice();
-  if (!device.calendarConnected) return compact ? null : connectPrompt();
+  if (!calendarSource()) return compact ? null : connectPrompt();
 
   const status = store.ui.calendarStatus;
   const retry = () =>
-    h(
-      'p',
-      { class: 'empty' },
-      'Couldn’t reach Google Calendar. ',
-      h('button', { type: 'button', class: 'text-btn', onClick: () => refreshCalendar() }, 'Retry'),
-    );
+    h('p', { class: 'empty' }, 'Couldn’t reach your calendar. ', h('button', { type: 'button', class: 'text-btn', onClick: () => refreshCalendar() }, 'Retry'));
 
   let events = store.ui.events[dayKey] || [];
   // Offline or token hiccup: keep showing what we already have.
@@ -47,8 +39,8 @@ export function eventList(dayKey, { limit, upcomingOnly = false, compact = false
         h('span', { class: 'event__time' }, ev.allDay ? 'All day' : formatTime(new Date(ev.start), h24)),
         h('span', { class: 'event__bar', style: ev.color ? { background: ev.color } : null }),
         h(
-          'a',
-          { class: 'event__title', href: ev.link, target: '_blank', rel: 'noopener' },
+          ev.link ? 'a' : 'span',
+          { class: 'event__title', href: ev.link || null, target: ev.link ? '_blank' : null, rel: ev.link ? 'noopener' : null },
           ev.title,
           ev.meet && !compact ? h('span', { class: 'event__meta' }, 'Meet') : null,
         ),
@@ -59,30 +51,15 @@ export function eventList(dayKey, { limit, upcomingOnly = false, compact = false
 }
 
 function connectPrompt() {
-  const avail = authAvailability();
   return h(
     'div',
     { class: 'connect' },
-    h('p', { class: 'empty' }, 'See your Google Calendar events alongside your day.'),
+    h('p', { class: 'empty' }, 'See your calendar alongside your day — Google, Outlook or iCloud.'),
     h(
       'button',
-      {
-        type: 'button',
-        class: 'add-btn',
-        disabled: !avail.ok,
-        title: avail.ok ? null : avail.reason,
-        onClick: async () => {
-          try {
-            await connectCalendar();
-            loadMonth(store.ui.date, { force: true });
-          } catch (err) {
-            toast('Calendar wasn’t connected');
-          }
-        },
-      },
+      { type: 'button', class: 'add-btn', onClick: () => import('./settings.js').then((m) => m.openSettings('account')) },
       icon('calendar', 16),
-      h('span', null, 'Connect Google Calendar'),
+      h('span', null, 'Add your calendar'),
     ),
-    !avail.ok && h('p', { class: 'fineprint' }, avail.reason),
   );
 }
