@@ -18,9 +18,9 @@ export function applyTheme() {
   if (root.dataset.sky !== sky) root.dataset.sky = sky;
   applyBackdrop();
   // Cache for first paint on the next tab (see src/paint.js).
-  const { texture, grid, light, sky: skyPick } = backdrop();
+  const { texture, grid, light, sky: skyPick, custom } = backdrop();
   try {
-    localStorage.setItem('inspira.paint', JSON.stringify({ theme, sky, texture, grid, light, skyPick }));
+    localStorage.setItem('inspira.paint', JSON.stringify({ theme, sky, texture, grid, light, skyPick, custom }));
   } catch {
     /* ignore */
   }

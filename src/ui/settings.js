@@ -15,7 +15,7 @@ import { h, icon, reactive } from './dom.js';
 import { openSheet, closeOverlay, toast } from './overlay.js';
 import { openLocation } from './hero.js';
 import { kitIcon } from './weatherIcons.js';
-import { PRESETS, SKY_PHASES, DEFAULT_BACKDROP, backdrop, setBackdrop, activePreset, skyPhaseAt } from './backdrop.js';
+import { PRESETS, SKY_PHASES, DEFAULT_BACKDROP, CUSTOM_SWATCHES, backdrop, setBackdrop, activePreset, skyPhaseAt, validHex } from './backdrop.js';
 
 const TABS = [
   ['appearance', 'Appearance'],
@@ -28,7 +28,8 @@ const TABS = [
 export function openSettings(tab) {
   if (typeof tab === 'string' && TABS.some(([id]) => id === tab)) store.setUI({ settingsTab: tab });
   const body = reactive(h('div', { class: 'settings' }), render);
-  openSheet('Settings', body);
+  // No scrim: appearance changes are seen live on the page behind the panel.
+  openSheet('Settings', body, { clear: true });
 }
 
 function render() {
@@ -36,7 +37,7 @@ function render() {
   const d = store.getDevice();
   const tab = TABS.some(([id]) => id === store.ui.settingsTab) ? store.ui.settingsTab : 'appearance';
   const panels = {
-    appearance: () => [modeCard(p), backgroundCard(), skyCard(), fineTuneCard()],
+    appearance: () => [modeCard(p), backgroundCard(), colourCard(), skyCard(), fineTuneCard()],
     general: () => [youCard(p), clockCard(p), inspirationCard(p), weatherCard(d, p)],
     focus: () => [focusCard(p)],
     account: () => [
@@ -364,6 +365,82 @@ function modeCard(p) {
   );
 }
 
+/**
+ * Your colour: pick any colour for the background and accent. Suggested
+ * swatches, a full picker and a hex field. Dragging the picker previews live
+ * (just the CSS variable); letting go saves it.
+ */
+function colourCard() {
+  const b = backdrop();
+  const on = b.light === 'custom';
+  const current = validHex(b.custom) || DEFAULT_BACKDROP.custom;
+  const use = (hex) => {
+    const value = validHex(hex);
+    if (value) setBackdrop({ light: 'custom', custom: value });
+    return value;
+  };
+  const preview = (hex) => document.documentElement.style.setProperty('--custom', hex);
+
+  const picker = h('input', {
+    type: 'color',
+    class: 'colour__native',
+    value: current,
+    'aria-label': 'Pick any colour',
+    onInput: (e) => preview(e.target.value),
+    onChange: (e) => use(e.target.value),
+  });
+  const hex = h('input', {
+    class: 'field__input colour__hex',
+    value: current.toUpperCase(),
+    maxlength: '7',
+    spellcheck: 'false',
+    'aria-label': 'Hex colour',
+    onChange: (e) => {
+      if (!use(e.target.value)) {
+        e.target.value = current.toUpperCase();
+        toast('Use a hex colour like #8B7CF6');
+      }
+    },
+    onKeydown: (e) => e.key === 'Enter' && e.target.blur(),
+  });
+
+  return card(
+    'Your colour',
+    row(
+      'Use my colour',
+      toggle(on, (v) => setBackdrop(v ? { light: 'custom', custom: current } : { light: 'sky', sky: 'auto' }), 'Use my colour'),
+      on ? 'Tints the background and accent' : 'Pick a colour to paint the background with it',
+    ),
+    block(
+      h(
+        'div',
+        { class: 'colour', role: 'radiogroup', 'aria-label': 'Background colour' },
+        CUSTOM_SWATCHES.map((c) =>
+          h('button', {
+            type: 'button',
+            role: 'radio',
+            'aria-checked': String(on && c === current),
+            'aria-label': c,
+            class: ['colour__swatch', on && c === current && 'is-active'],
+            style: { '--c': c },
+            onClick: () => use(c),
+          }),
+        ),
+        h(
+          'label',
+          {
+            class: ['colour__swatch', 'colour__any', on && !CUSTOM_SWATCHES.includes(current) && 'is-active'],
+            style: { '--c': current },
+            title: 'Any colour',
+          },
+          picker,
+        ),
+        hex,
+      ),
+    ),
+  );
+}
+
 function backgroundCard() {
   const current = activePreset();
   return card(
@@ -488,6 +565,7 @@ function fineTuneCard() {
             ['mesh', 'Mesh'],
             ['spotlight', 'Spot'],
             ['sky', 'Sky'],
+            ['custom', 'Colour'],
           ],
           b.light,
           (v) => setBackdrop({ light: v }),

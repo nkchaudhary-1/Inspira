@@ -17,6 +17,7 @@
       grid = cached.grid || grid;
       light = cached.light || light;
       skyPick = cached.skyPick || skyPick;
+      if (/^#[0-9a-f]{6}$/i.test(cached.custom || '')) root.style.setProperty('--custom', cached.custom);
     }
   } catch (e) {}
   var h = new Date().getHours();

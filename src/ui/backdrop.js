@@ -10,7 +10,8 @@
 import * as store from '../core/store.js';
 
 export const DEFAULT_BACKDROP = {
-  light: 'sky', // none | halo | horizon | mesh | spotlight | sky
+  light: 'sky', // none | halo | horizon | mesh | spotlight | sky | custom
+  custom: '#8b7cf6', // the "Your colour" background (light: 'custom')
   lightIntensity: 0.6,
   sky: 'auto', // auto (follows the time of day) | dawn | day | evening | night | late | deep
   texture: 'grain', // none | grain  (noise)
@@ -28,6 +29,7 @@ export const PRESETS = [
   { id: 'halo', label: 'Halo', value: { light: 'halo', lightIntensity: 0.6, texture: 'none', grid: 'none', shader: 'none' } },
   { id: 'horizon', label: 'Horizon', value: { light: 'horizon', lightIntensity: 0.6, texture: 'none', grid: 'none', shader: 'none' } },
   { id: 'sky', label: 'Sky', value: { light: 'sky', texture: 'grain', textureAmount: 0.3, grid: 'none', shader: 'none' } },
+  { id: 'custom', label: 'Custom', value: { light: 'custom', texture: 'grain', textureAmount: 0.3, grid: 'none', shader: 'none' } },
   { id: 'mesh', label: 'Mesh', value: { light: 'mesh', lightIntensity: 0.6, texture: 'grain', textureAmount: 0.3, grid: 'none', shader: 'none' } },
   { id: 'grid', label: 'Grid', value: { light: 'halo', lightIntensity: 0.5, texture: 'none', grid: 'lines', gridSize: 48, gridOpacity: 0.5, shader: 'none' } },
   { id: 'dots', label: 'Dots', value: { light: 'none', texture: 'none', grid: 'dots', gridSize: 24, gridOpacity: 0.6, shader: 'none' } },
@@ -81,6 +83,17 @@ export const backdrop = () => {
   return b;
 };
 
+/** '#abc' / 'abc' / '#aabbcc' → '#aabbcc', or null. */
+export function validHex(value) {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(value || '').trim());
+  if (!m) return null;
+  const hex = m[1].length === 3 ? m[1].replace(/./g, (c) => c + c) : m[1];
+  return `#${hex.toLowerCase()}`;
+}
+
+/** Suggested colours for the custom background. */
+export const CUSTOM_SWATCHES = ['#8b7cf6', '#5b8def', '#3fb5b0', '#6fae72', '#e9b949', '#f08a5d', '#e56b8a', '#b07fa6'];
+
 export function setBackdrop(patch) {
   store.setPrefs({ backdrop: { ...backdrop(), ...patch } });
 }
@@ -88,6 +101,8 @@ export function setBackdrop(patch) {
 /** Which preset (if any) the current settings match. */
 export function activePreset() {
   const b = backdrop();
+  // Your colour counts as the Custom style whatever the grain or grid.
+  if (b.light === 'custom') return 'custom';
   return PRESETS.find((p) => Object.entries(p.value).every(([k, v]) => b[k] === v))?.id ?? null;
 }
 
@@ -99,6 +114,7 @@ export function applyBackdrop() {
   const b = backdrop();
   for (const key of ['light', 'texture', 'grid']) if (root.dataset[key] !== b[key]) root.dataset[key] = b[key];
   root.style.setProperty('--light-k', String(b.lightIntensity));
+  root.style.setProperty('--custom', validHex(b.custom) || DEFAULT_BACKDROP.custom);
   root.style.setProperty('--texture-amount', String(b.textureAmount));
   root.style.setProperty('--grid-size', `${b.gridSize}px`);
   root.style.setProperty('--grid-alpha', `${Math.round(b.gridOpacity * 18)}%`);

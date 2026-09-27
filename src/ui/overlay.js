@@ -74,11 +74,12 @@ function besideAnchor(el, r) {
 }
 
 /** Side sheet (settings, shortcuts). */
-export function openSheet(title, content, { onClose } = {}) {
+/** `clear`: no dimming behind the panel (Settings, so changes show live). */
+export function openSheet(title, content, { onClose, clear = false } = {}) {
   closeOverlay();
   const el = h(
     'div',
-    { class: 'sheet-layer' },
+    { class: ['sheet-layer', clear && 'sheet-layer--clear'] },
     h('div', { class: 'sheet-scrim', onClick: () => closeOverlay() }),
     h(
       'aside',
