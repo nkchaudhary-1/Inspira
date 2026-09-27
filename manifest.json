@@ -11,19 +11,9 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": [
-    "storage",
-    "alarms"
-  ],
-  "optional_permissions": [
-    "notifications"
-  ],
-  "optional_host_permissions": [
-    "https://calendar.google.com/*",
-    "https://outlook.office365.com/*",
-    "https://outlook.live.com/*",
-    "https://*.icloud.com/*"
-  ],
+  "permissions": ["storage", "alarms"],
+  "optional_permissions": ["notifications"],
+  "optional_host_permissions": ["https://calendar.google.com/*", "https://outlook.office365.com/*", "https://outlook.live.com/*", "https://*.icloud.com/*"],
   "content_security_policy": {
     "extension_pages": "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; img-src 'self' data: https://*.googleusercontent.com; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://calendar.google.com https://outlook.office365.com https://outlook.live.com https://*.icloud.com https://www.googleapis.com https://oauth2.googleapis.com"
   },

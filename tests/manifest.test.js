@@ -78,8 +78,7 @@ test('network calls only go to disclosed services', () => {
     }
   }
   const privacy = readFileSync('privacy.html', 'utf8');
-  for (const name of ['Open-Meteo', 'Chrome sync', 'iCal'])
-    assert.ok(privacy.includes(name), `privacy policy mentions ${name}`);
+  for (const name of ['Open-Meteo', 'Chrome sync', 'iCal']) assert.ok(privacy.includes(name), `privacy policy mentions ${name}`);
 });
 
 test('current-location name comes from the time zone, offline', async () => {
