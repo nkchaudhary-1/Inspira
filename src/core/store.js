@@ -133,9 +133,20 @@ function newRev() {
 
 function persistData() {
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    storage.save(DATA_KEY, { ...data, _rev: newRev() });
-  }, 120);
+  saveTimer = setTimeout(flushData, 120);
+}
+
+/** Write any pending edit now — used when the tab is hidden or closing. */
+function flushData() {
+  if (!saveTimer) return;
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  storage.save(DATA_KEY, { ...data, _rev: newRev() });
+}
+
+if (typeof window !== 'undefined' && typeof document?.addEventListener === 'function') {
+  window.addEventListener('pagehide', flushData);
+  document.addEventListener('visibilitychange', () => document.hidden && flushData());
 }
 
 function persistDevice() {
