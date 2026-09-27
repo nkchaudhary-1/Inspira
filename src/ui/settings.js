@@ -801,7 +801,7 @@ function aboutCard() {
     h(
       'div',
       { class: 'about' },
-      h('img', { class: 'about__icon', src: 'icons/icon-128.png', alt: '', width: 48, height: 48 }),
+      h('img', { class: 'about__icon', src: 'icons/logo-96.png', alt: '', width: 48, height: 48 }),
       h(
         'div',
         null,

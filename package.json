@@ -7,6 +7,6 @@
   "scripts": {
     "test": "node --test tests/*.test.js",
     "serve": "npx --yes http-server -p 5173 -c-1 .",
-    "zip": "rm -f inspira.zip && zip -r inspira.zip manifest.json newtab.html privacy.html background.js src icons -x 'icons/icon.svg' -x '*.DS_Store'"
+    "zip": "rm -f inspira.zip && zip -r inspira.zip manifest.json newtab.html privacy.html background.js src icons -x 'icons/icon-source.png' -x '*.DS_Store'"
   }
 }
