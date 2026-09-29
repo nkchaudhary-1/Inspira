@@ -9,6 +9,8 @@ Inspira replaces Chrome's New Tab page with a calm clock, daily inspiration and 
 - **Three things stay separate.** _Schedule_ is what's booked (Google Calendar, read-only). _Tasks_ are what you need to do. _Notes_ are what you want to remember.
 - **Works without an account.** Data syncs through your Chrome profile (`chrome.storage.sync`) to every computer signed in to Chrome with sync on, and your calendar comes from a private iCal link (Google, Outlook or iCloud). Google sign-in is optional, for later.
 
+**Docs:** [Product & design decisions](docs/PRODUCT.md) · [Build journey: how Inspira 2.0 was made](docs/BUILD-JOURNEY.md)
+
 ---
 
 ## Theme
